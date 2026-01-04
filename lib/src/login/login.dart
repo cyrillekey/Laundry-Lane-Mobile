@@ -95,7 +95,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         style: ButtonStyle(
                           elevation: WidgetStatePropertyAll(0),
                           backgroundColor: WidgetStatePropertyAll(
-                            Color.fromRGBO(245, 248, 254, 1),
+                            Theme.of(context).colorScheme.inversePrimary,
                           ),
                           shape: WidgetStatePropertyAll(
                             RoundedRectangleBorder(
@@ -123,7 +123,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       child: TextButton.icon(
                         style: ButtonStyle(
                           backgroundColor: WidgetStatePropertyAll(
-                            Theme.of(context).colorScheme.tertiaryContainer,
+                            Theme.of(context).colorScheme.inversePrimary,
                           ),
                           shape: WidgetStatePropertyAll(
                             RoundedRectangleBorder(
@@ -227,7 +227,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               backgroundColor: Colors.white,
                             ),
                           )
-                          : Icon(TablerIcons.login),
+                          : Icon(
+                            TablerIcons.login,
+                            color: Colors.white,
+                            size: 26,
+                          ),
                   style: ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(
                       Color.fromRGBO(45, 111, 241, 1),
