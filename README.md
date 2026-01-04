@@ -8,54 +8,18 @@ A modern Flutter application for laundry and dry cleaning services. LaundryLane 
 
 ### User Interface & Features
 
+| ![Welcome Screen](flutter_01.png) | ![Authentication](flutter_02.png) | ![Home Dashboard](flutter_03.png) | ![Service Selection](flutter_04.png) |
+|----|------------|----------|----------|
+| ![Welcome Screen](flutter_05.png) | ![Authentication](flutter_06.png) | ![Home Dashboard](flutter_07.png) | ![Service Selection](flutter_08.png) |
+| ![Welcome Screen](flutter_09.png) | ![Authentication](flutter_10.png) | ![Home Dashboard](flutter_11.png) | ![Service Selection](flutter_12.png) |
+| ![Welcome Screen](flutter_13.png) | ![Authentication](flutter_14.png) | ![Home Dashboard](flutter_15.png) | ![Service Selection](flutter_16.png) |
+| ![Welcome Screen](flutter_17.png) | 
 <div align="center">
 
-#### Welcome & Authentication
-![Welcome Screen](flutter_01.png) ![Authentication](flutter_02.png)
 
-#### Home & Navigation
-![Home Dashboard](flutter_03.png) ![Service Selection](flutter_04.png)
 
-#### Shopping & Checkout
-![Cart Management](flutter_05.png) ![Checkout Process](flutter_06.png)
-
-#### Payment & Tracking
-![Payment Methods](flutter_07.png) ![Order Tracking](flutter_08.png)
-
-#### Profile & Settings
-![User Profile](flutter_09.png) ![Address Management](flutter_10.png)
-
-#### Communication & History
-![Notifications](flutter_11.png) ![Order History](flutter_12.png)
-
-#### Services & Support
-![Service Details](flutter_13.png) ![Support & Help](flutter_14.png)
-
-#### Configuration & Features
-![Settings](flutter_15.png) ![Promotions](flutter_16.png) ![Map Integration](flutter_17.png)
 
 </div>
-
-### 📋 Screen Descriptions
-
-- **Welcome & Onboarding** - Initial app introduction and user onboarding flow
-- **Authentication** - Login and registration screens with modern UI
-- **Home Dashboard** - Main dashboard with quick access to all features
-- **Service Selection** - Browse and select laundry services (wash, dry clean, ironing)
-- **Cart Management** - Add items to cart and manage quantities
-- **Checkout** - Complete order with delivery preferences
-- **Payment Integration** - Secure payment processing with multiple options
-- **Order Tracking** - Real-time status updates for placed orders
-- **User Profile** - Manage account settings and preferences
-- **Address Management** - Add and manage delivery addresses
-- **Push Notifications** - Order updates and promotional notifications
-- **Order History** - View past orders and reorder functionality
-- **Service Details** - Detailed view of laundry services and pricing
-- **Customer Support** - Help center and customer support features
-- **App Settings** - Configure app preferences and account settings
-- **Promotions & Offers** - Special deals and discount promotions
-- **Delivery Tracking** - Real-time delivery tracking with map integration
-
 ## ✨ Features
 
 ### 🏠 **Home & Navigation**
