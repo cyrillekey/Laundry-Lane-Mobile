@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -6,13 +7,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/signup/signup.dart';
+import 'package:laundrylane/utils/constants.dart';
 import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 class LoginPage extends StatefulHookConsumerWidget {
@@ -111,19 +113,78 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                   Size(double.infinity, 46),
                                 ),
                               ),
-                              onPressed: () {},
+                              onPressed: () async {
+                                try {
+                                  setLoadingState(true);
+                                  TwitterAuthProvider authProvider =
+                                      TwitterAuthProvider();
+                                  UserCredential? userCredential;
+                                  if (kIsWeb) {
+                                    userCredential = await FirebaseAuth.instance
+                                        .signInWithPopup(authProvider);
+                                  } else {
+                                    userCredential = await FirebaseAuth.instance
+                                        .signInWithProvider(authProvider);
+                                  }
+                                  String? firebaseToken =
+                                      await userCredential.user!.getIdToken();
+                                  if (firebaseToken != null) {
+                                    AuthResponse response = await socialLogin(
+                                      firebaseToken,
+                                    );
+                                    if (response.success) {
+                                      await saveToken(
+                                        response.token!,
+                                        response.id!,
+                                      );
+                                      setLoadingState(false);
+                                      Navigator.of(
+                                        context,
+                                      ).pushNamedAndRemoveUntil(
+                                        HomePage.routeName,
+                                        (r) => false,
+                                      );
+                                    } else {
+                                      setLoadingState(false);
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(response.message),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    setLoadingState(false);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Error! Could not login"),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+
+                                  setLoadingState(false);
+                                } catch (e) {
+                                  setLoadingState(false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Error! Could not login"),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
                               label: Text(
-                                "Facebook",
+                                "X(Twitter)",
                                 style: GoogleFonts.almarai(
                                   color: Colors.black,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
                               ),
-                              icon: Icon(
-                                TablerIcons.brand_facebook,
-                                weight: 12,
-                              ),
+                              icon: Icon(TablerIcons.brand_twitter, weight: 12),
                             ),
                       ),
                     ),
@@ -165,8 +226,54 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                             );
 
                                         // Once signed in, return the UserCredential
-                                        await FirebaseAuth.instance
-                                            .signInWithCredential(credential);
+                                        UserCredential userCredential =
+                                            await FirebaseAuth.instance
+                                                .signInWithCredential(
+                                                  credential,
+                                                );
+
+                                        String? firebaseToken =
+                                            await userCredential.user!
+                                                .getIdToken();
+                                        if (firebaseToken != null) {
+                                          AuthResponse response =
+                                              await socialLogin(firebaseToken);
+                                          if (response.success) {
+                                            await saveToken(
+                                              response.token!,
+                                              response.id!,
+                                            );
+                                            setLoadingState(false);
+                                            Navigator.of(
+                                              context,
+                                            ).pushNamedAndRemoveUntil(
+                                              HomePage.routeName,
+                                              (r) => false,
+                                            );
+                                          } else {
+                                            setLoadingState(false);
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(response.message),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } else {
+                                          setLoadingState(false);
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                "Error! Could not login",
+                                              ),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
 
                                         setLoadingState(false);
                                       } catch (e) {
@@ -304,14 +411,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         return response;
                       });
                       if (response.success && response.token != null) {
-                        final sharedPreference =
-                            await SharedPreferences.getInstance();
-                        await sharedPreference.setString(
-                          "token",
-                          response.token!,
-                        );
-                        await sharedPreference.setInt("userId", response.id!);
-
+                        await saveToken(response.token!, response.id!);
                         Navigator.of(context).pushNamedAndRemoveUntil(
                           HomePage.routeName,
                           (route) => route.isFirst,

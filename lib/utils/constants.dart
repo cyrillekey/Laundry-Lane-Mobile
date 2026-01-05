@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const String apiUrl = "https://ca55e8b75bb0.ngrok-free.app";
 const List<Color> cartColors = [
@@ -149,4 +150,10 @@ String getTimeOfDay() {
   if (timeOfDay.hour >= 12 && timeOfDay.hour < 18) return "afternoon";
   if (timeOfDay.hour >= 18 && timeOfDay.hour < 22) return "evening";
   return "night";
+}
+
+Future<void> saveToken(String token, int userId) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('token', token);
+  await prefs.setInt('userId', userId);
 }

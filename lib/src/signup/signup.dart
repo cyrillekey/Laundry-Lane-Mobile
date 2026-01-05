@@ -1,14 +1,19 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/login/login.dart';
+import 'package:laundrylane/utils/constants.dart';
 import 'package:laundrylane/widgets/password_input.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 class SignupPage extends StatefulHookConsumerWidget {
@@ -28,11 +33,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: FormBuilder(
         key: formState,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
+        child: SizedBox(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,61 +92,208 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: TextButton.icon(
-                        style: ButtonStyle(
-                          elevation: WidgetStatePropertyAll(0),
-                          backgroundColor: WidgetStatePropertyAll(
-                            Color.fromRGBO(245, 248, 254, 1),
-                          ),
-                          fixedSize: WidgetStatePropertyAll(
-                            Size(double.infinity, 46),
-                          ),
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      child: ProgressButton(
+                        builder:
+                            (isLoading, setLoadingState) => TextButton.icon(
+                              style: ButtonStyle(
+                                elevation: WidgetStatePropertyAll(0),
+                                backgroundColor: WidgetStatePropertyAll(
+                                  Theme.of(context).colorScheme.inversePrimary,
+                                ),
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                fixedSize: WidgetStatePropertyAll(
+                                  Size(double.infinity, 46),
+                                ),
+                              ),
+                              onPressed: () async {
+                                try {
+                                  setLoadingState(true);
+                                  TwitterAuthProvider authProvider =
+                                      TwitterAuthProvider();
+                                  UserCredential? userCredential;
+                                  if (kIsWeb) {
+                                    userCredential = await FirebaseAuth.instance
+                                        .signInWithPopup(authProvider);
+                                  } else {
+                                    userCredential = await FirebaseAuth.instance
+                                        .signInWithProvider(authProvider);
+                                  }
+                                  String? firebaseToken =
+                                      await userCredential.user!.getIdToken();
+                                  if (firebaseToken != null) {
+                                    AuthResponse response = await socialLogin(
+                                      firebaseToken,
+                                    );
+                                    if (response.success) {
+                                      await saveToken(
+                                        response.token!,
+                                        response.id!,
+                                      );
+                                      setLoadingState(false);
+                                      Navigator.of(
+                                        context,
+                                      ).pushNamedAndRemoveUntil(
+                                        HomePage.routeName,
+                                        (r) => false,
+                                      );
+                                    } else {
+                                      setLoadingState(false);
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(response.message),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    setLoadingState(false);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Error! Could not login"),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+
+                                  setLoadingState(false);
+                                } catch (e) {
+                                  setLoadingState(false);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Error! Could not login"),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                              label: Text(
+                                "X(Twitter)",
+                                style: GoogleFonts.almarai(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              icon: Icon(TablerIcons.brand_twitter, weight: 12),
                             ),
-                          ),
-                        ),
-                        onPressed: () {},
-                        label: Text(
-                          "Facebook",
-                          style: GoogleFonts.almarai(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                        icon: Icon(TablerIcons.brand_facebook, weight: 12),
                       ),
                     ),
                     SizedBox(width: 10),
-                    Expanded(
-                      child: TextButton.icon(
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(
-                            Color.fromRGBO(245, 248, 254, 1),
-                          ),
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                    ProgressButton(
+                      builder: (isLoading, setLoadingState) {
+                        return Expanded(
+                          child: TextButton.icon(
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                Theme.of(context).colorScheme.inversePrimary,
+                              ),
+                              shape: WidgetStatePropertyAll(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              fixedSize: WidgetStatePropertyAll(
+                                Size(double.infinity, 46),
+                              ),
                             ),
-                          ),
-                          fixedSize: WidgetStatePropertyAll(
-                            Size(double.infinity, 46),
-                          ),
-                        ),
-                        onPressed: () {},
+                            onPressed:
+                                isLoading
+                                    ? null
+                                    : () async {
+                                      setLoadingState(true);
+                                      try {
+                                        var googleUser =
+                                            await GoogleSignIn.instance
+                                                .authenticate();
+                                        // Obtain the auth details from the request
+                                        final GoogleSignInAuthentication
+                                        googleAuth = googleUser.authentication;
 
-                        label: Text(
-                          "Google",
-                          style: GoogleFonts.almarai(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                                        // Create a new credential
+                                        final credential =
+                                            GoogleAuthProvider.credential(
+                                              idToken: googleAuth.idToken,
+                                            );
+
+                                        // Once signed in, return the UserCredential
+                                        UserCredential userCredential =
+                                            await FirebaseAuth.instance
+                                                .signInWithCredential(
+                                                  credential,
+                                                );
+
+                                        String? firebaseToken =
+                                            await userCredential.user!
+                                                .getIdToken();
+                                        if (firebaseToken != null) {
+                                          AuthResponse response =
+                                              await socialLogin(firebaseToken);
+                                          if (response.success) {
+                                            await saveToken(
+                                              response.token!,
+                                              response.id!,
+                                            );
+                                            setLoadingState(false);
+                                            Navigator.of(
+                                              context,
+                                            ).pushNamedAndRemoveUntil(
+                                              HomePage.routeName,
+                                              (r) => false,
+                                            );
+                                          } else {
+                                            setLoadingState(false);
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(response.message),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                          }
+                                        } else {
+                                          setLoadingState(false);
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                "Error! Could not login",
+                                              ),
+                                              backgroundColor: Colors.red,
+                                            ),
+                                          );
+                                        }
+
+                                        setLoadingState(false);
+                                      } catch (e) {
+                                        setLoadingState(false);
+                                      }
+                                    },
+                            label:
+                                isLoading
+                                    ? CircularProgressIndicator.adaptive()
+                                    : Text(
+                                      "Google",
+                                      style: GoogleFonts.almarai(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                            icon:
+                                isLoading
+                                    ? SizedBox.shrink()
+                                    : Icon(TablerIcons.brand_google),
                           ),
-                        ),
-                        icon: Icon(TablerIcons.brand_google),
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -220,6 +370,79 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                 ),
                 SizedBox(height: 18),
                 PasswordInput(name: "password", showStrength: false),
+                SizedBox(height: 18),
+                FormBuilderField<bool>(
+                  name: "terms",
+                  initialValue: false,
+                  validator: FormBuilderValidators.compose([
+                    FormBuilderValidators.required(),
+                    FormBuilderValidators.isTrue(),
+                  ]),
+                  builder:
+                      (field) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Checkbox.adaptive(
+                                value: field.value,
+                                onChanged: (value) => field.didChange(value),
+                              ),
+                              SizedBox(width: 2),
+                              Expanded(
+                                child: RichText(
+                                  softWrap: true,
+                                  overflow: TextOverflow.fade,
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: "I have read and agreed to the ",
+                                      ),
+                                      TextSpan(
+                                        text: "Terms & Conditions",
+                                        style: TextStyle(
+                                          color: Color.fromRGBO(
+                                            45,
+                                            111,
+                                            241,
+                                            1,
+                                          ),
+                                        ),
+                                      ),
+                                      TextSpan(text: " and "),
+                                      TextSpan(
+                                        text: "Privacy Policy",
+                                        style: TextStyle(
+                                          color: Color.fromRGBO(
+                                            45,
+                                            111,
+                                            241,
+                                            1,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    style:
+                                        Theme.of(context).textTheme.labelMedium,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (field.hasError) ...[
+                            SizedBox(height: 6),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16),
+                              child: Text(
+                                field.errorText ?? "",
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(color: Colors.red, fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                ),
                 SizedBox(height: 36),
                 TextButton.icon(
                   iconAlignment: IconAlignment.start,
@@ -264,14 +487,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         return response;
                       });
                       if (response.success && response.token != null) {
-                        final sharedPreference =
-                            await SharedPreferences.getInstance();
-                        await sharedPreference.setString(
-                          "token",
-                          response.token!,
-                        );
-                        await sharedPreference.setInt("userId", response.id!);
-
+                        await saveToken(response.token!, response.id!);
                         Navigator.of(
                           context,
                         ).pushReplacementNamed(HomePage.routeName);
@@ -307,13 +523,15 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         ).pushNamed(LoginPage.routeName),
                     child: RichText(
                       text: TextSpan(
-                        style: GoogleFonts.almarai(color: Colors.black),
+                        style: Theme.of(context).textTheme.bodyMedium,
                         children: [
                           TextSpan(text: "Already have an account?"),
                           TextSpan(
                             text: " Sign in",
-                            style: GoogleFonts.almarai(
-                              color: Colors.blue,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelMedium?.copyWith(
+                              color: Theme.of(context).primaryColor,
                               fontWeight: FontWeight.w600,
                               decoration: TextDecoration.underline,
                             ),

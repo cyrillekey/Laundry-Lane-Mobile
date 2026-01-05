@@ -4,9 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
+import 'package:laundrylane/utils/constants.dart';
 import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ResetUpdatePassword extends StatefulWidget {
   const ResetUpdatePassword({super.key});
@@ -100,13 +100,7 @@ class _ResetUpdatePasswordState extends State<ResetUpdatePassword> {
                       );
 
                       if (response.success) {
-                        final sharedPreference =
-                            await SharedPreferences.getInstance();
-                        await sharedPreference.setString(
-                          "token",
-                          response.token!,
-                        );
-                        await sharedPreference.setInt("userId", response.id!);
+                        await saveToken(response.token!, response.id!);
                         Navigator.of(context).pushNamedAndRemoveUntil(
                           HomePage.routeName,
                           (route) => false,

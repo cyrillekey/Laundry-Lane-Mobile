@@ -248,3 +248,25 @@ Future<AuthResponse> updatePassword(
     );
   }
 }
+
+Future<AuthResponse> socialLogin(String token) async {
+  try {
+    final response = await apiDio.post(
+      "/authentication/social-auth",
+      data: {"token": token},
+    );
+    if (response.data == null) {
+      return AuthResponse(
+        message: "Error! Could not login",
+        id: 0,
+        success: false,
+      );
+    }
+    return AuthResponse.fromJson((response.data));
+  } catch (e) {
+    return AuthResponse(
+      message: "Error! Could not authenticate user",
+      success: false,
+    );
+  }
+}
