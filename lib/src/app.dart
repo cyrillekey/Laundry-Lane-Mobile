@@ -4,6 +4,8 @@ import 'package:laundrylane/src/address/add_address.dart';
 import 'package:laundrylane/src/cart/cart_page.dart';
 import 'package:laundrylane/src/checkout/checkout_page.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
+import 'package:laundrylane/src/forgot_password/reset_otp.dart';
+import 'package:laundrylane/src/forgot_password/reset_update_password.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/login/login.dart';
 import 'package:laundrylane/src/notifications/notifications_view.dart';
@@ -119,6 +121,10 @@ class MyApp extends ConsumerWidget {
                 return CartPage();
               case CheckoutPage.routeName:
                 return CheckoutPage();
+              case PasswordResetOtp.routeName:
+                return PasswordResetOtp();
+              case ResetUpdatePassword.routeName:
+                return ResetUpdatePassword();
               default:
                 return const OnboardingView();
             }

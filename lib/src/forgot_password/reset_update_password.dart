@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:laundrylane/models/default_response.dart';
+import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
-import 'package:laundrylane/src/forgot_password/reset_otp.dart';
+import 'package:laundrylane/src/home/home.dart';
+import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ForgotPassword extends StatefulWidget {
-  const ForgotPassword({super.key});
-  static const String routeName = "/forgotpassword";
-
+class ResetUpdatePassword extends StatefulWidget {
+  const ResetUpdatePassword({super.key});
+  static const routeName = '/reset_update_password';
   @override
-  State<ForgotPassword> createState() => _ForgotPasswordState();
+  State<ResetUpdatePassword> createState() => _ResetUpdatePasswordState();
 }
 
-class _ForgotPasswordState extends State<ForgotPassword> {
+class _ResetUpdatePasswordState extends State<ResetUpdatePassword> {
   final GlobalKey<FormBuilderState> formState = GlobalKey<FormBuilderState>();
   @override
   Widget build(BuildContext context) {
@@ -60,7 +59,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 SizedBox(height: 24),
                 Center(
                   child: Text(
-                    "Reset Password",
+                    "Update Password",
                     style: GoogleFonts.almarai(
                       wordSpacing: 2.0,
                       fontSize: 32,
@@ -72,7 +71,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 SizedBox(height: 4),
                 Center(
                   child: Text(
-                    "Enter your email address to reset your Laundrylane account password",
+                    "Update your Laundry Lane account password",
                     style: GoogleFonts.almarai(
                       fontSize: 16,
                       color: Color.fromRGBO(103, 107, 108, 1),
@@ -83,38 +82,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 ),
                 SizedBox(height: 40),
                 SizedBox(height: 16),
-                FormBuilderTextField(
-                  name: 'email',
-                  textInputAction: TextInputAction.next,
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(),
-                    FormBuilderValidators.email(),
-                  ]),
-                  keyboardType: TextInputType.emailAddress,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  decoration: InputDecoration(
-                    hintText: "Email address",
-                    hintStyle: GoogleFonts.almarai(),
-                    prefixIcon: Icon(TablerIcons.mail),
-                    filled: true,
-                    // fillColor: Color.fromRGBO(245, 248, 254, 1),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Color.fromRGBO(245, 248, 254, 1),
-                        width: 1.5,
-                      ),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: Color.fromRGBO(245, 248, 254, 1),
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
+                PasswordInput(name: "password"),
                 SizedBox(height: 16),
+                PasswordInput(name: "confirm_password"),
                 SizedBox(height: 24),
                 SizedBox(height: 24),
                 ProgressButton(
@@ -122,14 +92,24 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     if (formState.currentState?.saveAndValidate() == true) {
                       Map formData = formState.currentState!.value;
 
-                      DefaultResponse response = await requestPasswordReset(
-                        formData["email"],
+                      AuthResponse response = await updatePassword(
+                        (ModalRoute.of(context)!.settings.arguments
+                            as Map)["token"],
+                        formData["password"],
+                        formData["confirm_password"],
                       );
 
                       if (response.success) {
-                        Navigator.of(context).pushNamed(
-                          PasswordResetOtp.routeName,
-                          arguments: formData["email"],
+                        final sharedPreference =
+                            await SharedPreferences.getInstance();
+                        await sharedPreference.setString(
+                          "token",
+                          response.token!,
+                        );
+                        await sharedPreference.setInt("userId", response.id!);
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                          HomePage.routeName,
+                          (route) => false,
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(

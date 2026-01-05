@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-const String apiUrl = "https://laundry-lane-server.onrender.com";
+const String apiUrl = "https://ca55e8b75bb0.ngrok-free.app";
 const List<Color> cartColors = [
   Color.fromRGBO(235, 240, 254, 1),
   Color.fromRGBO(249, 244, 246, 1),

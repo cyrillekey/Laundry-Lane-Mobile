@@ -159,3 +159,92 @@ Future<DefaultResponse> updateAddress(
     );
   }
 }
+
+Future<DefaultResponse> requestPasswordReset(String email) async {
+  try {
+    final response = await apiDio
+        .post(
+          "/authentication/resetPassword",
+          data: {"email": email},
+          options: Options(contentType: "application/json"),
+        )
+        .then((value) => value.data)
+        .catchError((err) {
+          print(err);
+          return jsonDecode(err?.response.toString() ?? "{}");
+        });
+    if (response == null) {
+      return DefaultResponse(
+        success: false,
+        message: "Error! Could not request password reset",
+      );
+    }
+    return DefaultResponse.fromJson((response));
+  } catch (e) {
+    print(e);
+    return DefaultResponse(
+      message: "Error! Could not reset password",
+      success: false,
+    );
+  }
+}
+
+Future<DefaultResponse> verifyOTP(String email, String otp) async {
+  try {
+    final response = await apiDio
+        .post(
+          "/authentication/resetpassword/validate-otp",
+          data: {"email": email, "otp": otp},
+          options: Options(contentType: "application/json"),
+        )
+        .then((value) => value.data)
+        .catchError((err) {
+          return jsonDecode(err?.response.toString() ?? "{}");
+        });
+    if (response == null) {
+      return DefaultResponse(
+        success: false,
+        message: "Error! Could not verify otp",
+      );
+    }
+    return DefaultResponse.fromJson((response));
+  } catch (e) {
+    return DefaultResponse(
+      message: "Error! Could not verify otp",
+      success: false,
+    );
+  }
+}
+
+Future<AuthResponse> updatePassword(
+  String token,
+  String password,
+  String confirmPassword,
+) async {
+  try {
+    final response = await apiDio
+        .put(
+          "/authentication/resetpassword/update-password",
+          data: {"password": password, "confirmPassword": confirmPassword},
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((value) => value.data)
+        .catchError((err) {
+          return jsonDecode(err?.response.toString() ?? "{}");
+        });
+    if (response == null) {
+      return AuthResponse(
+        message: "Error! Could not update password",
+        id: 0,
+        success: false,
+      );
+    }
+    return AuthResponse.fromJson((response));
+  } catch (e) {
+    return AuthResponse(
+      message: "Error! Could not update password",
+      id: 0,
+      success: false,
+    );
+  }
+}

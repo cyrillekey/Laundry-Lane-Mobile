@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
@@ -9,6 +12,7 @@ import 'package:laundrylane/src/forgot_password/forgot_password.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/signup/signup.dart';
 import 'package:laundrylane/widgets/password_input.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
@@ -91,60 +95,103 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: TextButton.icon(
-                        style: ButtonStyle(
-                          elevation: WidgetStatePropertyAll(0),
-                          backgroundColor: WidgetStatePropertyAll(
-                            Theme.of(context).colorScheme.inversePrimary,
-                          ),
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      child: ProgressButton(
+                        builder:
+                            (isLoading, setLoadingState) => TextButton.icon(
+                              style: ButtonStyle(
+                                elevation: WidgetStatePropertyAll(0),
+                                backgroundColor: WidgetStatePropertyAll(
+                                  Theme.of(context).colorScheme.inversePrimary,
+                                ),
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                fixedSize: WidgetStatePropertyAll(
+                                  Size(double.infinity, 46),
+                                ),
+                              ),
+                              onPressed: () {},
+                              label: Text(
+                                "Facebook",
+                                style: GoogleFonts.almarai(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              icon: Icon(
+                                TablerIcons.brand_facebook,
+                                weight: 12,
+                              ),
                             ),
-                          ),
-                          fixedSize: WidgetStatePropertyAll(
-                            Size(double.infinity, 46),
-                          ),
-                        ),
-                        onPressed: () {},
-                        label: Text(
-                          "Facebook",
-                          style: GoogleFonts.almarai(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                        icon: Icon(TablerIcons.brand_facebook, weight: 12),
                       ),
                     ),
                     SizedBox(width: 10),
-                    Expanded(
-                      child: TextButton.icon(
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(
-                            Theme.of(context).colorScheme.inversePrimary,
-                          ),
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                    ProgressButton(
+                      builder: (isLoading, setLoadingState) {
+                        return Expanded(
+                          child: TextButton.icon(
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                Theme.of(context).colorScheme.inversePrimary,
+                              ),
+                              shape: WidgetStatePropertyAll(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              fixedSize: WidgetStatePropertyAll(
+                                Size(double.infinity, 46),
+                              ),
                             ),
+                            onPressed:
+                                isLoading
+                                    ? null
+                                    : () async {
+                                      setLoadingState(true);
+                                      try {
+                                        var googleUser =
+                                            await GoogleSignIn.instance
+                                                .authenticate();
+                                        // Obtain the auth details from the request
+                                        final GoogleSignInAuthentication
+                                        googleAuth = googleUser.authentication;
+
+                                        // Create a new credential
+                                        final credential =
+                                            GoogleAuthProvider.credential(
+                                              idToken: googleAuth.idToken,
+                                            );
+
+                                        // Once signed in, return the UserCredential
+                                        await FirebaseAuth.instance
+                                            .signInWithCredential(credential);
+
+                                        setLoadingState(false);
+                                      } catch (e) {
+                                        setLoadingState(false);
+                                      }
+                                    },
+                            label:
+                                isLoading
+                                    ? CircularProgressIndicator.adaptive()
+                                    : Text(
+                                      "Google",
+                                      style: GoogleFonts.almarai(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                            icon:
+                                isLoading
+                                    ? SizedBox.shrink()
+                                    : Icon(TablerIcons.brand_google),
                           ),
-                          fixedSize: WidgetStatePropertyAll(
-                            Size(double.infinity, 46),
-                          ),
-                        ),
-                        onPressed: () {},
-                        label: Text(
-                          "Google",
-                          style: GoogleFonts.almarai(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                        icon: Icon(TablerIcons.brand_google),
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -203,7 +250,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ).pushNamed(ForgotPassword.routeName),
                       child: Text(
                         "Forgot password?",
-                        style: GoogleFonts.almarai(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey,
                           fontWeight: FontWeight.w500,
                           decorationStyle: TextDecorationStyle.solid,

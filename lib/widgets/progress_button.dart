@@ -11,13 +11,14 @@ class ProgressButton extends StatefulWidget {
     this.label,
     this.child,
     this.textStyle,
-    required this.onPress,
+    this.onPress,
   });
-  final Widget Function(bool isLoading)? builder;
+  final Widget Function(bool isLoading, Function(bool state) setLoadingState)?
+  builder;
   final ButtonStyle? style;
   final Widget? child;
   final String? label;
-  final FutureOr Function() onPress;
+  final FutureOr Function()? onPress;
   final TextStyle? textStyle;
 
   @override
@@ -30,24 +31,36 @@ class _ProgressButtonState extends State<ProgressButton> {
   @override
   Widget build(BuildContext context) {
     if (widget.builder != null) {
-      return widget.builder!(isLoading);
+      return widget.builder!(
+        isLoading,
+        (state) => {
+          setState(() {
+            isLoading = state;
+          }),
+        },
+      );
     }
     return TextButton(
-      onPressed: () async {
-        try {
-          setState(() {
-            isLoading = true;
-          });
-          await widget.onPress();
-          setState(() {
-            isLoading = false;
-          });
-        } finally {
-          setState(() {
-            isLoading = false;
-          });
-        }
-      },
+      onPressed:
+          isLoading
+              ? null
+              : () async {
+                try {
+                  setState(() {
+                    isLoading = true;
+                  });
+                  if (widget.onPress != null) {
+                    await widget.onPress!();
+                  }
+                  setState(() {
+                    isLoading = false;
+                  });
+                } finally {
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
+              },
       style:
           widget.style ??
           ButtonStyle(
