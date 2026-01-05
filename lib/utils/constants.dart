@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -157,3 +158,5 @@ Future<void> saveToken(String token, int userId) async {
   await prefs.setString('token', token);
   await prefs.setInt('userId', userId);
 }
+
+final cloudinary = CloudinaryPublic("ddia14anf", 'laundry_lane', cache: false);

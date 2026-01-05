@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/src/login/login.dart';
 import 'package:laundrylane/src/payments/payment_methods.dart';
+import 'package:laundrylane/src/profile/update_profile.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tabler_icons/tabler_icons.dart';
@@ -59,6 +60,10 @@ class ProfileScreen extends ConsumerWidget {
                   SettingItem(
                     label: "Profile Details",
                     icon: TablerIcons.user_circle,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(UpdateProfile.routeName),
                   ),
                   Divider(),
                   SettingItem(
