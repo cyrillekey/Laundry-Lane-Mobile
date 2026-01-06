@@ -3,17 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/models/default_response.dart';
+import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:laundrylane/src/apis/mutations.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
-class AddCard extends StatefulWidget {
+class AddCard extends StatefulHookConsumerWidget {
   const AddCard({super.key});
   static const routeName = '/add-card';
 
   @override
-  State<AddCard> createState() => _AddCardState();
+  ConsumerState<AddCard> createState() => _AddCardState();
 }
 
-class _AddCardState extends State<AddCard> {
+class _AddCardState extends ConsumerState<AddCard> {
   final GlobalKey<FormBuilderState> formState = GlobalKey<FormBuilderState>();
   @override
   Widget build(BuildContext context) {
@@ -240,47 +245,83 @@ class _AddCardState extends State<AddCard> {
                 name: "save_creditcard",
               ),
               FormBuilderField<bool>(
+                validator: FormBuilderValidators.isTrue(),
                 builder: (builder) {
-                  return Row(
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Checkbox.adaptive(
-                        value: builder.value ?? false,
-                        onChanged: (value) => builder.didChange(value),
-                      ),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            style: Theme.of(context).textTheme.labelLarge,
-                            children: [
-                              TextSpan(
-                                text:
-                                    "I have read carefully and agreed to the ",
-                              ),
-                              TextSpan(
-                                text: "Terms & Conditions",
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.labelLarge?.copyWith(
-                                  color: Color.fromRGBO(6, 11, 156, 1),
-                                ),
-                              ),
-                            ],
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Checkbox.adaptive(
+                            value: builder.value ?? false,
+                            onChanged: (value) => builder.didChange(value),
                           ),
-                        ),
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                style: Theme.of(context).textTheme.labelLarge,
+                                children: [
+                                  TextSpan(
+                                    text:
+                                        "I have read carefully and agreed to the ",
+                                  ),
+                                  TextSpan(
+                                    text: "Terms & Conditions",
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelLarge?.copyWith(
+                                      color: Color.fromRGBO(6, 11, 156, 1),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                      if (builder.hasError) ...[
+                        SizedBox(height: 12),
+                        Text(
+                          builder.errorText!,
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ],
                     ],
                   );
                 },
                 name: "terms",
               ),
               SizedBox(height: 12),
-              TextButton(
-                onPressed: () {
+              ProgressButton(
+                onPress: () async {
                   if (formState.currentState!.saveAndValidate()) {
                     Map values = formState.currentState!.value;
-                    print(values);
+                    DefaultResponse response = await addUserCard(
+                      cardNumber: values['card_number'],
+                      cvv: values['cvv'],
+                      expiry: values['expiry_date'],
+                      holderName: values['name'],
+                      isDefault: values['save_creditcard'] == true,
+                    );
+                    if (response.success == true) {
+                      ref.invalidate(cardsState);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(response.message),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.of(context).pop();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(response.message),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   }
                 },
                 style: ButtonStyle(
@@ -292,7 +333,7 @@ class _AddCardState extends State<AddCard> {
                     Size(MediaQuery.of(context).size.width, 46),
                   ),
                 ),
-                child: Text("Save", style: GoogleFonts.almarai(fontSize: 16)),
+                label: "Save",
               ),
             ],
           ),

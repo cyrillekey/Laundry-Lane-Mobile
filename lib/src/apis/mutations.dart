@@ -300,7 +300,7 @@ Future<AuthResponse> updateUser({
         .catchError((err) {
           return jsonDecode(err?.response.toString() ?? "{}");
         });
-    print(response);
+
     if (response == null) {
       return AuthResponse(
         success: false,
@@ -309,10 +309,52 @@ Future<AuthResponse> updateUser({
     }
     return AuthResponse.fromJson((response));
   } catch (e) {
-    print(e);
     return AuthResponse(
       success: false,
       message: "Error! Could not update user",
+    );
+  }
+}
+
+Future<DefaultResponse> addUserCard({
+  required String cardNumber,
+  required String cvv,
+  required String expiry,
+  required String holderName,
+  required bool isDefault,
+}) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String token = sharedPreferences.getString("token") ?? "";
+    final response = await apiDio
+        .post(
+          "/payments/card",
+          data: {
+            "cardNumber": cardNumber,
+            "expiryDate": expiry,
+            "cvv": cvv,
+            "isDefault": isDefault,
+            "name": holderName,
+          },
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((resp) => resp.data)
+        .catchError((err) {
+          return jsonDecode(err?.response.toString() ?? "{}");
+        });
+    print(response);
+    if (response == null) {
+      return DefaultResponse(
+        success: false,
+        message: "Error! Could not add card",
+      );
+    }
+    return DefaultResponse.fromJson((response));
+  } catch (e) {
+    print(e);
+    return DefaultResponse(
+      success: false,
+      message: "Error! Could not add card",
     );
   }
 }

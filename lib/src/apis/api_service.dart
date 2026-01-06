@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -6,6 +8,7 @@ import 'package:laundrylane/models/clothing_type.dart';
 import 'package:laundrylane/models/goecode_reverse.dart';
 import 'package:laundrylane/models/home_address.dart';
 import 'package:laundrylane/models/order_model.dart';
+import 'package:laundrylane/models/payment_card.dart';
 import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/utils/constants.dart';
 
@@ -160,4 +163,23 @@ FutureProvider<Order?> ongoingOrderState = FutureProvider.autoDispose((
 
   List<Order> orders = data.map((e) => Order.fromJson(e)).toList();
   return orders.firstOrNull;
+});
+
+FutureProvider<List> cardsState = FutureProvider.autoDispose((ref) async {
+  final token = ref.watch(tokenProvider).value;
+  final CancelToken cancelToken = CancelToken();
+
+  ref.onDispose(cancelToken.cancel);
+  List response = await apiDio
+      .get(
+        "/payments/card",
+        options: Options(headers: {"Authorization": "Bearer $token"}),
+        cancelToken: cancelToken,
+      )
+      .then((resp) => resp.data)
+      .catchError((e) {
+        return [];
+      });
+  print(response);
+  return paymentCardFromJson(jsonEncode(response));
 });
