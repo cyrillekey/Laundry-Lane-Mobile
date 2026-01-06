@@ -25,7 +25,7 @@ class _UpdateProfileState extends ConsumerState<UpdateProfile> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(userProvider).value;
-    print(user?.toJson());
+
     return Scaffold(
       appBar: AppBar(centerTitle: true, title: Text("Edit Profile")),
       body: FormBuilder(

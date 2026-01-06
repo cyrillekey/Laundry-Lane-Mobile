@@ -34,7 +34,7 @@ class AddressBar extends ConsumerWidget {
                 children: [
                   Text(
                     "Set your address now",
-                    style: GoogleFonts.almarai(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),

@@ -28,13 +28,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.of(context).pushNamed(ServiceSelect.routeName);
-        },
+      floatingActionButton:
+          currentIndex == 0
+              ? FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.of(context).pushNamed(ServiceSelect.routeName);
+                },
 
-        label: Text("New Order", style: GoogleFonts.almarai()),
-      ),
+                label: Text("New Order", style: GoogleFonts.almarai()),
+              )
+              : null,
       // backgroundColor: Color.fromRGBO(244, 245, 247, 1),
       body: SafeArea(child: tabs[currentIndex]),
       bottomNavigationBar: SalomonBottomBar(

@@ -5,6 +5,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:laundrylane/models/order_model.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 class OrdersTab extends ConsumerWidget {
@@ -45,7 +46,36 @@ class OrdersTab extends ConsumerWidget {
                   return Center(child: Text("Error"));
                 },
                 loading: () {
-                  return Center(child: CircularProgressIndicator());
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.59,
+                    child: ListView.separated(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      separatorBuilder: (_, __) => SizedBox(height: 10),
+                      itemCount: 6,
+                      itemBuilder: (_, index) {
+                        return Shimmer.fromColors(
+                          baseColor: Theme.of(context).scaffoldBackgroundColor,
+                          highlightColor: Theme.of(context).highlightColor,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.grey,
+                                width: 1.5,
+                              ),
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height * 0.18,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
                 },
               ),
             ),

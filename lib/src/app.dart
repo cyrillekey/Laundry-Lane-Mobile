@@ -35,7 +35,7 @@ class MyApp extends ConsumerWidget {
     // The ListenableBuilder Widget listens to the SettingsController for changes.
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
     String? token = (sharedPreferences.getString("token"));
-
+    bool isThemeSet = sharedPreferences.getBool("isDark") != null;
     // Retrieves the default theme for the platform
     //TextTheme textTheme = Theme.of(context).textTheme;
 
@@ -86,7 +86,14 @@ class MyApp extends ConsumerWidget {
       // preferred ThemeMode (light, dark, or system default) from the
       // SettingsController to display the correct theme.
       themeMode: watchTheme,
-      theme: watchTheme == ThemeMode.light ? theme.light() : theme.dark(),
+      theme:
+          isThemeSet == false
+              ? MediaQuery.of(context).platformBrightness == Brightness.dark
+                  ? theme.dark()
+                  : theme.light()
+              : watchTheme == ThemeMode.light
+              ? theme.light()
+              : theme.dark(),
       title: "Laundry Lane",
 
       // Define a function to handle named routes in order to support

@@ -33,7 +33,11 @@ class HomeTab extends ConsumerWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage("assets/icons/user-icon.png"),
+                        fit: BoxFit.cover,
+                        image:
+                            user?.avatar?.isNotEmpty == true
+                                ? NetworkImage(user!.avatar!)
+                                : AssetImage("assets/icons/user-icon.png"),
                       ),
                       borderRadius: const BorderRadius.all(Radius.circular(16)),
                     ),
@@ -59,8 +63,9 @@ class HomeTab extends ConsumerWidget {
                         const SizedBox(height: 1),
                         Text(
                           "${user?.name}",
-                          style: GoogleFonts.almarai(
-                            color: Color(0xFF212121),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                           ),

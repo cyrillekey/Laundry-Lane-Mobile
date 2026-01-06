@@ -31,6 +31,8 @@ TextTheme createTextTheme(
 FutureProvider<ThemeMode> themeProvider = FutureProvider((ref) async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   if (preferences.getBool("isDark") == null) {
+    //
+    await preferences.setBool("isDark", false);
     return ThemeMode.system;
   }
   return preferences.getBool("isDark") ?? false

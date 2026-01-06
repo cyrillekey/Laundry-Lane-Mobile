@@ -35,9 +35,8 @@ class ProfileScreen extends ConsumerWidget {
           Center(
             child: Text(
               "${user?.name}",
-              style: GoogleFonts.almarai(
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontSize: 20,
-                color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -250,7 +249,10 @@ class ThemeSwitch extends ConsumerWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Icon(TablerIcons.moon, size: 20),
+          Icon(
+            watchTheme == ThemeMode.dark ? TablerIcons.sun : TablerIcons.moon,
+            size: 20,
+          ),
           SizedBox(width: 12),
           Text(
             "Switch theme",

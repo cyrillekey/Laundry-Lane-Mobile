@@ -300,6 +300,7 @@ Future<AuthResponse> updateUser({
         .catchError((err) {
           return jsonDecode(err?.response.toString() ?? "{}");
         });
+    print(response);
     if (response == null) {
       return AuthResponse(
         success: false,
@@ -308,6 +309,7 @@ Future<AuthResponse> updateUser({
     }
     return AuthResponse.fromJson((response));
   } catch (e) {
+    print(e);
     return AuthResponse(
       success: false,
       message: "Error! Could not update user",
