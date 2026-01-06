@@ -1,10 +1,12 @@
-import 'dart:ui';
+import 'dart:convert';
 
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
+import 'package:laundrylane/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String apiUrl = "https://ca55e8b75bb0.ngrok-free.app";
+// const String apiUrl = "https://laundry-lane-server.onrender.com";
+const String apiUrl = "https://bf3cdb70bcf8.ngrok-free.app";
 const List<Color> cartColors = [
   Color.fromRGBO(235, 240, 254, 1),
   Color.fromRGBO(249, 244, 246, 1),
@@ -157,6 +159,11 @@ Future<void> saveToken(String token, int userId) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await prefs.setString('token', token);
   await prefs.setInt('userId', userId);
+}
+
+Future<void> saveUserModel(UserModel user) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('user', jsonEncode(user.toJson()));
 }
 
 final cloudinary = CloudinaryPublic("ddia14anf", 'laundry_lane', cache: false);

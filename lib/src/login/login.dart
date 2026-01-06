@@ -137,6 +137,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                         response.token!,
                                         response.id!,
                                       );
+                                      saveUserModel(response.user!);
                                       setLoadingState(false);
                                       Navigator.of(
                                         context,
@@ -243,6 +244,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                               response.token!,
                                               response.id!,
                                             );
+                                            saveUserModel(response.user!);
                                             setLoadingState(false);
                                             Navigator.of(
                                               context,
@@ -412,6 +414,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       });
                       if (response.success && response.token != null) {
                         await saveToken(response.token!, response.id!);
+                        saveUserModel(response.user!);
                         Navigator.of(context).pushNamedAndRemoveUntil(
                           HomePage.routeName,
                           (route) => route.isFirst,

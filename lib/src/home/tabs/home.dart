@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/src/home/widgets/address_bar.dart';
 import 'package:laundrylane/src/home/widgets/current_order.dart';
 import 'package:laundrylane/src/notifications/notifications_view.dart';
@@ -15,6 +16,7 @@ class HomeTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final theme = ref.watch(themeProvider).value;
+    final user = ref.watch(userProvider).value;
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -56,7 +58,7 @@ class HomeTab extends ConsumerWidget {
                         ),
                         const SizedBox(height: 1),
                         Text(
-                          "John Doe",
+                          "${user?.name}",
                           style: GoogleFonts.almarai(
                             color: Color(0xFF212121),
                             fontWeight: FontWeight.bold,

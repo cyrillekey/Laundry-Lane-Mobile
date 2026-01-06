@@ -2,27 +2,42 @@ import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:laundrylane/models/auth_response.dart';
+import 'package:laundrylane/providers/token_provider.dart';
+import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/utils/constants.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 
-class UpdateProfile extends StatefulWidget {
+class UpdateProfile extends StatefulHookConsumerWidget {
   const UpdateProfile({super.key});
   static const String routeName = "/update-profile";
 
   @override
-  State<UpdateProfile> createState() => _UpdateProfileState();
+  ConsumerState<UpdateProfile> createState() => _UpdateProfileState();
 }
 
-class _UpdateProfileState extends State<UpdateProfile> {
+class _UpdateProfileState extends ConsumerState<UpdateProfile> {
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
   final TextEditingController dobController = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(userProvider).value;
+    print(user?.toJson());
     return Scaffold(
       appBar: AppBar(centerTitle: true, title: Text("Edit Profile")),
       body: FormBuilder(
+        initialValue: {
+          "avatar": user?.avatar,
+          "name": user?.name,
+          "phone": user?.phone,
+          "date_of_birth": user?.dateOfBirth,
+          "email": user?.email,
+          "userName": user?.userName,
+          "gender": user?.gender,
+        },
         key: _formKey,
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
@@ -46,7 +61,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                           child: CircleAvatar(
                             radius: 48,
                             foregroundImage:
-                                field.value != null
+                                field.value != null && field.value != ""
                                     ? NetworkImage(field.value!)
                                     : null,
                           ),
@@ -99,6 +114,13 @@ class _UpdateProfileState extends State<UpdateProfile> {
                     );
                   },
                 ),
+                SizedBox(height: 24),
+                Text(
+                  "${user?.name}",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                SizedBox(height: 4),
+                Text("${user?.email}"),
                 SizedBox(height: 24),
                 Divider(thickness: 1.5),
                 SizedBox(height: 16),
@@ -296,12 +318,69 @@ class _UpdateProfileState extends State<UpdateProfile> {
                     ),
                   ),
                 ),
+                SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      width:
+                          Theme.of(
+                            context,
+                          ).inputDecorationTheme.border?.borderSide.width ??
+                          1.2,
+                      color: Color.fromRGBO(214, 214, 214, 1),
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                  child: FormBuilderTextField(
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                    ]),
+                    name: "userName",
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.auto,
+                      floatingLabelAlignment: FloatingLabelAlignment.start,
+                      label: Text("Username"),
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                    ),
+                  ),
+                ),
                 SizedBox(height: 24),
                 ProgressButton(
                   onPress: () async {
                     if (_formKey.currentState!.saveAndValidate()) {
                       Map formData = _formKey.currentState!.value;
-                      print(formData);
+                      AuthResponse response = await updateUser(
+                        email: formData["email"],
+                        avatar: formData['avatar'],
+                        gender: formData['gender'],
+                        dateOfBirth: formData['date_of_birth'],
+                        phone: formData['phone'],
+                        name: formData['name'],
+                        username: formData['userName'],
+                      );
+                      if (response.success) {
+                        saveUserModel(response.user!);
+                        ref.invalidate(userProvider);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(response.message),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(response.message),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     }
                   },
                   label: "Save",

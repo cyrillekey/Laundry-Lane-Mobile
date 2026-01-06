@@ -170,7 +170,6 @@ Future<DefaultResponse> requestPasswordReset(String email) async {
         )
         .then((value) => value.data)
         .catchError((err) {
-          print(err);
           return jsonDecode(err?.response.toString() ?? "{}");
         });
     if (response == null) {
@@ -181,7 +180,6 @@ Future<DefaultResponse> requestPasswordReset(String email) async {
     }
     return DefaultResponse.fromJson((response));
   } catch (e) {
-    print(e);
     return DefaultResponse(
       message: "Error! Could not reset password",
       success: false,
@@ -267,6 +265,52 @@ Future<AuthResponse> socialLogin(String token) async {
     return AuthResponse(
       message: "Error! Could not authenticate user",
       success: false,
+    );
+  }
+}
+
+Future<AuthResponse> updateUser({
+  String? name,
+  required String email,
+  String? phone,
+  String? username,
+  String? avatar,
+  DateTime? dateOfBirth,
+  String? gender,
+}) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String token = sharedPreferences.getString("token") ?? "";
+
+    final response = await apiDio
+        .put(
+          "/user",
+          data: {
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "username": username,
+            "avatar": avatar,
+            "gender": gender,
+            "dateOfBirth": dateOfBirth?.toUtc().toIso8601String(),
+          },
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((value) => value.data)
+        .catchError((err) {
+          return jsonDecode(err?.response.toString() ?? "{}");
+        });
+    if (response == null) {
+      return AuthResponse(
+        success: false,
+        message: "Error! Could not update user",
+      );
+    }
+    return AuthResponse.fromJson((response));
+  } catch (e) {
+    return AuthResponse(
+      success: false,
+      message: "Error! Could not update user",
     );
   }
 }

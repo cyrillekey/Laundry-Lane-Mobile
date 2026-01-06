@@ -101,6 +101,7 @@ class _ResetUpdatePasswordState extends State<ResetUpdatePassword> {
 
                       if (response.success) {
                         await saveToken(response.token!, response.id!);
+                        saveUserModel(response.user!);
                         Navigator.of(context).pushNamedAndRemoveUntil(
                           HomePage.routeName,
                           (route) => false,

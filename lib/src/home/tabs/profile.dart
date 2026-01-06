@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/src/login/login.dart';
 import 'package:laundrylane/src/payments/payment_methods.dart';
 import 'package:laundrylane/src/profile/update_profile.dart';
@@ -14,17 +15,26 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final theme = ref.watch(themeProvider).value;
+    final user = ref.watch(userProvider).value;
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 12).copyWith(top: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 24),
-          Center(child: CircleAvatar(minRadius: 50)),
+          Center(
+            child: CircleAvatar(
+              minRadius: 50,
+              foregroundImage:
+                  user?.avatar == null || user?.avatar == ""
+                      ? null
+                      : NetworkImage("${user?.avatar}"),
+            ),
+          ),
           SizedBox(height: 12),
           Center(
             child: Text(
-              "John Doe",
+              "${user?.name}",
               style: GoogleFonts.almarai(
                 fontSize: 20,
                 color: Colors.black,
@@ -35,7 +45,7 @@ class ProfileScreen extends ConsumerWidget {
           SizedBox(height: 2),
           Center(
             child: Text(
-              "johndoe@mailsac.com",
+              "${user?.email}",
               style: GoogleFonts.almarai(
                 color: Color.fromRGBO(158, 150, 150, 1),
                 fontSize: 14,

@@ -133,6 +133,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                         response.token!,
                                         response.id!,
                                       );
+                                      saveUserModel(response.user!);
                                       setLoadingState(false);
                                       Navigator.of(
                                         context,
@@ -239,6 +240,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                               response.token!,
                                               response.id!,
                                             );
+                                            saveUserModel(response.user!);
                                             setLoadingState(false);
                                             Navigator.of(
                                               context,
@@ -488,6 +490,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       });
                       if (response.success && response.token != null) {
                         await saveToken(response.token!, response.id!);
+                        saveUserModel(response.user!);
                         Navigator.of(
                           context,
                         ).pushReplacementNamed(HomePage.routeName);
