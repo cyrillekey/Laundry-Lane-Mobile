@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:laundrylane/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// const String apiUrl = "https://laundry-lane-server.onrender.com";
-const String apiUrl = "https://5bde0fc0b930.ngrok-free.app";
+const String apiUrl = "https://laundry-lane-server.onrender.com";
+
 const List<Color> cartColors = [
   Color.fromRGBO(235, 240, 254, 1),
   Color.fromRGBO(249, 244, 246, 1),
