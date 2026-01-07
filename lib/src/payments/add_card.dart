@@ -9,6 +9,7 @@ import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:tabler_icons/tabler_icons.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class AddCard extends StatefulHookConsumerWidget {
   const AddCard({super.key});
@@ -20,6 +21,7 @@ class AddCard extends StatefulHookConsumerWidget {
 
 class _AddCardState extends ConsumerState<AddCard> {
   final GlobalKey<FormBuilderState> formState = GlobalKey<FormBuilderState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -307,13 +309,52 @@ class _AddCardState extends ConsumerState<AddCard> {
                     );
                     if (response.success == true) {
                       ref.invalidate(cardsState);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(response.message),
-                          backgroundColor: Colors.green,
-                        ),
+
+                      showModalBottomSheet(
+                        context: context,
+                        builder:
+                            (context) => SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.9,
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: WebViewWidget(
+                                      controller:
+                                          WebViewController()
+                                            ..setJavaScriptMode(
+                                              JavaScriptMode.unrestricted,
+                                            )
+                                            ..setNavigationDelegate(
+                                              NavigationDelegate(
+                                                onProgress: (int progress) {
+                                                  // Update loading bar.
+                                                },
+                                                onPageStarted: (String url) {},
+                                                onPageFinished: (String url) {},
+                                                onHttpError:
+                                                    (
+                                                      HttpResponseError error,
+                                                    ) {},
+                                                onWebResourceError:
+                                                    (WebResourceError error) {},
+                                                onNavigationRequest: (
+                                                  NavigationRequest request,
+                                                ) {
+                                                  return NavigationDecision
+                                                      .navigate;
+                                                },
+                                              ),
+                                            )
+                                            ..loadRequest(
+                                              Uri.parse(response.message),
+                                            ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        isScrollControlled: true,
                       );
-                      Navigator.of(context).pop();
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

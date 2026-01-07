@@ -88,7 +88,7 @@ class PaymentCardItem extends StatelessWidget {
           Row(
             children: [
               Text(
-                "Credit Card",
+                "Debit Card",
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
@@ -117,10 +117,15 @@ class PaymentCardItem extends StatelessWidget {
               Spacer(),
               Row(
                 children: [
-                  Icon(TablerIcons.brand_visa),
+                  Icon(
+                    card.brand == "visa"
+                        ? TablerIcons.brand_visa
+                        : TablerIcons.brand_mastercard,
+                    size: 28,
+                  ),
                   SizedBox(width: 12),
                   Text(
-                    "12/23",
+                    "${card.expiryDate}",
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
