@@ -30,9 +30,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: TextButton(
           onPressed: () {
-            if (reviewForm.currentState?.saveAndValidate() == true) {
-              print(reviewForm.currentState?.value);
-            }
+            if (reviewForm.currentState?.saveAndValidate() == true) {}
           },
           style: ButtonStyle(
             fixedSize: WidgetStatePropertyAll(

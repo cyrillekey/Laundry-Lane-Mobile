@@ -357,3 +357,32 @@ Future<AddCardResponse> addUserCard({
     );
   }
 }
+
+Future<DefaultResponse> deleteCard({required int cardId}) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String token = sharedPreferences.getString("token") ?? "";
+    final response = await apiDio
+        .delete(
+          "/payments/card/$cardId",
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((resp) => resp.data)
+        .catchError((err) {
+          return jsonDecode(err?.response.toString() ?? "{}");
+        });
+
+    if (response == null) {
+      return DefaultResponse(
+        success: false,
+        message: "Error! Could not delete card",
+      );
+    }
+    return DefaultResponse.fromJson((response));
+  } catch (e) {
+    return DefaultResponse(
+      success: false,
+      message: "Error! Could not delete card",
+    );
+  }
+}

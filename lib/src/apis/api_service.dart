@@ -180,6 +180,5 @@ FutureProvider<List> cardsState = FutureProvider.autoDispose((ref) async {
       .catchError((e) {
         return [];
       });
-  print(response);
   return paymentCardFromJson(jsonEncode(response));
 });
