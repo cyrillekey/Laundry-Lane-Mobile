@@ -544,6 +544,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     ),
                   ),
                 ),
+                SizedBox(height: 36),
               ],
             ),
           ),

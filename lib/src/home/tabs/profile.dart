@@ -175,6 +175,7 @@ class ProfileScreen extends ConsumerWidget {
                                         await SharedPreferences.getInstance();
                                     await preferences.remove("userId");
                                     await preferences.remove("token");
+                                    await preferences.remove("user");
                                     Navigator.of(
                                       context,
                                     ).pushNamedAndRemoveUntil(

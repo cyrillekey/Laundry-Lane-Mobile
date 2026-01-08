@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/auth_response.dart';
+import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
 import 'package:laundrylane/src/home/home.dart';
@@ -415,6 +416,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       if (response.success && response.token != null) {
                         await saveToken(response.token!, response.id!);
                         saveUserModel(response.user!);
+                        ref.invalidate(tokenProvider);
+                        ref.invalidate(userProvider);
                         Navigator.of(context).pushNamedAndRemoveUntil(
                           HomePage.routeName,
                           (route) => route.isFirst,
@@ -468,6 +471,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   ),
                 ),
+                SizedBox(height: 36),
               ],
             ),
           ),
