@@ -8,8 +8,8 @@ import 'package:laundrylane/models/default_response.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
+import 'package:paystack_flutter_sdk/paystack_flutter_sdk.dart';
 import 'package:tabler_icons/tabler_icons.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class AddCard extends StatefulHookConsumerWidget {
   const AddCard({super.key});
@@ -300,7 +300,7 @@ class _AddCardState extends ConsumerState<AddCard> {
                 onPress: () async {
                   if (formState.currentState!.saveAndValidate()) {
                     Map values = formState.currentState!.value;
-                    DefaultResponse response = await addUserCard(
+                    AddCardResponse response = await addUserCard(
                       cardNumber: values['card_number'],
                       cvv: values['cvv'],
                       expiry: values['expiry_date'],
@@ -308,53 +308,11 @@ class _AddCardState extends ConsumerState<AddCard> {
                       isDefault: values['save_creditcard'] == true,
                     );
                     if (response.success == true) {
+                      var paystack = Paystack();
+                      await paystack.initialize(response.publickey!, false);
+                      await paystack.launch(response.accessToken!);
                       ref.invalidate(cardsState);
-
-                      showModalBottomSheet(
-                        context: context,
-                        builder:
-                            (context) => SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.9,
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: WebViewWidget(
-                                      controller:
-                                          WebViewController()
-                                            ..setJavaScriptMode(
-                                              JavaScriptMode.unrestricted,
-                                            )
-                                            ..setNavigationDelegate(
-                                              NavigationDelegate(
-                                                onProgress: (int progress) {
-                                                  // Update loading bar.
-                                                },
-                                                onPageStarted: (String url) {},
-                                                onPageFinished: (String url) {},
-                                                onHttpError:
-                                                    (
-                                                      HttpResponseError error,
-                                                    ) {},
-                                                onWebResourceError:
-                                                    (WebResourceError error) {},
-                                                onNavigationRequest: (
-                                                  NavigationRequest request,
-                                                ) {
-                                                  return NavigationDecision
-                                                      .navigate;
-                                                },
-                                              ),
-                                            )
-                                            ..loadRequest(
-                                              Uri.parse(response.message),
-                                            ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        isScrollControlled: true,
-                      );
+                      Navigator.pop(context);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

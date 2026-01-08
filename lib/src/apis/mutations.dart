@@ -316,7 +316,7 @@ Future<AuthResponse> updateUser({
   }
 }
 
-Future<DefaultResponse> addUserCard({
+Future<AddCardResponse> addUserCard({
   required String cardNumber,
   required String cvv,
   required String expiry,
@@ -342,17 +342,16 @@ Future<DefaultResponse> addUserCard({
         .catchError((err) {
           return jsonDecode(err?.response.toString() ?? "{}");
         });
-    print(response);
+
     if (response == null) {
-      return DefaultResponse(
+      return AddCardResponse(
         success: false,
         message: "Error! Could not add card",
       );
     }
-    return DefaultResponse.fromJson((response));
+    return AddCardResponse.fromJson((response));
   } catch (e) {
-    print(e);
-    return DefaultResponse(
+    return AddCardResponse(
       success: false,
       message: "Error! Could not add card",
     );
