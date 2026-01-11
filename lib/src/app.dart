@@ -14,6 +14,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
 import 'package:laundrylane/src/payments/add_card.dart';
 import 'package:laundrylane/src/payments/payment_methods.dart';
+import 'package:laundrylane/src/profile/update_password.dart';
 import 'package:laundrylane/src/profile/update_profile.dart';
 import 'package:laundrylane/src/request_order/service_select.dart';
 import 'package:laundrylane/src/signup/signup.dart';
@@ -135,6 +136,8 @@ class MyApp extends ConsumerWidget {
                 return ResetUpdatePassword();
               case UpdateProfile.routeName:
                 return UpdateProfile();
+              case UpdatePassword.routeName:
+                return UpdatePassword();
               default:
                 return const OnboardingView();
             }

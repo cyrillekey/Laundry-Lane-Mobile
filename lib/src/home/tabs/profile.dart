@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/src/login/login.dart';
 import 'package:laundrylane/src/payments/payment_methods.dart';
+import 'package:laundrylane/src/profile/update_password.dart';
 import 'package:laundrylane/src/profile/update_profile.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -100,7 +101,14 @@ class ProfileScreen extends ConsumerWidget {
               width: MediaQuery.of(context).size.width,
               child: Column(
                 children: [
-                  SettingItem(label: "Password", icon: TablerIcons.lock),
+                  SettingItem(
+                    label: "Password",
+                    icon: TablerIcons.lock,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(UpdatePassword.routeName),
+                  ),
                   Divider(),
                   SettingItem(
                     label: "Payment Methods",
