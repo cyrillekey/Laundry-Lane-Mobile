@@ -135,25 +135,48 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                       );
                                       saveUserModel(response.user!);
                                       setLoadingState(false);
-                                      Navigator.of(
-                                        context,
-                                      ).pushNamedAndRemoveUntil(
-                                        HomePage.routeName,
-                                        (r) => false,
-                                      );
+                                      if (context.mounted) {
+                                        Navigator.of(
+                                          context,
+                                        ).pushNamedAndRemoveUntil(
+                                          HomePage.routeName,
+                                          ModalRoute.withName(
+                                            HomePage.routeName,
+                                          ),
+                                        );
+                                      }
                                     } else {
                                       setLoadingState(false);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(response.message),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } else {
+                                    setLoadingState(false);
+                                    if (context.mounted) {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
                                         SnackBar(
-                                          content: Text(response.message),
+                                          content: Text(
+                                            "Error! Could not login",
+                                          ),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
                                     }
-                                  } else {
-                                    setLoadingState(false);
+                                  }
+                                  setLoadingState(false);
+                                } catch (e) {
+                                  setLoadingState(false);
+                                  if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text("Error! Could not login"),
@@ -161,16 +184,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                       ),
                                     );
                                   }
-
-                                  setLoadingState(false);
-                                } catch (e) {
-                                  setLoadingState(false);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Error! Could not login"),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
                                 }
                               },
                               label: Text(
@@ -242,37 +255,46 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                             );
                                             saveUserModel(response.user!);
                                             setLoadingState(false);
-                                            Navigator.of(
-                                              context,
-                                            ).pushNamedAndRemoveUntil(
-                                              HomePage.routeName,
-                                              (r) => false,
-                                            );
+                                            if (context.mounted) {
+                                              Navigator.of(
+                                                context,
+                                              ).pushNamedAndRemoveUntil(
+                                                HomePage.routeName,
+                                                ModalRoute.withName(
+                                                  HomePage.routeName,
+                                                ),
+                                              );
+                                            }
                                           } else {
-                                            setLoadingState(false);
+                                            if (context.mounted) {
+                                              setLoadingState(false);
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    response.message,
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        } else {
+                                          setLoadingState(false);
+                                          if (context.mounted) {
                                             ScaffoldMessenger.of(
                                               context,
                                             ).showSnackBar(
                                               SnackBar(
-                                                content: Text(response.message),
+                                                content: Text(
+                                                  "Error! Could not login",
+                                                ),
                                                 backgroundColor: Colors.red,
                                               ),
                                             );
                                           }
-                                        } else {
-                                          setLoadingState(false);
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "Error! Could not login",
-                                              ),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
                                         }
-
                                         setLoadingState(false);
                                       } catch (e) {
                                         setLoadingState(false);
@@ -491,19 +513,23 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       if (response.success && response.token != null) {
                         await saveToken(response.token!, response.id!);
                         saveUserModel(response.user!);
-                        Navigator.of(
-                          context,
-                        ).pushReplacementNamed(HomePage.routeName);
+                        if (context.mounted) {
+                          Navigator.of(
+                            context,
+                          ).pushReplacementNamed(HomePage.routeName);
+                        }
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            content: Text(response.message),
-                            elevation: 1,
-                            backgroundColor:
-                                response.success ? Colors.green : Colors.red,
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              content: Text(response.message),
+                              elevation: 1,
+                              backgroundColor:
+                                  response.success ? Colors.green : Colors.red,
+                            ),
+                          );
+                        }
                       }
                     }
                   },

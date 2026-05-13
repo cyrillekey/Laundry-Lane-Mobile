@@ -184,12 +184,14 @@ class ProfileScreen extends ConsumerWidget {
                                     await preferences.remove("userId");
                                     await preferences.remove("token");
                                     await preferences.remove("user");
-                                    Navigator.of(
-                                      context,
-                                    ).pushNamedAndRemoveUntil(
-                                      LoginPage.routeName,
-                                      (route) => route.isFirst,
-                                    );
+                                    if (context.mounted) {
+                                      Navigator.of(
+                                        context,
+                                      ).pushNamedAndRemoveUntil(
+                                        LoginPage.routeName,
+                                        (route) => route.isFirst,
+                                      );
+                                    }
                                   },
                                   child: Text("Logout"),
                                 ),

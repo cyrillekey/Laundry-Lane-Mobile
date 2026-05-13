@@ -140,25 +140,49 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       );
                                       saveUserModel(response.user!);
                                       setLoadingState(false);
-                                      Navigator.of(
-                                        context,
-                                      ).pushNamedAndRemoveUntil(
-                                        HomePage.routeName,
-                                        (r) => false,
-                                      );
+                                      if (context.mounted) {
+                                        Navigator.of(
+                                          context,
+                                        ).pushNamedAndRemoveUntil(
+                                          HomePage.routeName,
+                                          ModalRoute.withName(
+                                            HomePage.routeName,
+                                          ),
+                                        );
+                                      }
                                     } else {
                                       setLoadingState(false);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(response.message),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  } else {
+                                    setLoadingState(false);
+                                    if (context.mounted) {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
                                         SnackBar(
-                                          content: Text(response.message),
+                                          content: Text(
+                                            "Error! Could not login",
+                                          ),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
                                     }
-                                  } else {
-                                    setLoadingState(false);
+                                  }
+
+                                  setLoadingState(false);
+                                } catch (e) {
+                                  setLoadingState(false);
+                                  if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text("Error! Could not login"),
@@ -166,16 +190,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       ),
                                     );
                                   }
-
-                                  setLoadingState(false);
-                                } catch (e) {
-                                  setLoadingState(false);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text("Error! Could not login"),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
                                 }
                               },
                               label: Text(
@@ -247,35 +261,45 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                             );
                                             saveUserModel(response.user!);
                                             setLoadingState(false);
-                                            Navigator.of(
-                                              context,
-                                            ).pushNamedAndRemoveUntil(
-                                              HomePage.routeName,
-                                              (r) => false,
-                                            );
+                                            if (context.mounted) {
+                                              Navigator.of(
+                                                context,
+                                              ).pushNamedAndRemoveUntil(
+                                                HomePage.routeName,
+                                                ModalRoute.withName(
+                                                  HomePage.routeName,
+                                                ),
+                                              );
+                                            }
                                           } else {
                                             setLoadingState(false);
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    response.message,
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        } else {
+                                          setLoadingState(false);
+                                          if (context.mounted) {
                                             ScaffoldMessenger.of(
                                               context,
                                             ).showSnackBar(
                                               SnackBar(
-                                                content: Text(response.message),
+                                                content: Text(
+                                                  "Error! Could not login",
+                                                ),
                                                 backgroundColor: Colors.red,
                                               ),
                                             );
                                           }
-                                        } else {
-                                          setLoadingState(false);
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "Error! Could not login",
-                                              ),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
                                         }
 
                                         setLoadingState(false);
@@ -418,20 +442,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         saveUserModel(response.user!);
                         ref.invalidate(tokenProvider);
                         ref.invalidate(userProvider);
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          HomePage.routeName,
-                          (route) => route.isFirst,
-                        );
+                        if (context.mounted) {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            HomePage.routeName,
+                            ModalRoute.withName(HomePage.routeName),
+                          );
+                        }
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            content: Text(response.message),
-                            elevation: 1,
-                            backgroundColor:
-                                response.success ? Colors.green : Colors.red,
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              content: Text(response.message),
+                              elevation: 1,
+                              backgroundColor:
+                                  response.success ? Colors.green : Colors.red,
+                            ),
+                          );
+                        }
                       }
                     }
                   },

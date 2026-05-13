@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnboardingView extends StatefulWidget {
@@ -141,8 +142,13 @@ class _OnboardingViewState extends State<OnboardingView> {
             ),
             Spacer(),
             InkWell(
-              onTap: () {
-                Navigator.of(context).pushReplacementNamed("/login");
+              onTap: () async {
+                await SharedPreferences.getInstance().then((preference) {
+                  preference.setBool("onboarded", true);
+                });
+                if (context.mounted) {
+                  Navigator.of(context).popAndPushNamed("/login");
+                }
               },
               child: Container(
                 alignment: Alignment.center,

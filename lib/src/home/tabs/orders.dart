@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jiffy/jiffy.dart';
@@ -35,6 +36,32 @@ class OrdersTab extends ConsumerWidget {
               },
               child: orderListener.when(
                 data: (data) {
+                  if (data.isEmpty) {
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          SizedBox(height: 48),
+                          SvgPicture.asset(
+                            "assets/svgs/bag-svgrepo-com.svg",
+                            height: 100,
+                          ),
+                          SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Text(
+                              "You don't have any orders yet",
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.almarai(
+                                fontSize: 17,
+                                color: Color.fromRGBO(152, 152, 152, 1),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                   return ListView.separated(
                     separatorBuilder: (context, index) => SizedBox(height: 6),
                     itemCount: data.length,

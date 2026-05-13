@@ -102,20 +102,24 @@ class _ResetUpdatePasswordState extends State<ResetUpdatePassword> {
                       if (response.success) {
                         await saveToken(response.token!, response.id!);
                         saveUserModel(response.user!);
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          HomePage.routeName,
-                          (route) => false,
-                        );
+                        if (context.mounted) {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            HomePage.routeName,
+                            ModalRoute.withName(HomePage.routeName),
+                          );
+                        }
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            content: Text(response.message),
-                            elevation: 1,
-                            backgroundColor:
-                                response.success ? Colors.green : Colors.red,
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              content: Text(response.message),
+                              elevation: 1,
+                              backgroundColor:
+                                  response.success ? Colors.green : Colors.red,
+                            ),
+                          );
+                        }
                       }
                     }
                   },

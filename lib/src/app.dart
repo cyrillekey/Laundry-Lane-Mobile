@@ -36,6 +36,7 @@ class MyApp extends ConsumerWidget {
     // The ListenableBuilder Widget listens to the SettingsController for changes.
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
     String? token = (sharedPreferences.getString("token"));
+    bool? onboarded = sharedPreferences.getBool("onboarded");
     bool isThemeSet = sharedPreferences.getBool("isDark") != null;
     // Retrieves the default theme for the platform
     //TextTheme textTheme = Theme.of(context).textTheme;
@@ -53,7 +54,11 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       initialRoute:
-          token == null ? OnboardingView.routeName : HomePage.routeName,
+          onboarded == false
+              ? OnboardingView.routeName
+              : token == null
+              ? LoginPage.routeName
+              : HomePage.routeName,
       // theme: settingsController.themeMode == ThemeMode.light
       //     ? theme.light()
       //     : theme.dark(),
