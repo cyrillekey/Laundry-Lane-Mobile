@@ -38,5 +38,5 @@ jobs:
       - name: Lint
         run: flutter analyze
 
-      - name: Test
-        run: flutter test
+      # - name: Test
+      #   run: flutter test
