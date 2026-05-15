@@ -386,3 +386,35 @@ Future<DefaultResponse> deleteCard({required int cardId}) async {
     );
   }
 }
+
+Future<DefaultResponse> changePassword(
+  String oldPassword,
+  String newPassword,
+) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String token = sharedPreferences.getString("token") ?? "";
+    final response = await apiDio
+        .put(
+          "/user/change-password",
+          data: {"oldPassword": oldPassword, "newPassword": newPassword},
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((value) => value.data)
+        .catchError((err) {
+          return jsonDecode(err?.response.toString() ?? "{}");
+        });
+    if (response == null) {
+      return DefaultResponse(
+        message: "Error! Could not update password",
+        success: false,
+      );
+    }
+    return DefaultResponse.fromJson((response));
+  } catch (e) {
+    return DefaultResponse(
+      message: "Error! Could not update password",
+      success: false,
+    );
+  }
+}

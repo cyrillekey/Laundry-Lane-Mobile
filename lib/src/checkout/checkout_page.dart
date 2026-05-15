@@ -2,18 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:laundrylane/src/checkout/checkout_review.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
-class CheckoutPage extends StatefulWidget {
+class CheckoutPage extends StatefulHookConsumerWidget {
   const CheckoutPage({super.key});
   static const String routeName = "/checkout";
 
   @override
-  State<CheckoutPage> createState() => _CheckoutPageState();
+  ConsumerState<CheckoutPage> createState() => _CheckoutPageState();
 }
 
-class _CheckoutPageState extends State<CheckoutPage> {
+class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final GlobalKey<FormBuilderState> reviewForm = GlobalKey<FormBuilderState>();
 
   @override
@@ -23,6 +27,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final serviceListenter = ref.watch(serviceTypeState);
     return FormBuilder(
       key: reviewForm,
       child: Scaffold(
@@ -30,7 +35,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: TextButton(
           onPressed: () {
-            if (reviewForm.currentState?.saveAndValidate() == true) {}
+            if (reviewForm.currentState?.saveAndValidate() == true) {
+              Map formValues = reviewForm.currentState!.value;
+              Navigator.of(
+                context,
+              ).pushNamed(CheckoutReview.routeName, arguments: formValues);
+            }
           },
           style: ButtonStyle(
             fixedSize: WidgetStatePropertyAll(
@@ -52,15 +62,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
           ),
         ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.8,
+        body: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.8,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 12),
                 FormBuilderField<String>(
+                  onChanged: (value) {
+                    setState(() {});
+                  },
                   name: "orderType",
                   initialValue: "Pickup",
                   validator: FormBuilderValidators.required(),
@@ -257,39 +270,110 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
                 SizedBox(height: 26),
                 Text(
-                  "Delivery Days",
+                  "Service Type",
                   style: Theme.of(context).textTheme.labelLarge,
                 ),
-                SizedBox(height: 6),
-                FormBuilderField<String?>(
+                SizedBox(height: 12),
+                FormBuilderField<int?>(
                   builder: (formBuiler) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          children: [
-                            ServiceDay(
-                              title: "Regular",
-                              days: "(2-3) days",
-                              price: "No extra fee",
-                              formBuilderState: formBuiler,
-                            ),
-                            SizedBox(width: 8),
-                            ServiceDay(
-                              formBuilderState: formBuiler,
-                              title: "Express",
-                              days: "(1 day)",
-                              price: "Exta Ksh 100 ",
-                            ),
-                            SizedBox(width: 8),
-                            ServiceDay(
-                              formBuilderState: formBuiler,
-                              title: "Same Day",
-                              days: "(8 hours)",
-                              price: "Extra Ksh 200",
-                            ),
-                          ],
+                        serviceListenter.when(
+                          data: (services) {
+                            return SizedBox(
+                              height: 100,
+                              width: MediaQuery.of(context).size.width,
+                              child: ListView.separated(
+                                separatorBuilder:
+                                    (context, index) => SizedBox(width: 12),
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) {
+                                  final service = services[index];
+                                  return ServiceDay(
+                                    id: service.id,
+                                    title: service.name ?? "",
+                                    days: service.serviceTimelines ?? "",
+                                    price:
+                                        service.price == 0
+                                            ? "No extra fee"
+                                            : "Extra Ksh ${service.price}",
+                                    formBuilderState: formBuiler,
+                                  );
+                                },
+                                itemCount: 3,
+                              ),
+                            );
+                          },
+                          loading:
+                              () => SizedBox(
+                                height: 100,
+                                width: MediaQuery.of(context).size.width,
+                                child: ListView.separated(
+                                  separatorBuilder:
+                                      (context, index) => SizedBox(width: 4),
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+                                    return Shimmer.fromColors(
+                                      baseColor:
+                                          Theme.of(
+                                            context,
+                                          ).scaffoldBackgroundColor,
+                                      highlightColor:
+                                          Theme.of(context).highlightColor,
+                                      child: Container(
+                                        height: 100,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).cardColor,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  itemCount: 3,
+                                ),
+                              ),
+                          error:
+                              (error, stackTrace) => SizedBox(
+                                height: 80,
+                                width: MediaQuery.of(context).size.width,
+                                child: ListView.separated(
+                                  separatorBuilder:
+                                      (context, index) => SizedBox(width: 4),
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+                                    return Shimmer.fromColors(
+                                      baseColor:
+                                          Theme.of(
+                                            context,
+                                          ).scaffoldBackgroundColor,
+                                      highlightColor:
+                                          Theme.of(context).highlightColor,
+                                      child: Container(
+                                        height: 100,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).cardColor,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  itemCount: 3,
+                                ),
+                              ),
                         ),
+
                         if (formBuiler.hasError) ...[
                           SizedBox(height: 12),
                           Text(
@@ -304,6 +388,40 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   validator: FormBuilderValidators.required(),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                 ),
+
+                if (reviewForm.currentState?.getRawValue("orderType") ==
+                    "Pickup and Delivery") ...[
+                  SizedBox(height: 16),
+                  Text(
+                    "Delivery Window",
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  SizedBox(height: 12),
+                  // show a list of one hour windows for delivery between 6am and 10pm
+                  FormBuilderDropdown(
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    name: "deliveryWindow",
+                    validator: FormBuilderValidators.required(),
+                    decoration: InputDecoration(
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey, width: 1),
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.red, width: 1),
+                      ),
+                    ),
+                    items: List.generate(
+                      16,
+                      (index) => DropdownMenuItem(
+                        value: "${index + 6}:00 - ${index + 7}:00",
+                        child: Text("${index + 6}:00 - ${index + 7}:00"),
+                      ),
+                    ),
+                  ),
+                ],
+
                 SizedBox(height: 26),
                 Text(
                   "Select Washing Preference",
@@ -349,6 +467,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: FormBuilderValidators.required(),
                 ),
+                SizedBox(height: 64),
               ],
             ),
           ),
@@ -365,60 +484,61 @@ class ServiceDay extends StatelessWidget {
     required this.days,
     required this.price,
     required this.formBuilderState,
+    required this.id,
   });
-  final FormFieldState<String?> formBuilderState;
+  final FormFieldState<int?> formBuilderState;
   final String title;
   final String days;
   final String price;
+  final int id;
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: () => formBuilderState.didChange(title),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color:
-                formBuilderState.value == title
-                    ? Theme.of(context).primaryColor
-                    : Color.fromRGBO(246, 246, 246, 1),
-          ),
-          child: Column(
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color:
-                      formBuilderState.value == title
-                          ? Colors.white
-                          : Colors.black,
-                ),
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => formBuilderState.didChange(id),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color:
+              formBuilderState.value == id
+                  ? Theme.of(context).primaryColor
+                  : Color.fromRGBO(246, 246, 246, 1),
+        ),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color:
+                    formBuilderState.value == title
+                        ? Colors.white
+                        : Colors.black,
               ),
-              SizedBox(height: 2),
-              Text(
-                days,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color:
-                      formBuilderState.value == title
-                          ? Colors.white
-                          : Color.fromRGBO(132, 137, 147, 1),
-                  fontWeight: FontWeight.w600,
-                ),
+            ),
+            SizedBox(height: 2),
+            Text(
+              days,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color:
+                    formBuilderState.value == title
+                        ? Colors.white
+                        : Color.fromRGBO(132, 137, 147, 1),
+                fontWeight: FontWeight.w600,
               ),
-              SizedBox(height: 2),
-              Text(
-                price,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color:
-                      formBuilderState.value == title
-                          ? Colors.white
-                          : Color.fromRGBO(132, 137, 147, 1),
-                ),
+            ),
+            SizedBox(height: 2),
+            Text(
+              price,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color:
+                    formBuilderState.value == title
+                        ? Colors.white
+                        : Color.fromRGBO(132, 137, 147, 1),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -443,6 +563,7 @@ class WashItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      borderRadius: BorderRadius.circular(12),
       onTap: () => formBuilder.didChange(name),
       child: Card.outlined(
         shape:

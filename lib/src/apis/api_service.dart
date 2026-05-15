@@ -9,6 +9,7 @@ import 'package:laundrylane/models/goecode_reverse.dart';
 import 'package:laundrylane/models/home_address.dart';
 import 'package:laundrylane/models/order_model.dart';
 import 'package:laundrylane/models/payment_card.dart';
+import 'package:laundrylane/models/service_model.dart';
 import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/utils/constants.dart';
 
@@ -182,3 +183,31 @@ FutureProvider<List> cardsState = FutureProvider.autoDispose((ref) async {
       });
   return paymentCardFromJson(jsonEncode(response));
 });
+
+FutureProvider<List<ServiceType>> serviceTypeState = FutureProvider.autoDispose(
+  (ref) async {
+    try {
+      final token = ref.watch(tokenProvider).value;
+      final CancelToken cancelToken = CancelToken();
+
+      ref.onDispose(cancelToken.cancel);
+      final response = await apiDio
+          .get(
+            "/catalog/service-types",
+            options: Options(headers: {"Authorization": "Bearer $token"}),
+            cancelToken: cancelToken,
+          )
+          .then((resp) => resp.data)
+          .catchError((e) {
+            return [];
+          });
+      return List<ServiceType>.from(
+        response.map((e) {
+          return ServiceType.fromJson(e);
+        }),
+      );
+    } catch (e) {
+      return [];
+    }
+  },
+);

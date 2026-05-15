@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/providers/token_provider.dart';
+import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:laundrylane/src/cart/cart_page.dart';
 import 'package:laundrylane/src/home/widgets/address_bar.dart';
 import 'package:laundrylane/src/home/widgets/current_order.dart';
 import 'package:laundrylane/src/notifications/notifications_view.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:laundrylane/utils/constants.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 class HomeTab extends ConsumerWidget {
@@ -17,6 +21,8 @@ class HomeTab extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final theme = ref.watch(themeProvider).value;
     final user = ref.watch(userProvider).value;
+    final catalogListener = ref.watch(catalogState);
+
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -119,60 +125,149 @@ class HomeTab extends ConsumerWidget {
                   ),
                 ),
                 SizedBox(height: 12),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.21,
-                  child: GridView.count(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      CategoryCard(
-                        title: "Kids",
-                        assetName: "assets/svgs/shirt-svgrepo-com.svg",
-                        themeData: theme,
+                catalogListener.when(
+                  data: (data) {
+                    final catalog = data.firstWhere(
+                      (element) => element.bulk == false,
+                    );
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.21,
+                      child: GridView.count(
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        physics: NeverScrollableScrollPhysics(),
+                        children: [
+                          CategoryCard(
+                            title: "Kids",
+                            assetName: "assets/svgs/shirt-svgrepo-com.svg",
+                            themeData: theme,
+                            catalog: catalog,
+                          ),
+                          CategoryCard(
+                            title: "Women",
+                            assetName:
+                                "assets/svgs/skirt-fashion-clothes-svgrepo-com.svg",
+                            themeData: theme,
+                            catalog: catalog,
+                          ),
+                          CategoryCard(
+                            title: "Men",
+                            assetName: "assets/svgs/coat-svgrepo-com.svg",
+                            themeData: theme,
+                            catalog: catalog,
+                          ),
+                          CategoryCard(
+                            title: "Curtains",
+                            assetName:
+                                "assets/svgs/blinds-circus-curtain-svgrepo-com.svg",
+                            themeData: theme,
+                            catalog: catalog,
+                          ),
+                          CategoryCard(
+                            title: 'Coach',
+                            assetName: "assets/svgs/sofa-2-svgrepo-com.svg",
+                            themeData: theme,
+                            catalog: catalog,
+                          ),
+                          CategoryCard(
+                            title: "Others",
+                            assetName:
+                                "assets/svgs/socks-christmas-winter-svgrepo-com.svg",
+                            themeData: theme,
+                            catalog: catalog,
+                          ),
+                          CategoryCard(
+                            title: "Blankets",
+                            assetName:
+                                "assets/svgs/blanket-laundry-clean-svgrepo-com.svg",
+                            themeData: theme,
+                            catalog: catalog,
+                          ),
+                          CategoryCard(
+                            title: "Bags",
+                            assetName: "assets/svgs/bag-svgrepo-com.svg",
+                            themeData: theme,
+                            catalog: catalog,
+                          ),
+                        ],
                       ),
-                      CategoryCard(
-                        title: "Women",
-                        assetName:
-                            "assets/svgs/skirt-fashion-clothes-svgrepo-com.svg",
-                        themeData: theme,
+                    );
+                  },
+                  loading: () {
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.21,
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: 8,
+                        itemBuilder: (context, index) {
+                          return Shimmer.fromColors(
+                            baseColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            highlightColor: Theme.of(context).highlightColor,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.grey,
+                                  width: 1.5,
+                                ),
+                                color: Theme.of(context).cardColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height * 0.18,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      CategoryCard(
-                        title: "Men",
-                        assetName: "assets/svgs/coat-svgrepo-com.svg",
-                        themeData: theme,
+                    );
+                  },
+                  error: (error, stackTrace) {
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.21,
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: 8,
+                        itemBuilder: (context, index) {
+                          return Shimmer.fromColors(
+                            baseColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            highlightColor: Theme.of(context).highlightColor,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.grey,
+                                  width: 1.5,
+                                ),
+                                color: Theme.of(context).cardColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height * 0.18,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      CategoryCard(
-                        title: "Curtains",
-                        assetName:
-                            "assets/svgs/blinds-circus-curtain-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: 'Coach',
-                        assetName: "assets/svgs/sofa-2-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: "Others",
-                        assetName:
-                            "assets/svgs/socks-christmas-winter-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: "Blankets",
-                        assetName:
-                            "assets/svgs/blanket-laundry-clean-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: "Bags",
-                        assetName: "assets/svgs/bag-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -188,16 +283,21 @@ class CategoryCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.assetName,
+    required this.catalog,
     this.themeData,
   });
   final String title;
   final ThemeMode? themeData;
   final String assetName;
+  final Catalog catalog;
   @override
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () => {},
+      onTap:
+          () => Navigator.of(
+            context,
+          ).pushNamed(CartPage.routeName, arguments: catalog),
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(

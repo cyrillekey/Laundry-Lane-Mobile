@@ -321,7 +321,7 @@ class CartItemWidget extends StatelessWidget {
                                   ).editItem(subtype.id!, quantity - 1);
                                 }
                               },
-                      child: Icon(TablerIcons.minus),
+                      child: Icon(TablerIcons.minus, size: 24),
                     );
                   },
                 ),
@@ -346,7 +346,7 @@ class CartItemWidget extends StatelessWidget {
                 Consumer<CartProvider>(
                   builder: (context, provider, child) {
                     return InkWell(
-                      child: Icon(TablerIcons.plus, size: 20),
+                      child: Icon(TablerIcons.plus, size: 24),
                       onTap: () {
                         int quantity =
                             provider.items

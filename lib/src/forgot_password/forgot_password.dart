@@ -127,20 +127,24 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       );
 
                       if (response.success) {
-                        Navigator.of(context).pushNamed(
-                          PasswordResetOtp.routeName,
-                          arguments: formData["email"],
-                        );
+                        if (context.mounted) {
+                          Navigator.of(context).pushNamed(
+                            PasswordResetOtp.routeName,
+                            arguments: formData["email"],
+                          );
+                        }
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            content: Text(response.message),
-                            elevation: 1,
-                            backgroundColor:
-                                response.success ? Colors.green : Colors.red,
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              content: Text(response.message),
+                              elevation: 1,
+                              backgroundColor:
+                                  response.success ? Colors.green : Colors.red,
+                            ),
+                          );
+                        }
                       }
                     }
                   },

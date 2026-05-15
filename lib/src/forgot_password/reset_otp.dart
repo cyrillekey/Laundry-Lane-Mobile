@@ -165,23 +165,27 @@ class _PasswordResetOtpState extends State<PasswordResetOtp> {
                         formData["otp"],
                       );
                       if (response.success) {
-                        Navigator.of(context).popAndPushNamed(
-                          ResetUpdatePassword.routeName,
-                          arguments: {
-                            "token": response.message,
-                            "email":
-                                ModalRoute.of(context)?.settings.arguments
-                                    as String,
-                          },
-                        );
+                        if (context.mounted) {
+                          Navigator.of(context).popAndPushNamed(
+                            ResetUpdatePassword.routeName,
+                            arguments: {
+                              "token": response.message,
+                              "email":
+                                  ModalRoute.of(context)?.settings.arguments
+                                      as String,
+                            },
+                          );
+                        }
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            behavior: SnackBarBehavior.floating,
-                            content: Text(response.message),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              behavior: SnackBarBehavior.floating,
+                              content: Text(response.message),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     }
                   },
@@ -220,17 +224,19 @@ class _PasswordResetOtpState extends State<PasswordResetOtp> {
                                   DefaultResponse response =
                                       await requestPasswordReset(email);
                                   startTimer();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      behavior: SnackBarBehavior.floating,
-                                      content: Text(response.message),
-                                      elevation: 1,
-                                      backgroundColor:
-                                          response.success
-                                              ? Colors.green
-                                              : Colors.red,
-                                    ),
-                                  );
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        behavior: SnackBarBehavior.floating,
+                                        content: Text(response.message),
+                                        elevation: 1,
+                                        backgroundColor:
+                                            response.success
+                                                ? Colors.green
+                                                : Colors.red,
+                                      ),
+                                    );
+                                  }
                                   setLoadingState(false);
                                 },
                         child: RichText(
