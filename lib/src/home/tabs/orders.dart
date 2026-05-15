@@ -6,6 +6,7 @@ import 'package:jiffy/jiffy.dart';
 import 'package:laundrylane/models/order_model.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
@@ -37,8 +38,13 @@ class OrdersTab extends ConsumerWidget {
               child: orderListener.when(
                 data: (data) {
                   if (data.isEmpty) {
-                    return SingleChildScrollView(
+                    return SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height * 0.70,
                       child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           SizedBox(height: 48),
                           SvgPicture.asset(
@@ -57,6 +63,11 @@ class OrdersTab extends ConsumerWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
+                          ),
+                          SizedBox(height: 24),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 36),
+                            child: ProgressButton(label: "Place an Order"),
                           ),
                         ],
                       ),
