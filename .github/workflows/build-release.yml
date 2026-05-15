@@ -53,8 +53,7 @@ jobs:
           echo "versionName=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "versionCode=${{ github.run_number }}" >> $GITHUB_OUTPUT
       - name: Setup keystore
-        run: |
-          echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > android/keys.keystore
+        run: |          
           cat <<EOF > android/key.properties
           storeFile=../keys.keystore
           storePassword=${{ secrets.KEYSTORE_PASSWORD }}
@@ -62,12 +61,7 @@ jobs:
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF      
       - name: Build APK (split per ABI)
-        run: flutter build apk --split-per-abi --release
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-
+        run: flutter build apk --split-per-abi --release        
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
