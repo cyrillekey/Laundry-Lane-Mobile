@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/src/address/add_address.dart';
 import 'package:laundrylane/src/cart/cart_page.dart';
 import 'package:laundrylane/src/checkout/checkout_page.dart';
+import 'package:laundrylane/src/checkout/checkout_review.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
 import 'package:laundrylane/src/forgot_password/reset_otp.dart';
 import 'package:laundrylane/src/forgot_password/reset_update_password.dart';
@@ -143,6 +144,8 @@ class MyApp extends ConsumerWidget {
                 return UpdateProfile();
               case UpdatePassword.routeName:
                 return UpdatePassword();
+              case CheckoutReview.routeName:
+                return CheckoutReview();
               default:
                 return const OnboardingView();
             }

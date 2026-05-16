@@ -707,7 +707,9 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
                             );
                             if (response.success == true) {
                               ref.invalidate(addressState);
-                              Navigator.pop(context);
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
                             }
                           } else {
                             DefaultResponse response = await updateAddress(
@@ -719,7 +721,9 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
                             );
                             if (response.success == true) {
                               ref.invalidate(addressState);
-                              Navigator.pop(context);
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
                             }
                           }
                         }

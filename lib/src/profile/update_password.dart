@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 
@@ -16,9 +17,11 @@ class _UpdatePasswordState extends State<UpdatePassword> {
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
   @override
   Widget build(BuildContext context) {
+    // print(formKey.currentState?.getRawValue("newPassword"));
     return Scaffold(
       appBar: AppBar(centerTitle: true, title: Text("Update Password")),
       body: FormBuilder(
+        autovalidateMode: AutovalidateMode.onUserInteractionIfError,
         key: formKey,
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 16),
@@ -77,6 +80,9 @@ class _UpdatePasswordState extends State<UpdatePassword> {
                     minUppercaseCount: 1,
                   ),
                 ],
+                onChanged: (p0) {
+                  setState(() {});
+                },
               ),
               SizedBox(height: 16),
               Text(
@@ -106,10 +112,34 @@ class _UpdatePasswordState extends State<UpdatePassword> {
               SizedBox(height: 48),
 
               ProgressButton(
-                onPress: () {
+                onPress: () async {
                   if (formKey.currentState?.saveAndValidate() == true) {
                     Map formData = formKey.currentState!.value;
-                    print(formData);
+                    final response = await changePassword(
+                      formData['password'],
+                      formData['newPassword'],
+                    );
+                    if (response.success) {
+                      formKey.currentState?.reset();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(response.message),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                        Navigator.pop(context);
+                      }
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(response.message),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
                   }
                 },
                 label: "Update Password",

@@ -15,7 +15,7 @@ class CartItem {
 }
 
 class CartProvider with ChangeNotifier {
-  List<CartItem> _items = [];
+  final List<CartItem> _items = [];
 
   UnmodifiableListView<CartItem> get items => UnmodifiableListView(_items);
 

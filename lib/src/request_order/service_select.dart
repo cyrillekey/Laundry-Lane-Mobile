@@ -238,7 +238,10 @@ class ServiceItem extends StatelessWidget {
                     child: SvgPicture.network(
                       catalog.imageUrl!,
                       height: 26,
-                      color: Colors.white,
+                      colorFilter: ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                   SizedBox(width: 6),
@@ -254,21 +257,38 @@ class ServiceItem extends StatelessWidget {
                           fontSize: 16,
                         ),
                       ),
-                      RichText(
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          children: [
-                            TextSpan(text: "From "),
-                            TextSpan(
-                              text: '\$${catalog.price}/kg ',
-                              style: GoogleFonts.almarai(
-                                fontWeight: FontWeight.bold,
+                      if (catalog.bulk == true)
+                        RichText(
+                          text: TextSpan(
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            children: [
+                              TextSpan(text: "From "),
+                              TextSpan(
+                                text: 'Ksh ${catalog.price}/kg ',
+                                style: GoogleFonts.almarai(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            TextSpan(text: "Price per weight"),
-                          ],
+                              TextSpan(text: "Price per weight"),
+                            ],
+                          ),
                         ),
-                      ),
+                      if (catalog.bulk == false)
+                        RichText(
+                          text: TextSpan(
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            children: [
+                              TextSpan(text: "From "),
+                              TextSpan(
+                                text: 'Ksh ${catalog.price}/item ',
+                                style: GoogleFonts.almarai(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextSpan(text: "Price per item"),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                   Spacer(),
