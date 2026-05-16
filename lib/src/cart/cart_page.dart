@@ -215,9 +215,10 @@ class _CartPageState extends ConsumerState<CartPage> {
                       cart.items.isEmpty
                           ? null
                           : () {
-                            Navigator.of(
-                              context,
-                            ).pushNamed(CheckoutPage.routeName);
+                            Navigator.of(context).pushNamed(
+                              CheckoutPage.routeName,
+                              arguments: service,
+                            );
                           },
                   style: ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(

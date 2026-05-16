@@ -238,7 +238,10 @@ class ServiceItem extends StatelessWidget {
                     child: SvgPicture.network(
                       catalog.imageUrl!,
                       height: 26,
-                      color: Colors.white,
+                      colorFilter: ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                   SizedBox(width: 6),

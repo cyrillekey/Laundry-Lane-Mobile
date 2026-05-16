@@ -315,7 +315,10 @@ class CategoryCard extends StatelessWidget {
               assetName,
               height: 40,
               width: 40,
-              color: themeData == ThemeMode.light ? null : Colors.white,
+              colorFilter:
+                  themeData == ThemeMode.light
+                      ? null
+                      : ColorFilter.mode(Colors.white, BlendMode.srcIn),
             ),
             SizedBox(height: 2),
             Text(

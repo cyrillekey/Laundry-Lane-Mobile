@@ -4,6 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:laundrylane/models/catalog_model.dart';
+import 'package:laundrylane/models/checkout_model.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/checkout/checkout_review.dart';
 import 'package:shimmer/shimmer.dart';
@@ -37,9 +39,22 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
           onPressed: () {
             if (reviewForm.currentState?.saveAndValidate() == true) {
               Map formValues = reviewForm.currentState!.value;
+              final service = ref
+                  .read(serviceTypeState)
+                  .value!
+                  .firstWhere((e) => e.id == formValues['serviceDays']);
+              final CheckoutModel checkoutModel = CheckoutModel(
+                catalog: ModalRoute.of(context)?.settings.arguments as Catalog,
+                deliveryWindow: formValues["deliveryWindow"],
+                orderType: formValues["orderType"],
+                pickupDate: formValues["date"],
+                pickupTime: formValues['time'],
+                serviceType: service,
+                washingPreference: formValues['washType'],
+              );
               Navigator.of(
                 context,
-              ).pushNamed(CheckoutReview.routeName, arguments: formValues);
+              ).pushNamed(CheckoutReview.routeName, arguments: checkoutModel);
             }
           },
           style: ButtonStyle(
@@ -512,9 +527,7 @@ class ServiceDay extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color:
-                    formBuilderState.value == title
-                        ? Colors.white
-                        : Colors.black,
+                    formBuilderState.value == id ? Colors.white : Colors.black,
               ),
             ),
             SizedBox(height: 2),
@@ -522,7 +535,7 @@ class ServiceDay extends StatelessWidget {
               days,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color:
-                    formBuilderState.value == title
+                    formBuilderState.value == id
                         ? Colors.white
                         : Color.fromRGBO(132, 137, 147, 1),
                 fontWeight: FontWeight.w600,
@@ -533,7 +546,7 @@ class ServiceDay extends StatelessWidget {
               price,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 color:
-                    formBuilderState.value == title
+                    formBuilderState.value == id
                         ? Colors.white
                         : Color.fromRGBO(132, 137, 147, 1),
               ),
