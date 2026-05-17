@@ -1,15 +1,21 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Consumer;
+import 'package:intl/intl.dart';
+import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/checkout_model.dart';
+import 'package:laundrylane/models/service_model.dart';
 import 'package:laundrylane/providers/card_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
+import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:provider/provider.dart' show Consumer;
+import 'package:shimmer/shimmer.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 class CheckoutReview extends StatefulWidget {
@@ -26,7 +32,7 @@ class _CheckoutReviewState extends State<CheckoutReview> {
     final CheckoutModel checkoutModel =
         ModalRoute.of(context)?.settings.arguments as CheckoutModel;
     return Scaffold(
-      appBar: AppBar(title: Text("Review"), centerTitle: true),
+      appBar: AppBar(title: Text("Review Order"), centerTitle: true),
       body: FormBuilder(
         key: formKey,
         child: SizedBox(
@@ -36,9 +42,13 @@ class _CheckoutReviewState extends State<CheckoutReview> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Subtotal(
+                  catalog: checkoutModel.catalog,
+                  serviceType: checkoutModel.serviceType,
+                ),
+                SizedBox(height: 16),
                 AddressWidget(),
                 SizedBox(height: 16),
-
                 if (checkoutModel.catalog.bulk == false) ...[
                   SizedBox(height: 20),
                   Text("Choose Payment Method"),
@@ -59,6 +69,7 @@ class _CheckoutReviewState extends State<CheckoutReview> {
                     ),
                   ),
                 ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.12),
               ],
             ),
           ),
@@ -228,6 +239,186 @@ class PaymentRadio extends StatelessWidget {
   }
 }
 
+class Subtotal extends ConsumerWidget {
+  const Subtotal({super.key, required this.catalog, required this.serviceType});
+  final Catalog catalog;
+  final ServiceType serviceType;
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final zonesState = ref.watch(deliveryZoneState);
+    final addressListener = ref.watch(addressState);
+    return zonesState.when(
+      data: (zones) {
+        if (addressListener.isLoading == true) {
+          return Shimmer.fromColors(
+            baseColor: Theme.of(context).scaffoldBackgroundColor,
+            highlightColor: Theme.of(context).highlightColor,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey, width: 1.5),
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.18,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          );
+        }
+        final address = addressListener.value;
+        final zone = getDeliveryZone(
+          zones,
+          address?.latitude ?? 0,
+          address?.longitude ?? 0,
+        );
+        return Consumer<CartProvider>(
+          builder: (context, cart, child) {
+            num cartTotal = cart.items.fold(
+              0,
+              (a, b) => a + b.quantity * b.price,
+            );
+            num subtotal =
+                catalog.bulk == true ? (catalog.price ?? 0) : cartTotal;
+            num serviceFee = serviceType.price;
+            num deliveryFee = zone?.price ?? 0;
+            num total = subtotal + serviceFee;
+            return Card.outlined(
+              child: Column(
+                children: [
+                  SizedBox(height: 24),
+                  Padding(
+                    padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Items Subtotal:",
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w500),
+                        ),
+                        Spacer(),
+                        Text(
+                          NumberFormat.currency(
+                            symbol: "Ksh ",
+                            name: "KSH",
+                            decimalDigits: 2,
+                          ).format(subtotal),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Padding(
+                    padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Service Fee:",
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w500),
+                        ),
+                        Spacer(),
+                        Text(
+                          NumberFormat.currency(
+                            symbol: "Ksh ",
+                            name: "KSH",
+                            decimalDigits: 2,
+                          ).format(serviceFee),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Padding(
+                    padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Delivery Fee:",
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w500),
+                        ),
+                        Spacer(),
+                        Text(
+                          NumberFormat.currency(
+                            symbol: "Ksh ",
+                            name: "KSH",
+                            decimalDigits: 2,
+                          ).format(deliveryFee),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Divider(),
+                  Padding(
+                    padding: EdgeInsetsGeometry.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          "Subtotal",
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        Spacer(),
+                        Text(
+                          "Ksh ${total.toStringAsFixed(2)}",
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                ],
+              ),
+            );
+          },
+        );
+      },
+      error:
+          (error, stackTrace) => Shimmer.fromColors(
+            baseColor: Theme.of(context).scaffoldBackgroundColor,
+            highlightColor: Theme.of(context).highlightColor,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey, width: 1.5),
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.18,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+      loading:
+          () => Shimmer.fromColors(
+            baseColor: Theme.of(context).scaffoldBackgroundColor,
+            highlightColor: Theme.of(context).highlightColor,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey, width: 1.5),
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.18,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+    );
+  }
+}
+
 class AddressWidget extends ConsumerWidget {
   const AddressWidget({super.key});
 
@@ -257,19 +448,50 @@ class AddressWidget extends ConsumerWidget {
                     Icon(
                       TablerIcons.truck_delivery,
                       color: Theme.of(context).primaryColor,
-                      size: 24,
+                      size: 23,
                     ),
                   ],
                 ),
               ),
               Divider(),
-              SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Text(address?.street ?? "")],
+              SizedBox(height: 16),
+              FutureBuilder(
+                future: reverseGeocode(
+                  LatLng(address!.latitude!, address.longitude!),
                 ),
+                builder: (context, asyncSnapshot) {
+                  final reverseAddress = asyncSnapshot.data;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          address.recipientName ?? "",
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        SizedBox(height: 2),
+                        Text(reverseAddress?.properties?.addressLine2 ?? ""),
+                        Text(
+                          "${reverseAddress?.properties?.name}",
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          "${reverseAddress?.properties?.city} - ${reverseAddress?.properties?.state}",
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          reverseAddress?.properties?.country ?? "",
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
               SizedBox(height: 20),
             ],

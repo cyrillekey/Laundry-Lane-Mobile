@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/clothing_type.dart';
+import 'package:laundrylane/models/delivery_zone.dart';
 import 'package:laundrylane/models/goecode_reverse.dart';
 import 'package:laundrylane/models/home_address.dart';
 import 'package:laundrylane/models/order_model.dart';
@@ -212,3 +213,30 @@ FutureProvider<List<ServiceType>> serviceTypeState = FutureProvider.autoDispose(
     }
   },
 );
+
+FutureProvider<List<DeliveryZone>> deliveryZoneState =
+    FutureProvider.autoDispose((ref) async {
+      try {
+        final token = ref.watch(tokenProvider).value;
+        final CancelToken cancelToken = CancelToken();
+
+        ref.onDispose(cancelToken.cancel);
+        final response = await apiDio
+            .get(
+              "/delivery/zones",
+              cancelToken: cancelToken,
+              options: Options(headers: {"Authorization": "Bearer $token"}),
+            )
+            .then((resp) => resp.data)
+            .onError<DioException>((e, s) {
+              return [];
+            });
+        return List<DeliveryZone>.from(
+          response.map((e) {
+            return DeliveryZone.fromJson(e);
+          }),
+        );
+      } catch (e) {
+        return [];
+      }
+    });

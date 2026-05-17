@@ -362,6 +362,7 @@ class CartItemWidget extends StatelessWidget {
                               productId: subtype.id!,
                               quantity: 1,
                               type: subtype.type!,
+                              price: subtype.price ?? 0,
                             ),
                           );
                           // add to cart provider

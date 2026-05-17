@@ -10,7 +10,7 @@ import 'package:laundrylane/src/home/widgets/address_bar.dart';
 import 'package:laundrylane/src/home/widgets/current_order.dart';
 import 'package:laundrylane/src/notifications/notifications_view.dart';
 import 'package:laundrylane/theme/util.dart';
-import 'package:laundrylane/utils/constants.dart';
+import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 

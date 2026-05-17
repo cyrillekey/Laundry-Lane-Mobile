@@ -11,7 +11,7 @@ import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/login/login.dart';
-import 'package:laundrylane/utils/constants.dart';
+import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:tabler_icons/tabler_icons.dart';

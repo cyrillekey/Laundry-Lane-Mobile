@@ -6,11 +6,13 @@ class CartItem {
   final int productId;
   int quantity;
   final String type;
+  final num price;
 
   CartItem({
     required this.productId,
     required this.quantity,
     required this.type,
+    required this.price,
   });
 
   Map<String, dynamic> toJson() => {
