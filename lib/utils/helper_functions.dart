@@ -26,7 +26,7 @@ Future<void> saveUserModel(UserModel user) async {
 }
 
 num haversineDistance(num centerLat, num centerLng, num lat, num lng) {
-  const EARTH_RADIUS_METERS = 6371000;
+  const earthRadiusMeters = 6371000;
   final deltaLatitude = toRadians(lat - centerLat);
   final deltaLongitude = toRadians(lng - centerLng);
   final haversine =
@@ -35,7 +35,7 @@ num haversineDistance(num centerLat, num centerLng, num lat, num lng) {
           cos(toRadians(lat)) *
           pow(sin(deltaLongitude / 2), 2);
   final angularDistance = 2 * asin(sqrt(haversine));
-  final distance = EARTH_RADIUS_METERS * angularDistance;
+  final distance = earthRadiusMeters * angularDistance;
   return distance;
 }
 
