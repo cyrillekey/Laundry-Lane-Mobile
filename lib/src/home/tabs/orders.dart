@@ -36,6 +36,8 @@ class OrdersTab extends ConsumerWidget {
                 ref.invalidate(ordersState);
               },
               child: orderListener.when(
+                skipLoadingOnReload: true,
+                skipLoadingOnRefresh: true,
                 data: (data) {
                   if (data.isEmpty) {
                     return SizedBox(
@@ -233,7 +235,7 @@ class OrderItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${order.status}",
+                        "${order.orderStatus}",
                         style: GoogleFonts.almarai(
                           fontSize: 12,
                           color: Color.fromRGBO(129, 129, 129, 1),

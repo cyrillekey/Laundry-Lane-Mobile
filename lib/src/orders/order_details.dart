@@ -5,6 +5,8 @@ class OrderDetails extends StatelessWidget {
   static const String routeName = "/OrderDetails";
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(title: Text("Order Details"), centerTitle: true),
+    );
   }
 }

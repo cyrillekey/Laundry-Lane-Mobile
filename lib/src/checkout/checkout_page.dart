@@ -90,20 +90,20 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                     setState(() {});
                   },
                   name: "orderType",
-                  initialValue: "Pickup",
+                  initialValue: "PICKUP",
                   validator: FormBuilderValidators.required(),
                   builder: (formBuiler) {
                     return Row(
                       children: [
                         Expanded(
                           child: InkWell(
-                            onTap: () => formBuiler.didChange("Pickup"),
+                            onTap: () => formBuiler.didChange("PICKUP"),
                             child: Container(
                               height: 42,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color:
-                                    formBuiler.value == "Pickup"
+                                    formBuiler.value == "PICKUP"
                                         ? Theme.of(context).primaryColor
                                         : Colors.white,
                                 border: Border.all(
@@ -122,7 +122,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                 ).textTheme.labelLarge?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color:
-                                      formBuiler.value == "Pickup"
+                                      formBuiler.value == "PICKUP"
                                           ? Colors.white
                                           : Theme.of(
                                             context,
@@ -136,13 +136,13 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                           child: InkWell(
                             onTap:
                                 () =>
-                                    formBuiler.didChange("Pickup and Delivery"),
+                                    formBuiler.didChange("PICKUP_AND_DELIVERY"),
                             child: Container(
                               height: 42,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color:
-                                    formBuiler.value == "Pickup and Delivery"
+                                    formBuiler.value == "PICKUP_AND_DELIVERY"
                                         ? Theme.of(context).primaryColor
                                         : null,
                                 border: Border(
@@ -168,7 +168,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                 ).textTheme.labelLarge?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color:
-                                      formBuiler.value == "Pickup and Delivery"
+                                      formBuiler.value == "PICKUP_AND_DELIVERY"
                                           ? Colors.white
                                           : Theme.of(
                                             context,

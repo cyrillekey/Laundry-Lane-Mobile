@@ -80,7 +80,7 @@ FutureProvider<HomeAddress?> addressState =
 FutureProvider<List<Order>> ordersState = FutureProvider.autoDispose((
   ref,
 ) async {
-  String? token = ref.read(tokenProvider).value;
+  String? token = ref.watch(tokenProvider).value;
 
   final CancelToken cancelToken = CancelToken();
   ref.onDispose(cancelToken.cancel);
@@ -160,6 +160,7 @@ FutureProvider<Order?> ongoingOrderState = FutureProvider.autoDispose((
       .catchError((e) {
         return [];
       });
+
   List data = List.from(response);
 
   List<Order> orders = data.map((e) => Order.fromJson(e)).toList();

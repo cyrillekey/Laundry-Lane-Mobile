@@ -484,78 +484,78 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
                             name: "type",
                             validator: FormBuilderValidators.required(),
                             builder: (builder) {
-                              return Expanded(
-                                child: SizedBox(
-                                  height: 40,
-                                  child: ListView.separated(
-                                    scrollDirection: Axis.horizontal,
-                                    itemBuilder:
-                                        (context, index) => InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              addressType =
-                                                  houseTypes[index]['name'];
-                                            });
-                                            builder.didChange(addressType);
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: 8,
+                              return SizedBox(
+                                height: 40,
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder:
+                                      (context, index) => InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            addressType =
+                                                houseTypes[index]['name'];
+                                          });
+                                          builder.didChange(addressType);
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                addressType ==
+                                                        houseTypes[index]['name']
+                                                    ? Color.fromRGBO(
+                                                      239,
+                                                      239,
+                                                      253,
+                                                      1,
+                                                    )
+                                                    : Colors.transparent,
+                                            borderRadius: BorderRadius.circular(
+                                              10,
                                             ),
-                                            decoration: BoxDecoration(
+                                            border: Border.all(
                                               color:
                                                   addressType ==
                                                           houseTypes[index]['name']
                                                       ? Color.fromRGBO(
-                                                        239,
-                                                        239,
-                                                        253,
+                                                        114,
+                                                        111,
+                                                        210,
                                                         1,
                                                       )
-                                                      : Colors.transparent,
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              border: Border.all(
-                                                color:
-                                                    addressType ==
-                                                            houseTypes[index]['name']
-                                                        ? Color.fromRGBO(
-                                                          114,
-                                                          111,
-                                                          210,
-                                                          1,
-                                                        )
-                                                        : Color.fromRGBO(
-                                                          238,
-                                                          238,
-                                                          238,
-                                                          1,
-                                                        ),
-                                                width: 1.5,
-                                              ),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                Icon(
-                                                  houseTypes[index]['icon'],
-                                                  size: 20,
-                                                ),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  houseTypes[index]['name'],
-                                                  style: GoogleFonts.almarai(
-                                                    color: Colors.black,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                              ],
+                                                      : Color.fromRGBO(
+                                                        238,
+                                                        238,
+                                                        238,
+                                                        1,
+                                                      ),
+                                              width: 1.5,
                                             ),
                                           ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                houseTypes[index]['icon'],
+                                                size: 20,
+                                              ),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                houseTypes[index]['name'],
+                                                style: GoogleFonts.almarai(
+                                                  color: Colors.black,
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                    separatorBuilder:
-                                        (context, index) => SizedBox(width: 12),
-                                    itemCount: houseTypes.length,
-                                  ),
+                                      ),
+                                  separatorBuilder:
+                                      (context, index) => SizedBox(width: 12),
+                                  itemCount: houseTypes.length,
                                 ),
                               );
                             },

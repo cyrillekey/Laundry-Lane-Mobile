@@ -1,9 +1,15 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart' hide Consumer;
 import 'package:laundrylane/models/checkout_model.dart';
+import 'package:laundrylane/providers/card_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:laundrylane/src/apis/mutations.dart';
+import 'package:laundrylane/src/home/home.dart';
+import 'package:laundrylane/src/orders/order_details.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
+import 'package:provider/provider.dart' show Consumer;
 import 'package:tabler_icons/tabler_icons.dart';
 
 class CheckoutReview extends StatefulWidget {
@@ -26,64 +32,126 @@ class _CheckoutReviewState extends State<CheckoutReview> {
         child: SizedBox(
           height: MediaQuery.of(context).size.height,
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AddressWidget(),
+                SizedBox(height: 16),
+
                 if (checkoutModel.catalog.bulk == false) ...[
                   SizedBox(height: 20),
                   Text("Choose Payment Method"),
                   SizedBox(height: 12),
                   PaymentRadio(),
                 ],
+                SizedBox(height: 16),
+                FormBuilderTextField(
+                  name: "instructions",
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    labelText: "Special Instructions",
+                    floatingLabelAlignment: FloatingLabelAlignment.start,
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(width: 1),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
-      bottomSheet: SafeArea(
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
+      floatingActionButton: _OrderSubmitButton(
+        checkoutModel: checkoutModel,
+        formKey: formKey,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+}
+
+class _OrderSubmitButton extends ConsumerWidget {
+  const _OrderSubmitButton({
+    required this.checkoutModel,
+    required this.formKey,
+  });
+  final CheckoutModel checkoutModel;
+  final GlobalKey<FormBuilderState> formKey;
+  @override
+  Widget build(BuildContext context, ref) {
+    return Consumer<CartProvider>(
+      builder: (context, cart, child) {
+        return ProgressButton(
+          onPress: () async {
+            if (formKey.currentState?.saveAndValidate() == true) {
+              final address = ref.read(addressState).value;
+              final response = await createOrderMutation(
+                addressId: address!.id!,
+                serviceTypeId: checkoutModel.serviceType.id,
+                catalogId: checkoutModel.catalog.id!,
+                type: checkoutModel.orderType,
+                pickupDate: checkoutModel.pickupDate?.toString(),
+                pickupTime: checkoutModel.pickupTime?.toString(),
+                items: cart.items,
+                deliveryWindow: checkoutModel.deliveryWindow,
+                washType: checkoutModel.washingPreference,
+                instructions: formKey.currentState?.value["instructions"],
+              );
+              if (response.success) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(response.message),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  ref.invalidate(ordersState);
+                  ref.invalidate(ongoingOrderState);
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    OrderDetails.routeName,
+                    ModalRoute.withName(HomePage.routeName),
+                    arguments: response.id,
+                  );
+                }
+              } else {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(response.message),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            }
+          },
+          style: ButtonStyle(
+            fixedSize: WidgetStatePropertyAll(
+              Size(MediaQuery.of(context).size.width * 0.8, 50),
+            ),
+            backgroundColor: WidgetStatePropertyAll(
+              Color.fromRGBO(121, 20, 199, 1),
+            ),
+            shape: WidgetStatePropertyAll(
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            foregroundColor: WidgetStatePropertyAll(Colors.white),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              "Place Order",
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 20),
-              TextButton(
-                onPressed: () {},
-                style: ButtonStyle(
-                  fixedSize: WidgetStatePropertyAll(
-                    Size(MediaQuery.of(context).size.width * 0.8, 50),
-                  ),
-                  backgroundColor: WidgetStatePropertyAll(
-                    Color.fromRGBO(121, 20, 199, 1),
-                  ),
-                  shape: WidgetStatePropertyAll(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  foregroundColor: WidgetStatePropertyAll(Colors.white),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    "Place Order",
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -168,14 +236,14 @@ class AddressWidget extends ConsumerWidget {
     final addressListener = ref.watch(addressState);
     return addressListener.when(
       data: (address) {
-        return Card(
+        return Card.outlined(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 12,
+                  vertical: 14,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

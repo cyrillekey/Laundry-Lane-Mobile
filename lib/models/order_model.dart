@@ -1,8 +1,7 @@
-// To parse this JSON data, do
-//
-//     final order = orderFromJson(jsonString);
-
 import 'dart:convert';
+
+import 'package:laundrylane/models/catalog_model.dart';
+import 'package:laundrylane/models/service_model.dart';
 
 List<Order> orderFromJson(String str) =>
     List<Order>.from(json.decode(str).map((x) => Order.fromJson(x)));
@@ -13,57 +12,104 @@ String orderToJson(List<Order> data) =>
 class Order {
   int? id;
   DateTime? date;
-  String? timeSlot;
+  DateTime? pickupDate;
+  String? pickupTime;
+  String? orderStatus;
   String? orderType;
+  String? deliveryWindow;
   String? instructions;
-  String? status;
+  dynamic weight;
+  String? washType;
   int? deliveryFee;
   int? total;
+  int? productCatalogId;
   int? userId;
+  dynamic deliveryZoneId;
+  int? serviceTypeId;
+  dynamic addressId;
   DateTime? createdat;
   DateTime? updatedat;
+  ServiceType? serviceType;
+  Catalog? productCatalog;
 
   Order({
     this.id,
     this.date,
-    this.timeSlot,
+    this.pickupDate,
+    this.pickupTime,
+    this.orderStatus,
     this.orderType,
+    this.deliveryWindow,
     this.instructions,
-    this.status,
+    this.weight,
+    this.washType,
     this.deliveryFee,
     this.total,
+    this.productCatalogId,
     this.userId,
+    this.deliveryZoneId,
+    this.serviceTypeId,
+    this.addressId,
     this.createdat,
     this.updatedat,
+    this.serviceType,
+    this.productCatalog,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
     id: json["id"],
     date: json["date"] == null ? null : DateTime.parse(json["date"]),
-    timeSlot: json["timeSlot"],
+    pickupDate:
+        json["pickupDate"] == null ? null : DateTime.parse(json["pickupDate"]),
+    pickupTime: json["pickupTime"],
+    orderStatus: json["orderStatus"],
     orderType: json["orderType"],
+    deliveryWindow: json["deliveryWindow"],
     instructions: json["instructions"],
-    status: json["status"],
+    weight: json["weight"],
+    washType: json["washType"],
     deliveryFee: json["deliveryFee"],
     total: json["total"],
+    productCatalogId: json["productCatalogId"],
     userId: json["userId"],
+    deliveryZoneId: json["deliveryZoneId"],
+    serviceTypeId: json["serviceTypeId"],
+    addressId: json["addressId"],
     createdat:
         json["createdat"] == null ? null : DateTime.parse(json["createdat"]),
     updatedat:
         json["updatedat"] == null ? null : DateTime.parse(json["updatedat"]),
+    serviceType:
+        json["serviceType"] == null
+            ? null
+            : ServiceType.fromJson(json["serviceType"]),
+    productCatalog:
+        json["productCatalog"] == null
+            ? null
+            : Catalog.fromJson(json["productCatalog"]),
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "date": date?.toIso8601String(),
-    "timeSlot": timeSlot,
+    "pickupDate": pickupDate?.toIso8601String(),
+    "pickupTime": pickupTime,
+    "orderStatus": orderStatus,
     "orderType": orderType,
+    "deliveryWindow": deliveryWindow,
     "instructions": instructions,
-    "status": status,
+    "weight": weight,
+    "washType": washType,
     "deliveryFee": deliveryFee,
     "total": total,
+    "productCatalogId": productCatalogId,
     "userId": userId,
+    "deliveryZoneId": deliveryZoneId,
+    "serviceTypeId": serviceTypeId,
+    "addressId": addressId,
     "createdat": createdat?.toIso8601String(),
     "updatedat": updatedat?.toIso8601String(),
+    "serviceType": serviceType?.toJson(),
+    "productCatalog": productCatalog?.toJson(),
   };
 }
