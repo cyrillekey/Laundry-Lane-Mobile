@@ -11,6 +11,7 @@ import 'package:laundrylane/providers/card_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
+import 'package:laundrylane/src/notifications/service.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
@@ -45,17 +46,21 @@ class _CheckoutReviewState extends State<CheckoutReview> {
                 Subtotal(
                   catalog: checkoutModel.catalog,
                   serviceType: checkoutModel.serviceType,
+                  weight: checkoutModel.weight ?? 1,
                 ),
-                SizedBox(height: 16),
-                AddressWidget(),
-                SizedBox(height: 16),
+                SizedBox(height: 12),
+                if (checkoutModel.orderType != OrderType.pickup) ...[
+                  AddressWidget(),
+                  SizedBox(height: 12),
+                ],
+
                 if (checkoutModel.catalog.bulk == false) ...[
                   SizedBox(height: 20),
                   Text("Choose Payment Method"),
                   SizedBox(height: 12),
                   PaymentRadio(),
                 ],
-                SizedBox(height: 16),
+                SizedBox(height: 12),
                 FormBuilderTextField(
                   name: "instructions",
                   maxLines: 4,
@@ -103,7 +108,7 @@ class _OrderSubmitButton extends ConsumerWidget {
                 addressId: address!.id!,
                 serviceTypeId: checkoutModel.serviceType.id,
                 catalogId: checkoutModel.catalog.id!,
-                type: checkoutModel.orderType,
+                type: checkoutModel.orderType.value,
                 pickupDate: checkoutModel.pickupDate?.toString(),
                 pickupTime: checkoutModel.pickupTime?.toString(),
                 items: cart.items,
@@ -121,6 +126,8 @@ class _OrderSubmitButton extends ConsumerWidget {
                   );
                   ref.invalidate(ordersState);
                   ref.invalidate(ongoingOrderState);
+                  ref.invalidate(notificationCountState);
+                  ref.invalidate(notificationsState);
                   Navigator.of(context).pushNamedAndRemoveUntil(
                     OrderDetails.routeName,
                     ModalRoute.withName(HomePage.routeName),
@@ -240,8 +247,14 @@ class PaymentRadio extends StatelessWidget {
 }
 
 class Subtotal extends ConsumerWidget {
-  const Subtotal({super.key, required this.catalog, required this.serviceType});
+  const Subtotal({
+    super.key,
+    required this.catalog,
+    required this.serviceType,
+    required this.weight,
+  });
   final Catalog catalog;
+  final num weight;
   final ServiceType serviceType;
 
   @override
@@ -279,8 +292,11 @@ class Subtotal extends ConsumerWidget {
               (a, b) => a + b.quantity * b.price,
             );
             num subtotal =
-                catalog.bulk == true ? (catalog.price ?? 0) : cartTotal;
+                catalog.bulk == true
+                    ? (catalog.price ?? 0) * weight
+                    : cartTotal;
             num serviceFee = serviceType.price;
+
             num deliveryFee = zone?.price ?? 0;
             num total = subtotal + serviceFee;
             return Card.outlined(

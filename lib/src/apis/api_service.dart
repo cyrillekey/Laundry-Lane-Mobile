@@ -146,7 +146,7 @@ FutureProvider<List<ClothingType>> clothingTypeState =
 FutureProvider<Order?> ongoingOrderState = FutureProvider.autoDispose((
   ref,
 ) async {
-  String? token = ref.read(tokenProvider).value;
+  String? token = ref.watch(tokenProvider).value;
 
   final CancelToken cancelToken = CancelToken();
   ref.onDispose(cancelToken.cancel);

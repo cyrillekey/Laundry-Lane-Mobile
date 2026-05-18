@@ -376,7 +376,7 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
 
   @override
   Widget build(BuildContext context) {
-    final address = ref.read(addressState);
+    final address = ref.watch(addressState);
     return Container(
       height: MediaQuery.of(context).size.height * 0.66,
       width: MediaQuery.of(context).size.width,

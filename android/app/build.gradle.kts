@@ -18,7 +18,7 @@ if (keyPropertiesFile.exists()) {
 
 android {
     namespace = "com.example.laundrylane"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 33
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

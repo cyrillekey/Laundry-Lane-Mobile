@@ -4,10 +4,11 @@ import 'package:laundrylane/models/service_model.dart';
 
 class CheckoutModel {
   final Catalog catalog;
-  final String orderType;
+  final OrderType orderType;
   final DateTime? pickupDate;
   final TimeOfDay? pickupTime;
   final String? deliveryWindow;
+  final num? weight;
   final String washingPreference;
   final ServiceType serviceType;
 
@@ -16,9 +17,28 @@ class CheckoutModel {
     required this.orderType,
     this.pickupDate,
     this.pickupTime,
-
     this.deliveryWindow,
     required this.washingPreference,
     required this.serviceType,
+    this.weight,
   });
+  Map<String, dynamic> toJson() => {
+    "catalog": catalog.toJson(),
+    "orderType": orderType.value,
+    "pickupDate": pickupDate?.toIso8601String(),
+    "pickupTime": pickupTime?.toString(),
+    "deliveryWindow": deliveryWindow,
+    "washingPreference": washingPreference,
+    "serviceType": serviceType.toJson(),
+    "weight": weight,
+  };
+}
+
+enum OrderType {
+  pickup("PICKUP"),
+  delivery("DELIVERY"),
+  pickupAndDelivery("PICKUP_AND_DELIVERY"); // ← semicolon here
+
+  const OrderType(this.value); // ← const constructor
+  final String value; // ← field
 }
