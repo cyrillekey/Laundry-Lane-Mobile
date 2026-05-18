@@ -1,23 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/src/home/tabs/home.dart';
 import 'package:laundrylane/src/home/tabs/messages.dart';
 import 'package:laundrylane/src/home/tabs/orders.dart';
 import 'package:laundrylane/src/home/tabs/profile.dart';
 import 'package:laundrylane/src/request_order/service_select.dart';
+import 'package:laundrylane/theme/util.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatefulHookConsumerWidget {
   const HomePage({super.key});
   static const String routeName = "/Home";
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   final List<Widget> tabs = [
     HomeTab(),
     OrdersTab(),
@@ -27,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
   @override
   Widget build(BuildContext context) {
+    final themeListener = ref.watch(themeProvider).value;
     return Scaffold(
       floatingActionButton:
           currentIndex == 0
@@ -42,7 +45,10 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(child: tabs[currentIndex]),
       bottomNavigationBar: SalomonBottomBar(
         currentIndex: currentIndex,
-        selectedItemColor: Theme.of(context).primaryColor,
+        selectedItemColor:
+            themeListener == ThemeMode.dark
+                ? Theme.of(context).primaryColorLight
+                : Theme.of(context).primaryColor,
         unselectedItemColor: Theme.of(context).unselectedWidgetColor,
         onTap: (p0) {
           setState(() {
@@ -51,20 +57,42 @@ class _HomePageState extends State<HomePage> {
         },
         items: [
           SalomonBottomBarItem(
-            icon: Icon(TablerIcons.home),
-            title: Text("Home"),
+            icon: Icon(
+              TablerIcons.home,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            title: Text("Home", style: Theme.of(context).textTheme.labelLarge),
           ),
           SalomonBottomBarItem(
-            icon: Image.asset("assets/icons/time-table.png", height: 26),
-            title: Text("Bookings"),
+            icon: Image.asset(
+              "assets/icons/time-table.png",
+              height: 26,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            title: Text(
+              "Bookings",
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
           ),
           SalomonBottomBarItem(
-            icon: Icon(CupertinoIcons.bell),
-            title: Text("Messages"),
+            icon: Icon(
+              CupertinoIcons.bell,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            title: Text(
+              "Messages",
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
           ),
           SalomonBottomBarItem(
-            icon: Icon(CupertinoIcons.profile_circled),
-            title: Text("Profile"),
+            icon: Icon(
+              CupertinoIcons.profile_circled,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            title: Text(
+              "Profile",
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
           ),
         ],
       ),

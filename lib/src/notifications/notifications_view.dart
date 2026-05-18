@@ -179,12 +179,13 @@ class NotificationItem extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Color.fromRGBO(246, 246, 246, 1),
+            // color: Color.fromRGBO(246, 246, 246, 1),
+            color: Theme.of(context).splashColor,
             borderRadius: BorderRadius.circular(46),
           ),
           child: Icon(TablerIcons.bell, size: 26),
         ),
-        SizedBox(width: 12),
+        SizedBox(width: 18),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

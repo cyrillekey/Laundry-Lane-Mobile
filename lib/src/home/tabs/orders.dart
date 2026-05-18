@@ -87,7 +87,7 @@ class OrdersTab extends ConsumerWidget {
                 },
                 loading: () {
                   return SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.59,
+                    height: MediaQuery.of(context).size.height * 0.90,
                     child: ListView.separated(
                       padding: EdgeInsets.symmetric(horizontal: 12),
                       separatorBuilder: (_, __) => SizedBox(height: 10),
@@ -135,7 +135,6 @@ class OrderItem extends StatelessWidget {
       onTap: () => Navigator.of(context).pushNamed(OrderDetails.routeName),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        color: Colors.white,
         elevation: 0.0,
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 18, vertical: 16),
