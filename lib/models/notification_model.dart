@@ -13,26 +13,26 @@ String appNotificationToJson(List<AppNotification> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class AppNotification {
-  int? id;
-  String? title;
-  String? message;
-  bool? read;
+  int id;
+  String title;
+  String message;
+  bool read;
   String? ref;
   String? attachment;
-  int? userId;
-  String? createdat;
-  String? updatedat;
+  int userId;
+  String createdat;
+  String updatedat;
 
   AppNotification({
-    this.id,
-    this.title,
-    this.message,
-    this.read,
-    this.ref,
+    required this.id,
+    required this.title,
+    required this.message,
+    required this.read,
+    required this.ref,
     this.attachment,
-    this.userId,
-    this.createdat,
-    this.updatedat,
+    required this.userId,
+    required this.createdat,
+    required this.updatedat,
   });
 
   factory AppNotification.fromJson(Map<String, dynamic> json) =>
