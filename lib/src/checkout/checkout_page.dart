@@ -6,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/checkout_model.dart';
-import 'package:laundrylane/models/order_model.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/checkout/checkout_review.dart';
 import 'package:shimmer/shimmer.dart';
