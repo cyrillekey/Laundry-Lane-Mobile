@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/providers/token_provider.dart';
+import 'package:laundrylane/src/address/address_list.dart';
 import 'package:laundrylane/src/login/login.dart';
 import 'package:laundrylane/src/payments/payment_methods.dart';
 import 'package:laundrylane/src/profile/help_center.dart';
@@ -120,7 +121,14 @@ class ProfileScreen extends ConsumerWidget {
                         ).pushNamed(PaymentMethods.routeName),
                   ),
                   Divider(),
-                  SettingItem(label: "Addresses", icon: TablerIcons.map_2),
+                  SettingItem(
+                    label: "Addresses",
+                    icon: TablerIcons.map_2,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(AddressList.routeName),
+                  ),
                   Divider(),
                   ThemeSwitch(),
                 ],

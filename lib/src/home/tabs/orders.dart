@@ -132,6 +132,7 @@ class OrderItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      borderRadius: BorderRadius.circular(24),
       onTap: () => Navigator.of(context).pushNamed(OrderDetails.routeName),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),

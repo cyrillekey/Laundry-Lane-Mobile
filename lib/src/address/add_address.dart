@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +10,7 @@ import 'package:laundrylane/models/home_address.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/models/goecode_reverse.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
+import 'package:laundrylane/theme/util.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
@@ -21,6 +23,14 @@ class AddAddressPage extends StatefulHookConsumerWidget {
 }
 
 enum Addressstate { create, submit }
+
+Future<String?> getMapStyle() async {
+  final darkModeStyle = await rootBundle.loadString(
+    "assets/styles/map_darkmode.json",
+  );
+
+  return darkModeStyle;
+}
 
 class _AddAddressPageState extends ConsumerState<AddAddressPage> {
   Addressstate state = Addressstate.create;
@@ -40,6 +50,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
     return Scaffold(
       bottomSheet:
           state == Addressstate.create
@@ -64,37 +75,46 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
           SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            child: GoogleMap(
-              onMapCreated: (controller) {
-                mapController = controller;
+            child: FutureBuilder(
+              future: getMapStyle(),
+              builder: (context, snapshot) {
+                return GoogleMap(
+                  liteModeEnabled: true,
+                  style: theme.value == ThemeMode.dark ? snapshot.data : null,
+                  onMapCreated: (controller) {
+                    mapController = controller;
+                  },
+                  markers:
+                      postion != null
+                          ? {
+                            Marker(
+                              markerId: MarkerId("postion"),
+                              position: postion!,
+                              infoWindow: InfoWindow(
+                                title: "Move pin to set your exact location",
+                              ),
+                            ),
+                          }
+                          : {},
+                  onTap: (argument) {
+                    setState(() {
+                      postion = argument;
+                    });
+                    mapController!.animateCamera(
+                      CameraUpdate.newLatLng(argument),
+                    );
+                  },
+                  mapType: MapType.terrain,
+                  compassEnabled: true,
+                  myLocationEnabled: true,
+                  buildingsEnabled: true,
+                  myLocationButtonEnabled: true,
+                  initialCameraPosition: CameraPosition(
+                    target: postion ?? LatLng(-1.242811, 36.655768),
+                    zoom: 14.4746,
+                  ),
+                );
               },
-              markers:
-                  postion != null
-                      ? {
-                        Marker(
-                          markerId: MarkerId("postion"),
-                          position: postion!,
-                          infoWindow: InfoWindow(
-                            title: "Move pin to set your exact location",
-                          ),
-                        ),
-                      }
-                      : {},
-              onTap: (argument) {
-                setState(() {
-                  postion = argument;
-                });
-                mapController!.animateCamera(CameraUpdate.newLatLng(argument));
-              },
-              mapType: MapType.terrain,
-              compassEnabled: true,
-              myLocationEnabled: true,
-              buildingsEnabled: true,
-              myLocationButtonEnabled: true,
-              initialCameraPosition: CameraPosition(
-                target: postion ?? LatLng(-1.242811, 36.655768),
-                zoom: 14.4746,
-              ),
             ),
           ),
           Positioned(

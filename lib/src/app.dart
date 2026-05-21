@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/src/address/add_address.dart';
+import 'package:laundrylane/src/address/address_list.dart';
 import 'package:laundrylane/src/cart/cart_page.dart';
 import 'package:laundrylane/src/checkout/checkout_page.dart';
 import 'package:laundrylane/src/checkout/checkout_review.dart';
@@ -149,6 +150,8 @@ class MyApp extends ConsumerWidget {
                 return CheckoutReview();
               case HelpCenter.routeName:
                 return HelpCenter();
+              case AddressList.routeName:
+                return AddressList();
               default:
                 return const OnboardingView();
             }
