@@ -13,7 +13,7 @@ import 'package:laundrylane/src/notifications/service.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class HomeTab extends ConsumerWidget {
   const HomeTab({super.key, required this.onProfileTap});

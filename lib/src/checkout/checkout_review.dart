@@ -18,7 +18,7 @@ import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:provider/provider.dart' show Consumer;
 import 'package:shimmer/shimmer.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class CheckoutReview extends StatefulWidget {
   const CheckoutReview({super.key});

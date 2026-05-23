@@ -16,7 +16,7 @@ import 'package:laundrylane/src/signup/signup.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class LoginPage extends StatefulHookConsumerWidget {
   static const String routeName = "/login";

@@ -6,7 +6,7 @@ import 'package:laundrylane/models/default_response.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/forgot_password/reset_otp.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});

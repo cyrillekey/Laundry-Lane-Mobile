@@ -6,7 +6,7 @@ import 'package:laundrylane/models/notification_model.dart';
 import 'package:laundrylane/src/notifications/notification_settings.dart';
 import 'package:laundrylane/src/notifications/service.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class NotificationsView extends StatefulHookConsumerWidget {
   const NotificationsView({super.key});

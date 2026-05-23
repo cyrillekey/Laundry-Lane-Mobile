@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider, Consumer;
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/clothing_type.dart';
@@ -8,7 +9,7 @@ import 'package:laundrylane/src/checkout/checkout_page.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:laundrylane/utils/constants.dart';
 import 'package:provider/provider.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+
 import "package:collection/collection.dart";
 
 class CartPage extends StatefulHookConsumerWidget {

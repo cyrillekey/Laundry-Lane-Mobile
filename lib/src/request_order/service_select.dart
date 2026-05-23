@@ -9,7 +9,7 @@ import 'package:laundrylane/src/cart/cart_page.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:string_extensions/string_extensions.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class ServiceSelect extends StatefulHookConsumerWidget {
   const ServiceSelect({super.key});

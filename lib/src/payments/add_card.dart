@@ -9,7 +9,7 @@ import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:paystack_flutter_sdk/paystack_flutter_sdk.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class AddCard extends StatefulHookConsumerWidget {
   const AddCard({super.key});

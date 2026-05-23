@@ -8,7 +8,7 @@ import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class OrdersTab extends ConsumerWidget {
   const OrdersTab({super.key});
