@@ -9,7 +9,7 @@ import 'package:laundrylane/src/payments/payments_list.dart';
 import 'package:laundrylane/src/request_order/service_select.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class HomePage extends StatefulHookConsumerWidget {
   const HomePage({super.key});

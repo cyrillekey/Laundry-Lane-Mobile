@@ -40,7 +40,7 @@ dependencies:
   hooks_riverpod: ^3.0.3
   smooth_page_indicator: ^1.2.1
   google_fonts: ^6.3.2
-  tabler_icons: ^2.5.0+1
+  flutter_tabler_icons: ^1.43.0
   dio: ^5.9.0
   firebase_core: ^4.2.1
   flutter_svg: ^2.2.2

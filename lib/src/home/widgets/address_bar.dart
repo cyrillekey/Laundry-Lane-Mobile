@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/src/address/add_address.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:tabler_icons/tabler_icons.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 class AddressBar extends ConsumerWidget {
   const AddressBar({super.key});

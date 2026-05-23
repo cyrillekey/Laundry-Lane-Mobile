@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -12,7 +13,6 @@ import 'package:laundrylane/models/goecode_reverse.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
-import 'package:tabler_icons/tabler_icons.dart';
 
 class AddAddressPage extends StatefulHookConsumerWidget {
   const AddAddressPage({super.key});
