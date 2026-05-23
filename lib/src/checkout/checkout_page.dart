@@ -806,7 +806,10 @@ class WashItem extends StatelessWidget {
               SvgPicture.asset(
                 icon,
                 height: 36,
-                color: Theme.of(context).iconTheme.color,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).iconTheme.color!,
+                  BlendMode.srcIn,
+                ),
               ),
               SizedBox(width: 16),
               Expanded(
