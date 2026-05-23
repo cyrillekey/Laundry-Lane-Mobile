@@ -6,6 +6,7 @@ import 'package:laundrylane/src/home/tabs/home.dart';
 import 'package:laundrylane/src/home/tabs/messages.dart';
 import 'package:laundrylane/src/home/tabs/orders.dart';
 import 'package:laundrylane/src/home/tabs/profile.dart';
+import 'package:laundrylane/src/payments/payments_list.dart';
 import 'package:laundrylane/src/request_order/service_select.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
@@ -34,7 +35,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         },
       ),
       OrdersTab(),
-      MessagesTab(),
+      PaymentsList(),
       ProfileScreen(),
     ];
   }
@@ -77,11 +78,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             title: Text("Home", style: Theme.of(context).textTheme.labelLarge),
           ),
           SalomonBottomBarItem(
-            icon: Image.asset(
-              "assets/icons/time-table.png",
-              height: 26,
-              color: Theme.of(context).iconTheme.color,
-            ),
+            icon: Icon(TablerIcons.receipt),
             title: Text(
               "Bookings",
               style: Theme.of(context).textTheme.labelLarge,
@@ -89,11 +86,11 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
           SalomonBottomBarItem(
             icon: Icon(
-              CupertinoIcons.bell,
+              TablerIcons.cash_banknote,
               color: Theme.of(context).iconTheme.color,
             ),
             title: Text(
-              "Messages",
+              "Payments",
               style: Theme.of(context).textTheme.labelLarge,
             ),
           ),
