@@ -130,8 +130,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                               decoration: BoxDecoration(
                                 color:
                                     formBuiler.value == OrderType.pickup
-                                        ? Theme.of(context).primaryColor
-                                        : Colors.white,
+                                        ? Color.fromRGBO(121, 20, 199, 1)
+                                        : null,
                                 border: Border.all(
                                   width: 1,
                                   color: Color.fromRGBO(147, 147, 147, 1),
@@ -171,7 +171,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                 color:
                                     formBuiler.value ==
                                             OrderType.pickupAndDelivery
-                                        ? Theme.of(context).primaryColor
+                                        ? Color.fromRGBO(121, 20, 199, 1)
                                         : null,
                                 border: Border(
                                   bottom: BorderSide(
@@ -263,7 +263,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                       children: [
                                         Icon(
                                           TablerIcons.calendar,
-                                          color: Theme.of(context).primaryColor,
+                                          color:
+                                              Theme.of(context).iconTheme.color,
                                         ),
                                         SizedBox(width: 8),
                                         Text(
@@ -323,7 +324,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                       children: [
                                         Icon(
                                           TablerIcons.clock,
-                                          color: Theme.of(context).primaryColor,
+                                          color:
+                                              Theme.of(context).iconTheme.color,
                                         ),
                                         SizedBox(width: 10),
                                         Text(
@@ -398,7 +400,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                           Icon(
                                             TablerIcons.calendar,
                                             color:
-                                                Theme.of(context).primaryColor,
+                                                Theme.of(
+                                                  context,
+                                                ).iconTheme.color,
                                           ),
                                           SizedBox(width: 8),
                                           Text(
@@ -465,7 +469,9 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                           Icon(
                                             TablerIcons.clock,
                                             color:
-                                                Theme.of(context).primaryColor,
+                                                Theme.of(
+                                                  context,
+                                                ).iconTheme.color,
                                           ),
                                           SizedBox(width: 10),
                                           Text(
@@ -797,7 +803,11 @@ class WashItem extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
             children: [
-              SvgPicture.asset(icon, height: 36),
+              SvgPicture.asset(
+                icon,
+                height: 36,
+                color: Theme.of(context).iconTheme.color,
+              ),
               SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -826,7 +836,7 @@ class WashItem extends StatelessWidget {
                     : TablerIcons.circle,
                 color:
                     formBuilder.value == name
-                        ? Theme.of(context).primaryColor
+                        ? Color.fromRGBO(121, 20, 199, 1)
                         : null,
               ),
             ],

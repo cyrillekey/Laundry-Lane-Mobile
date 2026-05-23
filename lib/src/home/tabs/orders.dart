@@ -133,7 +133,10 @@ class OrderItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(24),
-      onTap: () => Navigator.of(context).pushNamed(OrderDetails.routeName),
+      onTap:
+          () => Navigator.of(
+            context,
+          ).pushNamed(OrderDetails.routeName, arguments: order.id),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         elevation: 0.0,

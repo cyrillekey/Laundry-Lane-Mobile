@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/misc.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/clothing_type.dart';
 import 'package:laundrylane/models/delivery_zone.dart';
@@ -241,5 +242,30 @@ FutureProvider<List<DeliveryZone>> deliveryZoneState =
       }
     });
 
+FutureProviderFamily<Order?, int> orderDetailsState = FutureProvider.autoDispose
+    .family((ref, id) async {
+      try {
+        final token = ref.watch(tokenProvider).value;
+        final CancelToken cancelToken = CancelToken();
+        ref.onDispose(cancelToken.cancel);
+        final response = await apiDio
+            .get(
+              "/order/$id",
+              cancelToken: cancelToken,
+              options: Options(headers: {"Authorization": "Bearer $token"}),
+            )
+            .then((resp) => resp.data)
+            .onError<DioException>((e, s) {
+              return null;
+            })
+            .catchError((e) {
+              return null;
+            });
+        if (response == null) return null;
+        return Order.fromJson(response);
+      } catch (e) {
+        return null;
+      }
+    });
 
 // FutureProvider<List<>>

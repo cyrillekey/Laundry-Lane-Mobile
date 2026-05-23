@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Consumer;
 import 'package:intl/intl.dart';
@@ -118,20 +119,13 @@ class _OrderSubmitButton extends ConsumerWidget {
               );
               if (response.success) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(response.message),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
                   ref.invalidate(ordersState);
                   ref.invalidate(ongoingOrderState);
                   ref.invalidate(notificationCountState);
                   ref.invalidate(notificationsState);
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    OrderDetails.routeName,
-                    ModalRoute.withName(HomePage.routeName),
-                    arguments: response.id,
+                  showBottomSheet(
+                    context: context,
+                    builder: (context) => SuccessSheet(orderId: response.id!),
                   );
                 }
               } else {
@@ -520,6 +514,70 @@ class AddressWidget extends ConsumerWidget {
       error: (error, stackTrace) {
         return Text(error.toString());
       },
+    );
+  }
+}
+
+class SuccessSheet extends StatelessWidget {
+  const SuccessSheet({super.key, required this.orderId});
+  final int orderId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SvgPicture.asset(
+              "assets/svgs/success.svg",
+              height: 100,
+              width: 100,
+            ),
+          ),
+          Text(
+            "Your order has been placed",
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          Text(
+            "Order ID: $orderId",
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+          ),
+          Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ProgressButton(
+              onPress: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  OrderDetails.routeName,
+                  ModalRoute.withName(HomePage.routeName),
+                  arguments: orderId,
+                );
+              },
+              child: Text(
+                "View Order",
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
