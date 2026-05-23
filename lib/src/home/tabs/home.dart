@@ -2,183 +2,299 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/providers/token_provider.dart';
+import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:laundrylane/src/cart/cart_page.dart';
 import 'package:laundrylane/src/home/widgets/address_bar.dart';
 import 'package:laundrylane/src/home/widgets/current_order.dart';
 import 'package:laundrylane/src/notifications/notifications_view.dart';
+import 'package:laundrylane/src/notifications/service.dart';
 import 'package:laundrylane/theme/util.dart';
-import 'package:laundrylane/utils/constants.dart';
+import 'package:laundrylane/utils/helper_functions.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 class HomeTab extends ConsumerWidget {
-  const HomeTab({super.key});
+  const HomeTab({super.key, required this.onProfileTap});
+  final void Function() onProfileTap;
 
   @override
   Widget build(BuildContext context, ref) {
     final theme = ref.watch(themeProvider).value;
     final user = ref.watch(userProvider).value;
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          pinned: false,
-          // backgroundColor: Color.fromRGBO(244, 245, 247, 1),
-          automaticallyImplyLeading: false,
-          flexibleSpace: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                InkWell(
-                  borderRadius: const BorderRadius.all(Radius.circular(16)),
-                  onTap: () {},
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image:
-                            user?.avatar?.isNotEmpty == true
-                                ? NetworkImage(user!.avatar!)
-                                : AssetImage("assets/icons/user-icon.png"),
+    final catalogListener = ref.watch(catalogState);
+    final unreadNotificationsListener = ref.watch(notificationCountState);
+
+    return RefreshIndicator.adaptive(
+      onRefresh: () async {
+        ref.invalidate(catalogState);
+        ref.invalidate(ongoingOrderState);
+        ref.invalidate(addressState);
+      },
+      child: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: false,
+            // backgroundColor: Color.fromRGBO(244, 245, 247, 1),
+            automaticallyImplyLeading: false,
+            flexibleSpace: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  InkWell(
+                    borderRadius: const BorderRadius.all(Radius.circular(16)),
+                    onTap: onProfileTap,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image:
+                              user?.avatar?.isNotEmpty == true
+                                  ? NetworkImage(user!.avatar!)
+                                  : AssetImage("assets/icons/user-icon.png"),
+                        ),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(16),
+                        ),
                       ),
-                      borderRadius: const BorderRadius.all(Radius.circular(16)),
+                      height: 46,
+                      width: 46,
                     ),
-                    height: 46,
-                    width: 46,
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Good ${getTimeOfDay()} 👋',
-                          style: GoogleFonts.almarai(
-                            color: Color(0xFF757575),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16,
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Good ${getTimeOfDay()} 👋',
+                            style: GoogleFonts.almarai(
+                              color: Color(0xFF757575),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 1),
-                        Text(
-                          "${user?.name}",
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                          const SizedBox(height: 1),
+                          Text(
+                            "${user?.name}",
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                            textAlign: TextAlign.start,
                           ),
-                          textAlign: TextAlign.start,
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  // unreadNotificationsListener.when(data: (count) {}),
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(
+                        context,
+                      ).pushNamed(NotificationsView.routeName);
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(120),
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 1,
                         ),
-                      ],
+                      ),
+                      child: Badge.count(
+                        count: unreadNotificationsListener.value ?? 0,
+                        isLabelVisible:
+                            (unreadNotificationsListener.value ?? 0) > 0,
+                        child: const Icon(TablerIcons.bell, size: 24),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 20),
-                InkWell(
-                  onTap: () {
-                    Navigator.of(
-                      context,
-                    ).pushNamed(NotificationsView.routeName);
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(120),
-                      border: Border.all(color: Colors.grey.shade300, width: 1),
-                    ),
-                    child: Badge.count(
-                      count: 0,
-                      isLabelVisible: false,
-                      child: const Icon(TablerIcons.bell, size: 24),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 26),
-                AddressBar(),
-                SizedBox(height: 26),
-                CurrentOrder(),
-                Text(
-                  "Categories",
-                  style: GoogleFonts.almarai(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 26),
+                  AddressBar(),
+                  SizedBox(height: 26),
+                  CurrentOrder(),
+                  Text(
+                    "Categories",
+                    style: GoogleFonts.almarai(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                SizedBox(height: 12),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.21,
-                  child: GridView.count(
-                    crossAxisCount: 4,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      CategoryCard(
-                        title: "Kids",
-                        assetName: "assets/svgs/shirt-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: "Women",
-                        assetName:
-                            "assets/svgs/skirt-fashion-clothes-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: "Men",
-                        assetName: "assets/svgs/coat-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: "Curtains",
-                        assetName:
-                            "assets/svgs/blinds-circus-curtain-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: 'Coach',
-                        assetName: "assets/svgs/sofa-2-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: "Others",
-                        assetName:
-                            "assets/svgs/socks-christmas-winter-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: "Blankets",
-                        assetName:
-                            "assets/svgs/blanket-laundry-clean-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                      CategoryCard(
-                        title: "Bags",
-                        assetName: "assets/svgs/bag-svgrepo-com.svg",
-                        themeData: theme,
-                      ),
-                    ],
+                  SizedBox(height: 12),
+                  catalogListener.when(
+                    data: (data) {
+                      final catalog = data.firstWhere(
+                        (element) => element.bulk == false,
+                      );
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.21,
+                        child: GridView.count(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          physics: NeverScrollableScrollPhysics(),
+                          children: [
+                            CategoryCard(
+                              title: "Kids",
+                              assetName: "assets/svgs/shirt-svgrepo-com.svg",
+                              themeData: theme,
+                              catalog: catalog,
+                            ),
+                            CategoryCard(
+                              title: "Women",
+                              assetName:
+                                  "assets/svgs/skirt-fashion-clothes-svgrepo-com.svg",
+                              themeData: theme,
+                              catalog: catalog,
+                            ),
+                            CategoryCard(
+                              title: "Men",
+                              assetName: "assets/svgs/coat-svgrepo-com.svg",
+                              themeData: theme,
+                              catalog: catalog,
+                            ),
+                            CategoryCard(
+                              title: "Curtains",
+                              assetName:
+                                  "assets/svgs/blinds-circus-curtain-svgrepo-com.svg",
+                              themeData: theme,
+                              catalog: catalog,
+                            ),
+                            CategoryCard(
+                              title: 'Coach',
+                              assetName: "assets/svgs/sofa-2-svgrepo-com.svg",
+                              themeData: theme,
+                              catalog: catalog,
+                            ),
+                            CategoryCard(
+                              title: "Others",
+                              assetName:
+                                  "assets/svgs/socks-christmas-winter-svgrepo-com.svg",
+                              themeData: theme,
+                              catalog: catalog,
+                            ),
+                            CategoryCard(
+                              title: "Blankets",
+                              assetName:
+                                  "assets/svgs/blanket-laundry-clean-svgrepo-com.svg",
+                              themeData: theme,
+                              catalog: catalog,
+                            ),
+                            CategoryCard(
+                              title: "Bags",
+                              assetName: "assets/svgs/bag-svgrepo-com.svg",
+                              themeData: theme,
+                              catalog: catalog,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    loading: () {
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.21,
+                        child: GridView.builder(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                              ),
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: 8,
+                          itemBuilder: (context, index) {
+                            return Shimmer.fromColors(
+                              baseColor:
+                                  Theme.of(context).scaffoldBackgroundColor,
+                              highlightColor: Theme.of(context).highlightColor,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey,
+                                    width: 1.5,
+                                  ),
+                                  color: Theme.of(context).cardColor,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                width: MediaQuery.of(context).size.width,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.18,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    error: (error, stackTrace) {
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.21,
+                        child: GridView.builder(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                              ),
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: 8,
+                          itemBuilder: (context, index) {
+                            return Shimmer.fromColors(
+                              baseColor:
+                                  Theme.of(context).scaffoldBackgroundColor,
+                              highlightColor: Theme.of(context).highlightColor,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey,
+                                    width: 1.5,
+                                  ),
+                                  color: Theme.of(context).cardColor,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                width: MediaQuery.of(context).size.width,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.18,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -188,16 +304,21 @@ class CategoryCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.assetName,
+    required this.catalog,
     this.themeData,
   });
   final String title;
   final ThemeMode? themeData;
   final String assetName;
+  final Catalog catalog;
   @override
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap: () => {},
+      onTap:
+          () => Navigator.of(
+            context,
+          ).pushNamed(CartPage.routeName, arguments: catalog),
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -215,7 +336,10 @@ class CategoryCard extends StatelessWidget {
               assetName,
               height: 40,
               width: 40,
-              color: themeData == ThemeMode.light ? null : Colors.white,
+              colorFilter:
+                  themeData == ThemeMode.light
+                      ? null
+                      : ColorFilter.mode(Colors.white, BlendMode.srcIn),
             ),
             SizedBox(height: 2),
             Text(

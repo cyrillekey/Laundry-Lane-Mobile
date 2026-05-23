@@ -2,18 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jiffy/jiffy.dart';
+import 'package:laundrylane/models/catalog_model.dart';
+import 'package:laundrylane/models/checkout_model.dart';
+import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:laundrylane/src/checkout/checkout_review.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
-class CheckoutPage extends StatefulWidget {
+class CheckoutPage extends StatefulHookConsumerWidget {
   const CheckoutPage({super.key});
   static const String routeName = "/checkout";
 
   @override
-  State<CheckoutPage> createState() => _CheckoutPageState();
+  ConsumerState<CheckoutPage> createState() => _CheckoutPageState();
 }
 
-class _CheckoutPageState extends State<CheckoutPage> {
+class _CheckoutPageState extends ConsumerState<CheckoutPage> {
   final GlobalKey<FormBuilderState> reviewForm = GlobalKey<FormBuilderState>();
 
   @override
@@ -23,14 +29,59 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final serviceListenter = ref.watch(serviceTypeState);
+    final catalog = ModalRoute.of(context)?.settings.arguments as Catalog;
     return FormBuilder(
+      initialValue: {"estimatedWeight": "1", "pickupSelf": false},
       key: reviewForm,
       child: Scaffold(
         appBar: AppBar(title: Text("Checkout"), centerTitle: true),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: TextButton(
           onPressed: () {
-            if (reviewForm.currentState?.saveAndValidate() == true) {}
+            if (reviewForm.currentState?.saveAndValidate() == true) {
+              Map formValues = reviewForm.currentState!.value;
+              final service = ref
+                  .read(serviceTypeState)
+                  .value!
+                  .firstWhere((e) => e.id == formValues['serviceDays']);
+              String? deliveryWindow;
+
+              if (formValues['pickupSelf'] == false &&
+                  formValues['orderType'] == OrderType.pickupAndDelivery) {
+                final DateTime date = formValues['deliveryDate'];
+                final TimeOfDay time = formValues['deliveryTime'];
+                final DateTime deliveryTime = DateTime(
+                  date.year,
+                  date.month,
+                  date.day,
+                  time.hour,
+                  time.minute,
+                );
+                deliveryWindow = deliveryTime.toIso8601String();
+              }
+              final CheckoutModel checkoutModel = CheckoutModel(
+                catalog: catalog,
+                deliveryWindow: deliveryWindow,
+                orderType:
+                    formValues['orderType'] == OrderType.pickup
+                        ? OrderType.pickup
+                        : formValues['pickupSelf'] == true
+                        ? OrderType.delivery
+                        : formValues["orderType"],
+                pickupDate: formValues["date"],
+                pickupTime: formValues['time'],
+                weight:
+                    formValues['estimatedWeight'] != null
+                        ? num.parse(formValues['estimatedWeight'])
+                        : null,
+                serviceType: service,
+                washingPreference: formValues['washType'],
+              );
+              Navigator.of(
+                context,
+              ).pushNamed(CheckoutReview.routeName, arguments: checkoutModel);
+            }
           },
           style: ButtonStyle(
             fixedSize: WidgetStatePropertyAll(
@@ -52,32 +103,35 @@ class _CheckoutPageState extends State<CheckoutPage> {
             ),
           ),
         ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.8,
+        body: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.8,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 12),
-                FormBuilderField<String>(
+                FormBuilderField<OrderType>(
+                  onChanged: (value) {
+                    setState(() {});
+                  },
                   name: "orderType",
-                  initialValue: "Pickup",
+                  initialValue: OrderType.pickup,
                   validator: FormBuilderValidators.required(),
                   builder: (formBuiler) {
                     return Row(
                       children: [
                         Expanded(
                           child: InkWell(
-                            onTap: () => formBuiler.didChange("Pickup"),
+                            onTap: () => formBuiler.didChange(OrderType.pickup),
                             child: Container(
                               height: 42,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color:
-                                    formBuiler.value == "Pickup"
-                                        ? Theme.of(context).primaryColor
-                                        : Colors.white,
+                                    formBuiler.value == OrderType.pickup
+                                        ? Color.fromRGBO(121, 20, 199, 1)
+                                        : null,
                                 border: Border.all(
                                   width: 1,
                                   color: Color.fromRGBO(147, 147, 147, 1),
@@ -91,10 +145,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 "Pickup",
                                 style: Theme.of(
                                   context,
-                                ).textTheme.labelLarge?.copyWith(
+                                ).textTheme.bodyLarge?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   color:
-                                      formBuiler.value == "Pickup"
+                                      formBuiler.value == OrderType.pickup
                                           ? Colors.white
                                           : Theme.of(
                                             context,
@@ -107,15 +161,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         Expanded(
                           child: InkWell(
                             onTap:
-                                () =>
-                                    formBuiler.didChange("Pickup and Delivery"),
+                                () => formBuiler.didChange(
+                                  OrderType.pickupAndDelivery,
+                                ),
                             child: Container(
                               height: 42,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color:
-                                    formBuiler.value == "Pickup and Delivery"
-                                        ? Theme.of(context).primaryColor
+                                    formBuiler.value ==
+                                            OrderType.pickupAndDelivery
+                                        ? Color.fromRGBO(121, 20, 199, 1)
                                         : null,
                                 border: Border(
                                   bottom: BorderSide(
@@ -134,13 +190,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 ),
                               ),
                               child: Text(
-                                "Pickup and Delivery",
+                                "Pickup & Delivery",
                                 style: Theme.of(
                                   context,
-                                ).textTheme.labelLarge?.copyWith(
+                                ).textTheme.bodyLarge?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color:
-                                      formBuiler.value == "Pickup and Delivery"
+                                      formBuiler.value ==
+                                              OrderType.pickupAndDelivery
                                           ? Colors.white
                                           : Theme.of(
                                             context,
@@ -157,139 +214,424 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 SizedBox(height: 12),
                 Divider(),
                 SizedBox(height: 20),
-                Text(
-                  "Pickup Date & Time",
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: FormBuilderField<DateTime>(
-                        builder: (formBuilder) {
-                          return InkWell(
-                            onTap: () async {
-                              DateTime? date = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime.now().add(
-                                  Duration(days: 30),
-                                ),
-                              );
-                              formBuilder.didChange(date);
-                            },
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(width: 1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    TablerIcons.calendar,
-                                    color: Theme.of(context).primaryColor,
+                if (reviewForm.currentState?.getRawValue("orderType") ==
+                    OrderType.pickupAndDelivery) ...[
+                  Text(
+                    "Service Schedule",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Pickup Date",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          SizedBox(height: 6),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.58,
+                            child: FormBuilderField<DateTime>(
+                              builder: (formBuilder) {
+                                return InkWell(
+                                  onTap: () async {
+                                    DateTime? date = await showDatePicker(
+                                      context: context,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime.now(),
+                                      lastDate: DateTime.now().add(
+                                        Duration(days: 30),
+                                      ),
+                                    );
+                                    formBuilder.didChange(date);
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        width: 1.5,
+                                        color: Color.fromRGBO(215, 215, 215, 1),
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          TablerIcons.calendar,
+                                          color:
+                                              Theme.of(context).iconTheme.color,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          Jiffy.parseFromDateTime(
+                                            formBuilder.value ?? DateTime.now(),
+                                          ).format(pattern: "dd MMM yyyy"),
+                                          style:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodyMedium,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    Jiffy.parseFromDateTime(
-                                      formBuilder.value ?? DateTime.now(),
-                                    ).format(pattern: "dd MMM yyyy"),
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ],
-                              ),
+                                );
+                              },
+                              name: "date",
+                              initialValue: DateTime.now(),
                             ),
-                          );
-                        },
-                        name: "date",
-                        initialValue: DateTime.now(),
+                          ),
+                        ],
                       ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: FormBuilderField<TimeOfDay>(
-                        builder: (formBuilder) {
-                          return InkWell(
-                            onTap: () async {
-                              TimeOfDay? date = await showTimePicker(
-                                context: context,
-                                initialTime: TimeOfDay.now(),
-                              );
-                              formBuilder.didChange(date);
-                            },
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(width: 1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    TablerIcons.clock,
-                                    color: Theme.of(context).primaryColor,
+                      Spacer(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Pickup Time",
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          SizedBox(height: 6),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.31,
+                            child: FormBuilderField<TimeOfDay>(
+                              builder: (formBuilder) {
+                                return InkWell(
+                                  onTap: () async {
+                                    TimeOfDay? date = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay.now(),
+                                    );
+                                    formBuilder.didChange(date);
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        width: 1.5,
+                                        color: Color.fromRGBO(215, 215, 215, 1),
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          TablerIcons.clock,
+                                          color:
+                                              Theme.of(context).iconTheme.color,
+                                        ),
+                                        SizedBox(width: 10),
+                                        Text(
+                                          "${formBuilder.value?.hourOfPeriod}:${formBuilder.value?.minute} ${formBuilder.value?.period.name.toUpperCase()}",
+                                          style:
+                                              Theme.of(
+                                                context,
+                                              ).textTheme.bodyMedium,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    "${formBuilder.value?.hourOfPeriod}:${formBuilder.value?.minute} ${formBuilder.value?.period.name.toUpperCase()}",
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ],
-                              ),
+                                );
+                              },
+                              name: "time",
+                              initialValue: TimeOfDay.now(),
                             ),
-                          );
-                        },
-                        name: "time",
-                        initialValue: TimeOfDay.now(),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 26),
-                Text(
-                  "Delivery Days",
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-                SizedBox(height: 6),
-                FormBuilderField<String?>(
-                  builder: (formBuiler) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    ],
+                  ),
+
+                  if (reviewForm.currentState?.getRawValue("pickupSelf") ==
+                      false) ...[
+                    SizedBox(height: 18),
+                    Row(
                       children: [
-                        Row(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ServiceDay(
-                              title: "Regular",
-                              days: "(2-3) days",
-                              price: "No extra fee",
-                              formBuilderState: formBuiler,
+                            Text(
+                              "Delivery Date",
+                              style: Theme.of(context).textTheme.labelLarge,
                             ),
-                            SizedBox(width: 8),
-                            ServiceDay(
-                              formBuilderState: formBuiler,
-                              title: "Express",
-                              days: "(1 day)",
-                              price: "Exta Ksh 100 ",
-                            ),
-                            SizedBox(width: 8),
-                            ServiceDay(
-                              formBuilderState: formBuiler,
-                              title: "Same Day",
-                              days: "(8 hours)",
-                              price: "Extra Ksh 200",
+                            SizedBox(height: 6),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.58,
+                              child: FormBuilderField<DateTime>(
+                                builder: (formBuilder) {
+                                  return InkWell(
+                                    onTap: () async {
+                                      DateTime? date = await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime.now(),
+                                        lastDate: DateTime.now().add(
+                                          Duration(days: 30),
+                                        ),
+                                      );
+                                      formBuilder.didChange(date);
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 1.5,
+                                          color: Color.fromRGBO(
+                                            215,
+                                            215,
+                                            215,
+                                            1,
+                                          ),
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            TablerIcons.calendar,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).iconTheme.color,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            Jiffy.parseFromDateTime(
+                                              formBuilder.value ??
+                                                  DateTime.now(),
+                                            ).format(pattern: "dd MMM yyyy"),
+                                            style:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.bodyMedium,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                name: "deliveryDate",
+                                initialValue: DateTime.now(),
+                              ),
                             ),
                           ],
                         ),
+                        Spacer(),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Delivery Time",
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
+                            SizedBox(height: 6),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.31,
+                              child: FormBuilderField<TimeOfDay>(
+                                builder: (formBuilder) {
+                                  return InkWell(
+                                    onTap: () async {
+                                      TimeOfDay? date = await showTimePicker(
+                                        context: context,
+                                        initialTime: TimeOfDay.now(),
+                                      );
+                                      formBuilder.didChange(date);
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 1.5,
+                                          color: Color.fromRGBO(
+                                            215,
+                                            215,
+                                            215,
+                                            1,
+                                          ),
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            TablerIcons.clock,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).iconTheme.color,
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text(
+                                            "${formBuilder.value?.hourOfPeriod}:${formBuilder.value?.minute} ${formBuilder.value?.period.name.toUpperCase()}",
+                                            style:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.bodyMedium,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                name: "deliveryTime",
+                                initialValue: TimeOfDay.now(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                  SizedBox(height: 2),
+                  FormBuilderCheckbox(
+                    name: "pickupSelf",
+                    title: Text("I want to pick up the laundry myself"),
+                    onChanged: (value) => setState(() {}),
+                  ),
+                  SizedBox(height: 26),
+                ],
+                if (catalog.bulk == true) ...[
+                  Text(
+                    "Estimated Weight",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  SizedBox(height: 12),
+                  // show a list of one hour windows for delivery between 6am and 10pm
+                  FormBuilderTextField(
+                    name: "estimatedWeight",
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(),
+                      FormBuilderValidators.min(1),
+                    ]),
+                    decoration: InputDecoration(
+                      hintText: "Weight in Kgs",
+                      suffixText: "Kgs",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  SizedBox(height: 16),
+                ],
+                Text(
+                  "Service Type",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                SizedBox(height: 16),
+                FormBuilderField<int?>(
+                  builder: (formBuiler) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        serviceListenter.when(
+                          data: (services) {
+                            return SizedBox(
+                              height: 100,
+                              width: MediaQuery.of(context).size.width,
+                              child: ListView.separated(
+                                separatorBuilder:
+                                    (context, index) => SizedBox(width: 12),
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) {
+                                  final service = services[index];
+                                  return ServiceDay(
+                                    id: service.id,
+                                    title: service.name ?? "",
+                                    days: service.serviceTimelines ?? "",
+                                    price:
+                                        service.price == 0
+                                            ? "No extra fee"
+                                            : "Extra Ksh ${service.price}",
+                                    formBuilderState: formBuiler,
+                                  );
+                                },
+                                itemCount: 3,
+                              ),
+                            );
+                          },
+                          loading:
+                              () => SizedBox(
+                                height: 100,
+                                width: MediaQuery.of(context).size.width,
+                                child: ListView.separated(
+                                  separatorBuilder:
+                                      (context, index) => SizedBox(width: 4),
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+                                    return Shimmer.fromColors(
+                                      baseColor:
+                                          Theme.of(
+                                            context,
+                                          ).scaffoldBackgroundColor,
+                                      highlightColor:
+                                          Theme.of(context).highlightColor,
+                                      child: Container(
+                                        height: 100,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).cardColor,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  itemCount: 3,
+                                ),
+                              ),
+                          error:
+                              (error, stackTrace) => SizedBox(
+                                height: 80,
+                                width: MediaQuery.of(context).size.width,
+                                child: ListView.separated(
+                                  separatorBuilder:
+                                      (context, index) => SizedBox(width: 4),
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+                                    return Shimmer.fromColors(
+                                      baseColor:
+                                          Theme.of(
+                                            context,
+                                          ).scaffoldBackgroundColor,
+                                      highlightColor:
+                                          Theme.of(context).highlightColor,
+                                      child: Container(
+                                        height: 100,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.3,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).cardColor,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  itemCount: 3,
+                                ),
+                              ),
+                        ),
+
                         if (formBuiler.hasError) ...[
                           SizedBox(height: 12),
                           Text(
@@ -304,10 +646,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   validator: FormBuilderValidators.required(),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                 ),
-                SizedBox(height: 26),
+
+                SizedBox(height: 18),
                 Text(
                   "Select Washing Preference",
-                  style: Theme.of(context).textTheme.labelLarge,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 SizedBox(height: 12),
                 FormBuilderField<String?>(
@@ -349,6 +692,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: FormBuilderValidators.required(),
                 ),
+                SizedBox(height: 64),
               ],
             ),
           ),
@@ -365,60 +709,59 @@ class ServiceDay extends StatelessWidget {
     required this.days,
     required this.price,
     required this.formBuilderState,
+    required this.id,
   });
-  final FormFieldState<String?> formBuilderState;
+  final FormFieldState<int?> formBuilderState;
   final String title;
   final String days;
   final String price;
+  final int id;
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: () => formBuilderState.didChange(title),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color:
-                formBuilderState.value == title
-                    ? Theme.of(context).primaryColor
-                    : Color.fromRGBO(246, 246, 246, 1),
-          ),
-          child: Column(
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color:
-                      formBuilderState.value == title
-                          ? Colors.white
-                          : Colors.black,
-                ),
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => formBuilderState.didChange(id),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color:
+              formBuilderState.value == id
+                  ? Theme.of(context).primaryColor
+                  : Color.fromRGBO(246, 246, 246, 1),
+        ),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color:
+                    formBuilderState.value == id ? Colors.white : Colors.black,
               ),
-              SizedBox(height: 2),
-              Text(
-                days,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color:
-                      formBuilderState.value == title
-                          ? Colors.white
-                          : Color.fromRGBO(132, 137, 147, 1),
-                  fontWeight: FontWeight.w600,
-                ),
+            ),
+            SizedBox(height: 2),
+            Text(
+              days,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color:
+                    formBuilderState.value == id
+                        ? Colors.white
+                        : Color.fromRGBO(132, 137, 147, 1),
+                fontWeight: FontWeight.w600,
               ),
-              SizedBox(height: 2),
-              Text(
-                price,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color:
-                      formBuilderState.value == title
-                          ? Colors.white
-                          : Color.fromRGBO(132, 137, 147, 1),
-                ),
+            ),
+            SizedBox(height: 2),
+            Text(
+              price,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color:
+                    formBuilderState.value == id
+                        ? Colors.white
+                        : Color.fromRGBO(132, 137, 147, 1),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -443,6 +786,7 @@ class WashItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      borderRadius: BorderRadius.circular(12),
       onTap: () => formBuilder.didChange(name),
       child: Card.outlined(
         shape:
@@ -459,7 +803,14 @@ class WashItem extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
             children: [
-              SvgPicture.asset(icon, height: 36),
+              SvgPicture.asset(
+                icon,
+                height: 36,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).iconTheme.color!,
+                  BlendMode.srcIn,
+                ),
+              ),
               SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -488,7 +839,7 @@ class WashItem extends StatelessWidget {
                     : TablerIcons.circle,
                 color:
                     formBuilder.value == name
-                        ? Theme.of(context).primaryColor
+                        ? Color.fromRGBO(121, 20, 199, 1)
                         : null,
               ),
             ],

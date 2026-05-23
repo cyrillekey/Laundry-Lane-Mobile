@@ -1,38 +1,41 @@
 // To parse this JSON data, do
 //
-//     final clothingType = clothingTypeFromJson(jsonString);
+//     final serviceType = serviceTypeFromJson(jsonString);
 
 import 'dart:convert';
 
-List<ClothingType> clothingTypeFromJson(String str) => List<ClothingType>.from(
-  json.decode(str).map((x) => ClothingType.fromJson(x)),
+List<ServiceType> serviceTypeFromJson(String str) => List<ServiceType>.from(
+  json.decode(str).map((x) => ServiceType.fromJson(x)),
 );
 
-String clothingTypeToJson(List<ClothingType> data) =>
+String serviceTypeToJson(List<ServiceType> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-class ClothingType {
-  int? id;
+class ServiceType {
+  int id;
   String? name;
-  String? type;
-  num? price;
+  String? description;
+  num price;
+  String? serviceTimelines;
   DateTime? createdat;
   DateTime? updatedat;
 
-  ClothingType({
-    this.id,
+  ServiceType({
+    required this.id,
     this.name,
-    this.type,
-    this.price,
+    this.description,
+    required this.price,
+    this.serviceTimelines,
     this.createdat,
     this.updatedat,
   });
 
-  factory ClothingType.fromJson(Map<String, dynamic> json) => ClothingType(
+  factory ServiceType.fromJson(Map<String, dynamic> json) => ServiceType(
     id: json["id"],
     name: json["name"],
-    type: json["type"],
+    description: json["description"],
     price: json["price"],
+    serviceTimelines: json["serviceTimelines"],
     createdat:
         json["createdat"] == null ? null : DateTime.parse(json["createdat"]),
     updatedat:
@@ -42,8 +45,9 @@ class ClothingType {
   Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
-    "type": type,
+    "description": description,
     "price": price,
+    "serviceTimelines": serviceTimelines,
     "createdat": createdat?.toIso8601String(),
     "updatedat": updatedat?.toIso8601String(),
   };

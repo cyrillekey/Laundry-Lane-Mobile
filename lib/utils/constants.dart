@@ -1,9 +1,5 @@
-import 'dart:convert';
-
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/material.dart';
-import 'package:laundrylane/models/user_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 const String apiUrl = "https://laundry-lane-server.onrender.com";
 
@@ -146,24 +142,4 @@ const clothingTypes = [
     "subtypes": ["Socks", "Tie", "Scarf", "Hat", "Cap", "Gloves", "Belt"],
   },
 ];
-
-String getTimeOfDay() {
-  TimeOfDay timeOfDay = TimeOfDay.now();
-  if (timeOfDay.hour >= 6 && timeOfDay.hour < 12) return "morning";
-  if (timeOfDay.hour >= 12 && timeOfDay.hour < 18) return "afternoon";
-  if (timeOfDay.hour >= 18 && timeOfDay.hour < 22) return "evening";
-  return "night";
-}
-
-Future<void> saveToken(String token, int userId) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setString('token', token);
-  await prefs.setInt('userId', userId);
-}
-
-Future<void> saveUserModel(UserModel user) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setString('user', jsonEncode(user.toJson()));
-}
-
 final cloudinary = CloudinaryPublic("ddia14anf", 'laundry_lane', cache: false);

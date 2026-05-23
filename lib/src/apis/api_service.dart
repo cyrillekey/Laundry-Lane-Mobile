@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/misc.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/clothing_type.dart';
+import 'package:laundrylane/models/delivery_zone.dart';
 import 'package:laundrylane/models/goecode_reverse.dart';
 import 'package:laundrylane/models/home_address.dart';
 import 'package:laundrylane/models/order_model.dart';
 import 'package:laundrylane/models/payment_card.dart';
+import 'package:laundrylane/models/service_model.dart';
 import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/utils/constants.dart';
 
@@ -79,7 +82,7 @@ FutureProvider<HomeAddress?> addressState =
 FutureProvider<List<Order>> ordersState = FutureProvider.autoDispose((
   ref,
 ) async {
-  String? token = ref.read(tokenProvider).value;
+  String? token = ref.watch(tokenProvider).value;
 
   final CancelToken cancelToken = CancelToken();
   ref.onDispose(cancelToken.cancel);
@@ -144,7 +147,7 @@ FutureProvider<List<ClothingType>> clothingTypeState =
 FutureProvider<Order?> ongoingOrderState = FutureProvider.autoDispose((
   ref,
 ) async {
-  String? token = ref.read(tokenProvider).value;
+  String? token = ref.watch(tokenProvider).value;
 
   final CancelToken cancelToken = CancelToken();
   ref.onDispose(cancelToken.cancel);
@@ -159,6 +162,7 @@ FutureProvider<Order?> ongoingOrderState = FutureProvider.autoDispose((
       .catchError((e) {
         return [];
       });
+
   List data = List.from(response);
 
   List<Order> orders = data.map((e) => Order.fromJson(e)).toList();
@@ -182,3 +186,86 @@ FutureProvider<List> cardsState = FutureProvider.autoDispose((ref) async {
       });
   return paymentCardFromJson(jsonEncode(response));
 });
+
+FutureProvider<List<ServiceType>> serviceTypeState = FutureProvider.autoDispose(
+  (ref) async {
+    try {
+      final token = ref.watch(tokenProvider).value;
+      final CancelToken cancelToken = CancelToken();
+
+      ref.onDispose(cancelToken.cancel);
+      final response = await apiDio
+          .get(
+            "/catalog/service-types",
+            options: Options(headers: {"Authorization": "Bearer $token"}),
+            cancelToken: cancelToken,
+          )
+          .then((resp) => resp.data)
+          .catchError((e) {
+            return [];
+          });
+      return List<ServiceType>.from(
+        response.map((e) {
+          return ServiceType.fromJson(e);
+        }),
+      );
+    } catch (e) {
+      return [];
+    }
+  },
+);
+
+FutureProvider<List<DeliveryZone>> deliveryZoneState =
+    FutureProvider.autoDispose((ref) async {
+      try {
+        final token = ref.watch(tokenProvider).value;
+        final CancelToken cancelToken = CancelToken();
+
+        ref.onDispose(cancelToken.cancel);
+        final response = await apiDio
+            .get(
+              "/delivery/zones",
+              cancelToken: cancelToken,
+              options: Options(headers: {"Authorization": "Bearer $token"}),
+            )
+            .then((resp) => resp.data)
+            .onError<DioException>((e, s) {
+              return [];
+            });
+        return List<DeliveryZone>.from(
+          response.map((e) {
+            return DeliveryZone.fromJson(e);
+          }),
+        );
+      } catch (e) {
+        return [];
+      }
+    });
+
+FutureProviderFamily<Order?, int> orderDetailsState = FutureProvider.autoDispose
+    .family((ref, id) async {
+      try {
+        final token = ref.watch(tokenProvider).value;
+        final CancelToken cancelToken = CancelToken();
+        ref.onDispose(cancelToken.cancel);
+        final response = await apiDio
+            .get(
+              "/order/$id",
+              cancelToken: cancelToken,
+              options: Options(headers: {"Authorization": "Bearer $token"}),
+            )
+            .then((resp) => resp.data)
+            .onError<DioException>((e, s) {
+              return null;
+            })
+            .catchError((e) {
+              return null;
+            });
+        if (response == null) return null;
+        return Order.fromJson(response);
+      } catch (e) {
+        return null;
+      }
+    });
+
+// FutureProvider<List<>>

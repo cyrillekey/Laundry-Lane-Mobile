@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/cart/cart_page.dart';
+import 'package:laundrylane/theme/util.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:string_extensions/string_extensions.dart';
 import 'package:tabler_icons/tabler_icons.dart';
@@ -24,8 +25,9 @@ class _ServiceSelectState extends ConsumerState<ServiceSelect> {
   @override
   Widget build(BuildContext context) {
     final catalogListener = ref.watch(catalogState);
+    final watchTheme = ref.watch(themeProvider).value;
+    final isDarkTheme = watchTheme == ThemeMode.dark;
     return Scaffold(
-      // backgroundColor: Color.fromRGBO(252, 251, 255, 1),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Visibility(
         visible: selected != 0,
@@ -121,7 +123,6 @@ class _ServiceSelectState extends ConsumerState<ServiceSelect> {
             child: Text(
               "Select your services",
               style: GoogleFonts.almarai(
-                color: Colors.black,
                 fontWeight: FontWeight.w600,
                 fontSize: 18,
               ),
@@ -131,7 +132,7 @@ class _ServiceSelectState extends ConsumerState<ServiceSelect> {
           catalogListener.when(
             data: (services) {
               return SizedBox(
-                height: MediaQuery.of(context).size.height * 0.59,
+                height: MediaQuery.of(context).size.height * 0.50,
                 child: ListView.separated(
                   padding: EdgeInsets.symmetric(horizontal: 12),
                   separatorBuilder: (_, __) => SizedBox(height: 10),
@@ -141,6 +142,7 @@ class _ServiceSelectState extends ConsumerState<ServiceSelect> {
                     return ServiceItem(
                       catalog: service,
                       isSelected: selected == service.id,
+                      isDarkTheme: isDarkTheme,
                       onSelected: (value) {
                         setState(() {
                           selected = value;
@@ -198,12 +200,14 @@ class ServiceItem extends StatelessWidget {
     required this.isSelected,
     required this.onSelected,
     required this.catalog,
+    required this.isDarkTheme,
   });
 
   final OnSelected onSelected;
   final bool isSelected;
 
   final Catalog catalog;
+  final bool isDarkTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -217,7 +221,10 @@ class ServiceItem extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: Color.fromRGBO(243, 243, 245, 1),
+            color:
+                isDarkTheme == true
+                    ? Theme.of(context).focusColor
+                    : Color.fromRGBO(243, 243, 245, 1),
             width: 1.5,
           ),
           color: Theme.of(context).cardTheme.color,
@@ -235,10 +242,17 @@ class ServiceItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircleAvatar(
+                    backgroundColor:
+                        isDarkTheme
+                            ? Theme.of(context).primaryColorDark
+                            : Theme.of(context).primaryColor,
                     child: SvgPicture.network(
                       catalog.imageUrl!,
                       height: 26,
-                      color: Colors.white,
+                      colorFilter: ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
                   SizedBox(width: 6),
@@ -254,21 +268,38 @@ class ServiceItem extends StatelessWidget {
                           fontSize: 16,
                         ),
                       ),
-                      RichText(
-                        text: TextSpan(
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          children: [
-                            TextSpan(text: "From "),
-                            TextSpan(
-                              text: '\$${catalog.price}/kg ',
-                              style: GoogleFonts.almarai(
-                                fontWeight: FontWeight.bold,
+                      if (catalog.bulk == true)
+                        RichText(
+                          text: TextSpan(
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            children: [
+                              TextSpan(text: "From "),
+                              TextSpan(
+                                text: 'Ksh ${catalog.price}/kg ',
+                                style: GoogleFonts.almarai(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            TextSpan(text: "Price per weight"),
-                          ],
+                              TextSpan(text: "Price per weight"),
+                            ],
+                          ),
                         ),
-                      ),
+                      if (catalog.bulk == false)
+                        RichText(
+                          text: TextSpan(
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            children: [
+                              TextSpan(text: "From "),
+                              TextSpan(
+                                text: 'Ksh ${catalog.price}/item ',
+                                style: GoogleFonts.almarai(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextSpan(text: "Price per item"),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                   Spacer(),

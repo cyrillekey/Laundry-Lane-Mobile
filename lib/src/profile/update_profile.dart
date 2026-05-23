@@ -9,6 +9,7 @@ import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/utils/constants.dart';
+import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 
 class UpdateProfile extends StatefulHookConsumerWidget {
@@ -367,19 +368,23 @@ class _UpdateProfileState extends ConsumerState<UpdateProfile> {
                       if (response.success) {
                         saveUserModel(response.user!);
                         ref.invalidate(userProvider);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(response.message),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(response.message),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(response.message),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(response.message),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       }
                     }
                   },

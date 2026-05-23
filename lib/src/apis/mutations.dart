@@ -1,10 +1,9 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/models/default_response.dart';
+import 'package:laundrylane/providers/card_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,8 +18,8 @@ Future<AuthResponse> login(String email, String password) async {
         options: Options(contentType: "application/json"),
       )
       .then((value) => value.data)
-      .catchError((err) {
-        return jsonDecode(err?.response.toString() ?? "{}");
+      .onError<DioException>((err, s) {
+        return (err.response?.data);
       });
   if (response == null) {
     return AuthResponse(
@@ -49,8 +48,8 @@ Future<AuthResponse> signUp(String name, String email, String password) async {
         options: Options(contentType: "application/json"),
       )
       .then((value) => value.data)
-      .catchError((err) {
-        return jsonDecode(err?.response.toString() ?? "{}");
+      .onError<DioException>((err, s) {
+        return (err.response?.data);
       });
 
   if (response == null) {
@@ -96,7 +95,9 @@ Future<DefaultResponse> createAddress({
           ),
         )
         .then((resp) => resp.data)
-        .catchError((err) => err.response);
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
+        });
     if (response == null) {
       return DefaultResponse(
         success: false,
@@ -144,7 +145,9 @@ Future<DefaultResponse> updateAddress(
           ),
         )
         .then((resp) => resp.data)
-        .catchError((err) => err.response);
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
+        });
     if (response == null) {
       return DefaultResponse(
         success: false,
@@ -169,8 +172,8 @@ Future<DefaultResponse> requestPasswordReset(String email) async {
           options: Options(contentType: "application/json"),
         )
         .then((value) => value.data)
-        .catchError((err) {
-          return jsonDecode(err?.response.toString() ?? "{}");
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
         });
     if (response == null) {
       return DefaultResponse(
@@ -196,8 +199,8 @@ Future<DefaultResponse> verifyOTP(String email, String otp) async {
           options: Options(contentType: "application/json"),
         )
         .then((value) => value.data)
-        .catchError((err) {
-          return jsonDecode(err?.response.toString() ?? "{}");
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
         });
     if (response == null) {
       return DefaultResponse(
@@ -227,8 +230,8 @@ Future<AuthResponse> updatePassword(
           options: Options(headers: {"Authorization": "Bearer $token"}),
         )
         .then((value) => value.data)
-        .catchError((err) {
-          return jsonDecode(err?.response.toString() ?? "{}");
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
         });
     if (response == null) {
       return AuthResponse(
@@ -297,8 +300,8 @@ Future<AuthResponse> updateUser({
           options: Options(headers: {"Authorization": "Bearer $token"}),
         )
         .then((value) => value.data)
-        .catchError((err) {
-          return jsonDecode(err?.response.toString() ?? "{}");
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
         });
 
     if (response == null) {
@@ -339,8 +342,8 @@ Future<AddCardResponse> addUserCard({
           options: Options(headers: {"Authorization": "Bearer $token"}),
         )
         .then((resp) => resp.data)
-        .catchError((err) {
-          return jsonDecode(err?.response.toString() ?? "{}");
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
         });
 
     if (response == null) {
@@ -368,8 +371,8 @@ Future<DefaultResponse> deleteCard({required int cardId}) async {
           options: Options(headers: {"Authorization": "Bearer $token"}),
         )
         .then((resp) => resp.data)
-        .catchError((err) {
-          return jsonDecode(err?.response.toString() ?? "{}");
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
         });
 
     if (response == null) {
@@ -383,6 +386,94 @@ Future<DefaultResponse> deleteCard({required int cardId}) async {
     return DefaultResponse(
       success: false,
       message: "Error! Could not delete card",
+    );
+  }
+}
+
+Future<DefaultResponse> changePassword(
+  String oldPassword,
+  String newPassword,
+) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String token = sharedPreferences.getString("token") ?? "";
+    final response = await apiDio
+        .put(
+          "/user/change-password",
+          data: {"oldPassword": oldPassword, "newPassword": newPassword},
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((value) => value.data)
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
+        });
+    if (response == null) {
+      return DefaultResponse(
+        message: "Error! Could not update password",
+        success: false,
+      );
+    }
+    return DefaultResponse.fromJson((response));
+  } catch (e) {
+    return DefaultResponse(
+      message: "Error! Could not update password",
+      success: false,
+    );
+  }
+}
+
+Future<DefaultResponse> createOrderMutation({
+  required int addressId,
+  required int serviceTypeId,
+  required int catalogId,
+  required String type,
+  String? instructions,
+  required String? deliveryWindow,
+  required List<CartItem> items,
+  required String washType,
+  String? pickupDate,
+  String? pickupTime,
+}) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String token = sharedPreferences.getString("token") ?? "";
+    final response = await apiDio
+        .post(
+          "/order",
+          options: Options(
+            contentType: "application/json",
+            headers: {"Authorization": "Bearer $token"},
+          ),
+          data: {
+            "catalogId": catalogId,
+            "items": items.map((item) => item.toCartJson()).toList(),
+            "serviceTypeId": serviceTypeId,
+            "type": type,
+            "washType": washType,
+            "addressId": addressId,
+            "deliveryWindow": deliveryWindow,
+            "instructions": instructions,
+            "pickupDate": pickupDate,
+            "pickupTime": pickupTime,
+          },
+        )
+        .then((resp) => DefaultResponse.fromJson(resp.data))
+        .onError<DioException>((e, d) {
+          if (e.response != null) {
+            return DefaultResponse.fromJson(e.response!.data);
+          }
+          return DefaultResponse(
+            message: "Error! Could not create order",
+            success: false,
+            id: 0,
+          );
+        });
+    return response;
+  } catch (e) {
+    return DefaultResponse(
+      message: "Error! Could not create order",
+      success: false,
+      id: 0,
     );
   }
 }

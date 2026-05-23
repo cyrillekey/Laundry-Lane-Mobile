@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,9 +32,12 @@ TextTheme createTextTheme(
 FutureProvider<ThemeMode> themeProvider = FutureProvider((ref) async {
   SharedPreferences preferences = await SharedPreferences.getInstance();
   if (preferences.getBool("isDark") == null) {
-    //
-    await preferences.setBool("isDark", false);
-    return ThemeMode.system;
+    var brightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    bool isDarkMode = brightness == Brightness.dark;
+
+    await preferences.setBool("isDark", isDarkMode);
+    return isDarkMode ? ThemeMode.dark : ThemeMode.light;
   }
   return preferences.getBool("isDark") ?? false
       ? ThemeMode.dark

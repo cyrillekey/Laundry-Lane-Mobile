@@ -36,6 +36,8 @@ class OrdersTab extends ConsumerWidget {
                 ref.invalidate(ordersState);
               },
               child: orderListener.when(
+                skipLoadingOnReload: true,
+                skipLoadingOnRefresh: true,
                 data: (data) {
                   if (data.isEmpty) {
                     return SizedBox(
@@ -85,7 +87,7 @@ class OrdersTab extends ConsumerWidget {
                 },
                 loading: () {
                   return SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.59,
+                    height: MediaQuery.of(context).size.height * 0.90,
                     child: ListView.separated(
                       padding: EdgeInsets.symmetric(horizontal: 12),
                       separatorBuilder: (_, __) => SizedBox(height: 10),
@@ -130,10 +132,13 @@ class OrderItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Navigator.of(context).pushNamed(OrderDetails.routeName),
+      borderRadius: BorderRadius.circular(24),
+      onTap:
+          () => Navigator.of(
+            context,
+          ).pushNamed(OrderDetails.routeName, arguments: order.id),
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        color: Colors.white,
         elevation: 0.0,
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -233,7 +238,7 @@ class OrderItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${order.status}",
+                        "${order.orderStatus}",
                         style: GoogleFonts.almarai(
                           fontSize: 12,
                           color: Color.fromRGBO(129, 129, 129, 1),

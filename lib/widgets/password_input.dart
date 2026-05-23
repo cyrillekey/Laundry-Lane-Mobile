@@ -11,10 +11,12 @@ class PasswordInput extends StatefulWidget {
     required this.name,
     this.showStrength = true,
     this.validators,
+    this.onChanged,
   });
   final bool showStrength;
   final List<String? Function(String)>? validators;
   final String name;
+  final void Function(String)? onChanged;
   @override
   State<PasswordInput> createState() => _PasswordInputState();
 }
@@ -42,6 +44,9 @@ class _PasswordInputState extends State<PasswordInput> {
               setState(() {
                 strength = checkPasswordStrengh(value);
               });
+              if (widget.onChanged != null) {
+                widget.onChanged!(value);
+              }
             }
           },
           decoration: InputDecoration(

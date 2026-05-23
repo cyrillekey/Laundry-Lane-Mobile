@@ -6,16 +6,28 @@ class CartItem {
   final int productId;
   int quantity;
   final String type;
+  final num price;
 
   CartItem({
     required this.productId,
     required this.quantity,
     required this.type,
+    required this.price,
   });
+
+  Map<String, dynamic> toJson() => {
+    "productId": productId,
+    "quantity": quantity,
+    "type": type,
+  };
+  Map<String, dynamic> toCartJson() => {
+    "productId": productId,
+    "quantity": quantity,
+  };
 }
 
 class CartProvider with ChangeNotifier {
-  List<CartItem> _items = [];
+  final List<CartItem> _items = [];
 
   UnmodifiableListView<CartItem> get items => UnmodifiableListView(_items);
 

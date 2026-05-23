@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/src/address/add_address.dart';
+import 'package:laundrylane/src/address/address_list.dart';
 import 'package:laundrylane/src/cart/cart_page.dart';
 import 'package:laundrylane/src/checkout/checkout_page.dart';
+import 'package:laundrylane/src/checkout/checkout_review.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
 import 'package:laundrylane/src/forgot_password/reset_otp.dart';
 import 'package:laundrylane/src/forgot_password/reset_update_password.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/login/login.dart';
+import 'package:laundrylane/src/notifications/notification_settings.dart';
 import 'package:laundrylane/src/notifications/notifications_view.dart';
 import 'package:laundrylane/src/onboarding/onboarding_view.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
 import 'package:laundrylane/src/payments/add_card.dart';
 import 'package:laundrylane/src/payments/payment_methods.dart';
+import 'package:laundrylane/src/profile/help_center.dart';
 import 'package:laundrylane/src/profile/update_password.dart';
 import 'package:laundrylane/src/profile/update_profile.dart';
 import 'package:laundrylane/src/request_order/service_select.dart';
@@ -143,6 +147,14 @@ class MyApp extends ConsumerWidget {
                 return UpdateProfile();
               case UpdatePassword.routeName:
                 return UpdatePassword();
+              case CheckoutReview.routeName:
+                return CheckoutReview();
+              case HelpCenter.routeName:
+                return HelpCenter();
+              case AddressList.routeName:
+                return AddressList();
+              case NotificationSettings.routeName:
+                return NotificationSettings();
               default:
                 return const OnboardingView();
             }

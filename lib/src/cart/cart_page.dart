@@ -5,6 +5,7 @@ import 'package:laundrylane/models/clothing_type.dart';
 import 'package:laundrylane/providers/card_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/checkout/checkout_page.dart';
+import 'package:laundrylane/theme/util.dart';
 import 'package:laundrylane/utils/constants.dart';
 import 'package:provider/provider.dart';
 import 'package:tabler_icons/tabler_icons.dart';
@@ -41,7 +42,8 @@ class _CartPageState extends ConsumerState<CartPage> {
     final Catalog service =
         ModalRoute.of(context)?.settings.arguments as Catalog;
     final clothingListener = ref.watch(clothingTypeState);
-
+    final watchTheme = ref.watch(themeProvider).value;
+    final isDarkTheme = watchTheme == ThemeMode.dark;
     return Scaffold(
       appBar: AppBar(title: Text("${service.name}"), centerTitle: true),
 
@@ -137,6 +139,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                         itemBuilder:
                             (context, index) => CartItemWidget(
                               subtype: subtypes[index],
+                              isDarkTheme: isDarkTheme,
                               index: index,
                             ),
                         separatorBuilder: (_, __) => SizedBox(height: 12),
@@ -215,9 +218,10 @@ class _CartPageState extends ConsumerState<CartPage> {
                       cart.items.isEmpty
                           ? null
                           : () {
-                            Navigator.of(
-                              context,
-                            ).pushNamed(CheckoutPage.routeName);
+                            Navigator.of(context).pushNamed(
+                              CheckoutPage.routeName,
+                              arguments: service,
+                            );
                           },
                   style: ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(
@@ -248,8 +252,13 @@ class _CartPageState extends ConsumerState<CartPage> {
 }
 
 class CartItemWidget extends StatelessWidget {
-  const CartItemWidget({super.key, required this.subtype, required this.index});
-
+  const CartItemWidget({
+    super.key,
+    required this.subtype,
+    required this.index,
+    required this.isDarkTheme,
+  });
+  final bool isDarkTheme;
   final ClothingType subtype;
   final int index;
 
@@ -260,7 +269,10 @@ class CartItemWidget extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16),
       height: 80,
       decoration: BoxDecoration(
-        color: cartColors[index % cartColors.length],
+        color:
+            isDarkTheme
+                ? Theme.of(context).primaryColorDark
+                : cartColors[index % cartColors.length],
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -290,7 +302,7 @@ class CartItemWidget extends StatelessWidget {
             padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
             height: 36,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDarkTheme ? Colors.black : Colors.white,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -321,7 +333,7 @@ class CartItemWidget extends StatelessWidget {
                                   ).editItem(subtype.id!, quantity - 1);
                                 }
                               },
-                      child: Icon(TablerIcons.minus),
+                      child: Icon(TablerIcons.minus, size: 24),
                     );
                   },
                 ),
@@ -346,7 +358,7 @@ class CartItemWidget extends StatelessWidget {
                 Consumer<CartProvider>(
                   builder: (context, provider, child) {
                     return InkWell(
-                      child: Icon(TablerIcons.plus, size: 20),
+                      child: Icon(TablerIcons.plus, size: 24),
                       onTap: () {
                         int quantity =
                             provider.items
@@ -361,6 +373,7 @@ class CartItemWidget extends StatelessWidget {
                               productId: subtype.id!,
                               quantity: 1,
                               type: subtype.type!,
+                              price: subtype.price ?? 0,
                             ),
                           );
                           // add to cart provider

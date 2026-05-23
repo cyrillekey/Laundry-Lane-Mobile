@@ -50,7 +50,7 @@ class AddressBar extends ConsumerWidget {
             onTap:
                 () => Navigator.of(context).pushNamed(AddAddressPage.routeName),
             child: Container(
-              height: 60,
+              height: 64,
               padding: EdgeInsets.symmetric(horizontal: 12),
               alignment: Alignment.center,
               decoration: BoxDecoration(
@@ -58,6 +58,7 @@ class AddressBar extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // SizedBox(width: 6),
                   Container(
@@ -101,16 +102,15 @@ class AddressBar extends ConsumerWidget {
                                 ),
                               ),
                               SizedBox(width: 1),
-                              Icon(
-                                TablerIcons.chevron_down,
-                                color: Colors.white,
-                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
                   ),
+                  Spacer(),
+                  Icon(TablerIcons.chevron_down, color: Colors.white),
+                  SizedBox(width: 6),
                 ],
               ),
             ),
