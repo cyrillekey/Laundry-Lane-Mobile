@@ -10,6 +10,7 @@ import 'package:laundrylane/src/forgot_password/reset_otp.dart';
 import 'package:laundrylane/src/forgot_password/reset_update_password.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/login/login.dart';
+import 'package:laundrylane/src/notifications/notification_settings.dart';
 import 'package:laundrylane/src/notifications/notifications_view.dart';
 import 'package:laundrylane/src/onboarding/onboarding_view.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -152,6 +153,8 @@ class MyApp extends ConsumerWidget {
                 return HelpCenter();
               case AddressList.routeName:
                 return AddressList();
+              case NotificationSettings.routeName:
+                return NotificationSettings();
               default:
                 return const OnboardingView();
             }

@@ -16,7 +16,8 @@ import 'package:shimmer/shimmer.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 class HomeTab extends ConsumerWidget {
-  const HomeTab({super.key});
+  const HomeTab({super.key, required this.onProfileTap});
+  final void Function() onProfileTap;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -43,7 +44,7 @@ class HomeTab extends ConsumerWidget {
                 children: [
                   InkWell(
                     borderRadius: const BorderRadius.all(Radius.circular(16)),
-                    onTap: () {},
+                    onTap: onProfileTap,
                     child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(

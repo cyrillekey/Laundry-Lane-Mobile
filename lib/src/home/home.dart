@@ -20,12 +20,25 @@ class HomePage extends StatefulHookConsumerWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  final List<Widget> tabs = [
-    HomeTab(),
-    OrdersTab(),
-    MessagesTab(),
-    ProfileScreen(),
-  ];
+  late List<Widget> tabs;
+
+  @override
+  void initState() {
+    super.initState();
+    tabs = [
+      HomeTab(
+        onProfileTap: () {
+          setState(() {
+            currentIndex = 3;
+          });
+        },
+      ),
+      OrdersTab(),
+      MessagesTab(),
+      ProfileScreen(),
+    ];
+  }
+
   int currentIndex = 0;
   @override
   Widget build(BuildContext context) {

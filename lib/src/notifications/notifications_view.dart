@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:laundrylane/models/notification_model.dart';
+import 'package:laundrylane/src/notifications/notification_settings.dart';
 import 'package:laundrylane/src/notifications/service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tabler_icons/tabler_icons.dart';
@@ -34,7 +35,9 @@ class NotificationsViewState extends ConsumerState<NotificationsView> {
         title: Text("Notifications"),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed(NotificationSettings.routeName);
+            },
             icon: Icon(TablerIcons.settings_2, size: 24),
           ),
         ],
@@ -48,7 +51,7 @@ class NotificationsViewState extends ConsumerState<NotificationsView> {
             child: notifications.when(
               data: (notifications) {
                 return ListView.separated(
-                  separatorBuilder: (context, index) => SizedBox(height: 16),
+                  separatorBuilder: (context, index) => SizedBox(height: 20),
                   padding: EdgeInsets.only(
                     top: 8,
                   ).copyWith(left: 16, right: 16),
