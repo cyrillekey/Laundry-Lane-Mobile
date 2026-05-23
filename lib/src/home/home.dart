@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/src/home/tabs/home.dart';
-import 'package:laundrylane/src/home/tabs/messages.dart';
 import 'package:laundrylane/src/home/tabs/orders.dart';
 import 'package:laundrylane/src/home/tabs/profile.dart';
 import 'package:laundrylane/src/payments/payments_list.dart';
