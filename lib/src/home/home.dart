@@ -71,13 +71,13 @@ class _HomePageState extends ConsumerState<HomePage> {
         items: [
           SalomonBottomBarItem(
             icon: Icon(
-              TablerIcons.home,
+              TablerIcons.apps,
               color: Theme.of(context).iconTheme.color,
             ),
             title: Text("Home", style: Theme.of(context).textTheme.labelLarge),
           ),
           SalomonBottomBarItem(
-            icon: Icon(TablerIcons.receipt),
+            icon: Icon(TablerIcons.receipt_filled),
             title: Text(
               "Bookings",
               style: Theme.of(context).textTheme.labelLarge,
@@ -85,7 +85,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
           SalomonBottomBarItem(
             icon: Icon(
-              TablerIcons.cash_banknote,
+              TablerIcons.cash_banknote_filled,
               color: Theme.of(context).iconTheme.color,
             ),
             title: Text(

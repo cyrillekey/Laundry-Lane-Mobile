@@ -7,6 +7,8 @@ import 'package:hooks_riverpod/misc.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/clothing_type.dart';
 import 'package:laundrylane/models/delivery_zone.dart';
+import 'package:laundrylane/models/support_models.dart';
+import 'package:laundrylane/models/full_order_details.dart';
 import 'package:laundrylane/models/goecode_reverse.dart';
 import 'package:laundrylane/models/home_address.dart';
 import 'package:laundrylane/models/order_model.dart';
@@ -242,7 +244,8 @@ FutureProvider<List<DeliveryZone>> deliveryZoneState =
       }
     });
 
-FutureProviderFamily<Order?, int> orderDetailsState = FutureProvider.autoDispose
+FutureProviderFamily<FullOrderDetails?, int> orderDetailsState = FutureProvider
+    .autoDispose
     .family((ref, id) async {
       try {
         final token = ref.watch(tokenProvider).value;
@@ -262,10 +265,51 @@ FutureProviderFamily<Order?, int> orderDetailsState = FutureProvider.autoDispose
               return null;
             });
         if (response == null) return null;
-        return Order.fromJson(response);
+        return FullOrderDetails.fromJson(response);
       } catch (e) {
         return null;
       }
     });
 
-// FutureProvider<List<>>
+FutureProvider<List<FaqModel>> faqsState = FutureProvider.autoDispose((
+  ref,
+) async {
+  try {
+    final CancelToken cancelToken = CancelToken();
+    ref.onDispose(cancelToken.cancel);
+    final response = await apiDio
+        .get("/faq", cancelToken: cancelToken)
+        .then((resp) => resp.data)
+        .onError<DioException>((e, s) {
+          return [];
+        });
+    return List<FaqModel>.from(
+      response.map((e) {
+        return FaqModel.fromJson(e);
+      }),
+    );
+  } catch (e) {
+    return [];
+  }
+});
+
+FutureProvider<List<SupportContactsModel>> supportContactsState =
+    FutureProvider.autoDispose((ref) async {
+      try {
+        final CancelToken cancelToken = CancelToken();
+        ref.onDispose(cancelToken.cancel);
+        final response = await apiDio
+            .get("/support-contacts", cancelToken: cancelToken)
+            .then((resp) => resp.data)
+            .onError<DioException>((e, s) {
+              return [];
+            });
+        return List<SupportContactsModel>.from(
+          response.map((e) {
+            return SupportContactsModel.fromJson(e);
+          }),
+        );
+      } catch (e) {
+        return [];
+      }
+    });

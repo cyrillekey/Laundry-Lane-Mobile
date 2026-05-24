@@ -65,7 +65,7 @@ class NotificationsViewState extends ConsumerState<NotificationsView> {
                 return SizedBox();
               },
               loading: () {
-                return CircularProgressIndicator.adaptive();
+                return Center(child: CircularProgressIndicator.adaptive());
               },
             ),
           ),

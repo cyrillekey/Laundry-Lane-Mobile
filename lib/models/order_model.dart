@@ -31,6 +31,7 @@ class Order {
   DateTime? updatedat;
   ServiceType? serviceType;
   Catalog? productCatalog;
+  int? itemsCount;
 
   Order({
     this.id,
@@ -54,6 +55,7 @@ class Order {
     this.updatedat,
     this.serviceType,
     this.productCatalog,
+    this.itemsCount,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -75,6 +77,7 @@ class Order {
     deliveryZoneId: json["deliveryZoneId"],
     serviceTypeId: json["serviceTypeId"],
     addressId: json["addressId"],
+    itemsCount: json["itemsCount"],
     createdat:
         json["createdat"] == null ? null : DateTime.parse(json["createdat"]),
     updatedat:

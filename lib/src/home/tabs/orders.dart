@@ -153,7 +153,7 @@ class OrderItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "5 Items, 9 Pieces",
+                        "5 Items, ${order.itemsCount} Pieces",
                         style: GoogleFonts.almarai(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -222,7 +222,7 @@ class OrderItem extends StatelessWidget {
                           SizedBox(width: 4),
                           Text(
                             Jiffy.parseFromDateTime(
-                              order.createdat!,
+                              order.date!,
                             ).format(pattern: "MMM dd,yyyy HH:mm a"),
                             style: GoogleFonts.almarai(
                               fontWeight: FontWeight.w600,

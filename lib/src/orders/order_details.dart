@@ -13,7 +13,7 @@ class OrderDetails extends ConsumerWidget {
       appBar: AppBar(title: Text("Order Details"), centerTitle: true),
       body: watchOrderDetails.when(
         data: (order) {
-          return Center(child: Text(order!.id.toString()));
+          return Center(child: Text("${order?.order?.id}"));
         },
         error: (e, s) => Center(child: Text(e.toString())),
         loading:
