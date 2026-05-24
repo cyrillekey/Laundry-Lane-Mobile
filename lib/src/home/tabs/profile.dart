@@ -4,11 +4,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/src/address/address_list.dart';
 import 'package:laundrylane/src/login/login.dart';
+import 'package:laundrylane/src/notifications/notification_settings.dart';
 import 'package:laundrylane/src/payments/payment_methods.dart';
 import 'package:laundrylane/src/profile/help_center.dart';
 import 'package:laundrylane/src/profile/update_password.dart';
 import 'package:laundrylane/src/profile/update_profile.dart';
 import 'package:laundrylane/theme/util.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
@@ -83,7 +85,14 @@ class ProfileScreen extends ConsumerWidget {
                     icon: TablerIcons.lock_access,
                   ),
                   Divider(),
-                  SettingItem(label: "Notification", icon: TablerIcons.bell),
+                  SettingItem(
+                    label: "Notification",
+                    icon: TablerIcons.bell,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(NotificationSettings.routeName),
+                  ),
                 ],
               ),
             ),
@@ -181,37 +190,10 @@ class ProfileScreen extends ConsumerWidget {
                     iconColor: Colors.red,
                     icon: TablerIcons.logout,
                     onClick: () {
-                      showDialog(
+                      showModalBottomSheet(
                         context: context,
-                        builder:
-                            (context) => AlertDialog.adaptive(
-                              title: Text("Logout"),
-                              content: Text("Are you sure you want to logout?"),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text("Cancel"),
-                                ),
-                                TextButton(
-                                  onPressed: () async {
-                                    SharedPreferences preferences =
-                                        await SharedPreferences.getInstance();
-                                    await preferences.remove("userId");
-                                    await preferences.remove("token");
-                                    await preferences.remove("user");
-                                    if (context.mounted) {
-                                      Navigator.of(
-                                        context,
-                                      ).pushNamedAndRemoveUntil(
-                                        LoginPage.routeName,
-                                        (route) => route.isFirst,
-                                      );
-                                    }
-                                  },
-                                  child: Text("Logout"),
-                                ),
-                              ],
-                            ),
+                        showDragHandle: true,
+                        builder: (context) => LogoutSheet(),
                       );
                     },
                   ),
@@ -304,6 +286,85 @@ class ThemeSwitch extends ConsumerWidget {
               thumbIcon: WidgetStatePropertyAll(Icon(TablerIcons.bulb)),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class LogoutSheet extends StatelessWidget {
+  const LogoutSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Logout",
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: 12),
+          Text(
+            "Are you sure you want to logout?",
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(
+                      Theme.of(context).splashColor,
+                    ),
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    fixedSize: WidgetStatePropertyAll(
+                      Size(MediaQuery.of(context).size.width, 44),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Cancel"),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: ProgressButton(
+                  onPress: () async {
+                    SharedPreferences preferences =
+                        await SharedPreferences.getInstance();
+                    await preferences.remove("userId");
+                    await preferences.remove("token");
+                    await preferences.remove("user");
+                    if (context.mounted) {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        LoginPage.routeName,
+                        (route) => route.isFirst,
+                      );
+                    }
+                  },
+                  child: Text(
+                    "Logout",
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 36),
         ],
       ),
     );

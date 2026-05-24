@@ -17,16 +17,19 @@ class OrdersTab extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final orderListener = ref.watch(ordersState);
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16).copyWith(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 18),
-          Text(
-            "My Orders",
-            style: GoogleFonts.almarai(
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Text(
+              "My Orders",
+              style: GoogleFonts.almarai(
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           SizedBox(height: 12),
@@ -76,6 +79,7 @@ class OrdersTab extends ConsumerWidget {
                     );
                   }
                   return ListView.separated(
+                    padding: const EdgeInsets.only(top: 12),
                     separatorBuilder: (context, index) => SizedBox(height: 6),
                     itemCount: data.length,
                     itemBuilder:
