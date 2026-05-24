@@ -47,7 +47,7 @@ class NotificationsViewState extends ConsumerState<NotificationsView> {
           SizedBox(height: 20),
           SizedBox(
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.78,
+            height: MediaQuery.of(context).size.height * 0.85,
             child: notifications.when(
               data: (notifications) {
                 return ListView.separated(
