@@ -1,4 +1,3 @@
-import 'package:flutter_new_badger/flutter_new_badger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -48,11 +47,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       floatingActionButton:
           currentIndex == 0
               ? FloatingActionButton.extended(
-                onPressed: () async {
-                  // is badge supported
-                  int? isBadgeSupported = await FlutterNewBadger.getBadge();
-                  print(isBadgeSupported);
-                  await FlutterNewBadger.incrementBadgeCount();
+                onPressed: () {
                   Navigator.of(context).pushNamed(ServiceSelect.routeName);
                 },
 
