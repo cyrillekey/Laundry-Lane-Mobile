@@ -230,7 +230,7 @@ class OrderItem extends StatelessWidget {
                             ).format(pattern: "MMM dd,yyyy HH:mm a"),
                             style: GoogleFonts.almarai(
                               fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                              fontSize: 11,
                             ),
                           ),
                         ],
@@ -257,7 +257,7 @@ class OrderItem extends StatelessWidget {
                             Jiffy.now().format(pattern: "MMM dd,yyyy HH:mm a"),
                             style: GoogleFonts.almarai(
                               fontWeight: FontWeight.w400,
-                              fontSize: 14,
+                              fontSize: 11,
                             ),
                           ),
                         ],

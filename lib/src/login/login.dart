@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/providers/token_provider.dart';
+import 'package:laundrylane/services/push_message_handler.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
 import 'package:laundrylane/src/home/home.dart';
@@ -141,6 +142,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       saveUserModel(response.user!);
                                       setLoadingState(false);
                                       if (context.mounted) {
+                                        updateFcmToken();
                                         Navigator.of(
                                           context,
                                         ).pushNamedAndRemoveUntil(
@@ -261,6 +263,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                             );
                                             saveUserModel(response.user!);
                                             setLoadingState(false);
+                                            updateFcmToken();
                                             if (context.mounted) {
                                               Navigator.of(
                                                 context,
@@ -443,6 +446,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ref.invalidate(tokenProvider);
                         ref.invalidate(userProvider);
                         if (context.mounted) {
+                          updateFcmToken();
                           Navigator.of(context).pushNamedAndRemoveUntil(
                             HomePage.routeName,
                             ModalRoute.withName(HomePage.routeName),

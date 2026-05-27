@@ -477,3 +477,37 @@ Future<DefaultResponse> createOrderMutation({
     );
   }
 }
+
+Future<DefaultResponse> setFcmToken(String token) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String? token = sharedPreferences.getString("token") ?? "";
+    final response = await apiDio
+        .put(
+          "/user/fcm-token",
+          options: Options(
+            contentType: "application/json",
+            headers: {"Authorization": "Bearer $token"},
+          ),
+          data: {"fcmToken": token},
+        )
+        .then((resp) => DefaultResponse.fromJson(resp.data))
+        .onError<DioException>((e, d) {
+          if (e.response != null) {
+            return DefaultResponse.fromJson(e.response!.data);
+          }
+          return DefaultResponse(
+            message: "Error! Could not set fcm token",
+            success: false,
+            id: 0,
+          );
+        });
+    return response;
+  } catch (e) {
+    return DefaultResponse(
+      message: "Error! Could not set fcm token",
+      success: false,
+      id: 0,
+    );
+  }
+}

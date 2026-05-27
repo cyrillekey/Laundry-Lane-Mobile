@@ -7,7 +7,7 @@ plugins {
     // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
+    id("dev.flutter.flutter-gradle-plugin")    
 }
 
 val keyPropertiesFile = rootProject.file("key.properties")
@@ -24,6 +24,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions { jvmTarget = JavaVersion.VERSION_11.toString() }
@@ -55,4 +56,16 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+
+     // For AGP 7.4+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+
+    // For AGP 7.3
+    // coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.3")
+
+    // For AGP 4.0 to 7.2 (to only access java 8+ features)
+    // coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.9")
 }

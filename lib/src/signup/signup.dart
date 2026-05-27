@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/auth_response.dart';
+import 'package:laundrylane/services/push_message_handler.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/login/login.dart';
@@ -136,6 +137,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                       saveUserModel(response.user!);
                                       setLoadingState(false);
                                       if (context.mounted) {
+                                        updateFcmToken();
                                         Navigator.of(
                                           context,
                                         ).pushNamedAndRemoveUntil(
@@ -256,6 +258,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                             saveUserModel(response.user!);
                                             setLoadingState(false);
                                             if (context.mounted) {
+                                              updateFcmToken();
                                               Navigator.of(
                                                 context,
                                               ).pushNamedAndRemoveUntil(
