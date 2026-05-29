@@ -65,5 +65,7 @@
 			</dict>
 		</array>
 		<!-- End of the Google Sign-in Section -->
+		 <key>NSLocationWhenInUseUsageDescription</key>
+		 <string>Core app functionality</string>		 
 	</dict>
 </plist>

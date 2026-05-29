@@ -69,8 +69,11 @@ dependencies:
   permission_handler: ^12.0.1
   flutter_new_badger: ^1.1.1
   flutter_local_notifications: ^21.0.0
+  geolocator: ^14.0.2
   firebase_messaging: ^16.2.2
-  
+  cached_network_image: ^3.4.1  
+  speech_balloon: ^0.0.4
+  widget_to_marker: ^1.0.6
 
 dev_dependencies:
   flutter_test:

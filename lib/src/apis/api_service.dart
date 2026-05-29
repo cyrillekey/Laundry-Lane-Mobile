@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/misc.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/clothing_type.dart';
 import 'package:laundrylane/models/delivery_zone.dart';
+import 'package:laundrylane/models/store_model.dart';
 import 'package:laundrylane/models/support_models.dart';
 import 'package:laundrylane/models/full_order_details.dart';
 import 'package:laundrylane/models/goecode_reverse.dart';
@@ -14,6 +15,7 @@ import 'package:laundrylane/models/home_address.dart';
 import 'package:laundrylane/models/order_model.dart';
 import 'package:laundrylane/models/payment_card.dart';
 import 'package:laundrylane/models/service_model.dart';
+import 'package:laundrylane/providers/store_provider.dart';
 import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/utils/constants.dart';
 
@@ -104,14 +106,17 @@ FutureProvider<List<Order>> ordersState = FutureProvider.autoDispose((
   return orders;
 });
 
-FutureProvider<List<Catalog>> catalogState = FutureProvider.autoDispose((
-  ref,
-) async {
+FutureProvider<List<Catalog>> catalogState = FutureProvider((ref) async {
   try {
+    final storeId = ref.watch(storeProvider).value;
     final CancelToken cancelToken = CancelToken();
     ref.onDispose(cancelToken.cancel);
     final response = await apiDio
-        .get("/catalog", cancelToken: cancelToken)
+        .get(
+          "/catalog",
+          cancelToken: cancelToken,
+          queryParameters: {"storeId": storeId},
+        )
         .then((resp) => resp.data)
         .catchError((e) {
           return [];
@@ -125,30 +130,33 @@ FutureProvider<List<Catalog>> catalogState = FutureProvider.autoDispose((
   }
 });
 
-FutureProvider<List<ClothingType>> clothingTypeState =
-    FutureProvider.autoDispose((ref) async {
-      try {
-        final CancelToken cancelToken = CancelToken();
-        ref.onDispose(cancelToken.cancel);
-        final response = await apiDio
-            .get("/catalog/clothes", cancelToken: cancelToken)
-            .then((resp) => resp.data)
-            .catchError((e) {
-              return [];
-            });
-        List data = List.from(response);
-
-        List<ClothingType> clothingType =
-            data.map((e) => ClothingType.fromJson(e)).toList();
-        return clothingType;
-      } catch (e) {
-        return [];
-      }
-    });
-
-FutureProvider<Order?> ongoingOrderState = FutureProvider.autoDispose((
+FutureProvider<List<ClothingType>> clothingTypeState = FutureProvider((
   ref,
 ) async {
+  try {
+    final CancelToken cancelToken = CancelToken();
+    ref.onDispose(cancelToken.cancel);
+    final response = await apiDio
+        .get(
+          "/catalog/clothes",
+          cancelToken: cancelToken,
+          queryParameters: {"storeId": ref.watch(storeProvider).value},
+        )
+        .then((resp) => resp.data)
+        .catchError((e) {
+          return [];
+        });
+    List data = List.from(response);
+
+    List<ClothingType> clothingType =
+        data.map((e) => ClothingType.fromJson(e)).toList();
+    return clothingType;
+  } catch (e) {
+    return [];
+  }
+});
+
+FutureProvider<Order?> ongoingOrderState = FutureProvider((ref) async {
   String? token = ref.watch(tokenProvider).value;
 
   final CancelToken cancelToken = CancelToken();
@@ -189,33 +197,34 @@ FutureProvider<List> cardsState = FutureProvider.autoDispose((ref) async {
   return paymentCardFromJson(jsonEncode(response));
 });
 
-FutureProvider<List<ServiceType>> serviceTypeState = FutureProvider.autoDispose(
-  (ref) async {
-    try {
-      final token = ref.watch(tokenProvider).value;
-      final CancelToken cancelToken = CancelToken();
+FutureProvider<List<ServiceType>> serviceTypeState = FutureProvider((
+  ref,
+) async {
+  try {
+    final token = ref.watch(tokenProvider).value;
+    final CancelToken cancelToken = CancelToken();
 
-      ref.onDispose(cancelToken.cancel);
-      final response = await apiDio
-          .get(
-            "/catalog/service-types",
-            options: Options(headers: {"Authorization": "Bearer $token"}),
-            cancelToken: cancelToken,
-          )
-          .then((resp) => resp.data)
-          .catchError((e) {
-            return [];
-          });
-      return List<ServiceType>.from(
-        response.map((e) {
-          return ServiceType.fromJson(e);
-        }),
-      );
-    } catch (e) {
-      return [];
-    }
-  },
-);
+    ref.onDispose(cancelToken.cancel);
+    final response = await apiDio
+        .get(
+          "/catalog/service-types",
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+          cancelToken: cancelToken,
+          queryParameters: {"storeId": ref.watch(storeProvider).value},
+        )
+        .then((resp) => resp.data)
+        .catchError((e) {
+          return [];
+        });
+    return List<ServiceType>.from(
+      response.map((e) {
+        return ServiceType.fromJson(e);
+      }),
+    );
+  } catch (e) {
+    return [];
+  }
+});
 
 FutureProvider<List<DeliveryZone>> deliveryZoneState =
     FutureProvider.autoDispose((ref) async {
@@ -229,6 +238,7 @@ FutureProvider<List<DeliveryZone>> deliveryZoneState =
               "/delivery/zones",
               cancelToken: cancelToken,
               options: Options(headers: {"Authorization": "Bearer $token"}),
+              queryParameters: {"storeId": ref.watch(storeProvider).value},
             )
             .then((resp) => resp.data)
             .onError<DioException>((e, s) {
@@ -278,7 +288,11 @@ FutureProvider<List<FaqModel>> faqsState = FutureProvider.autoDispose((
     final CancelToken cancelToken = CancelToken();
     ref.onDispose(cancelToken.cancel);
     final response = await apiDio
-        .get("/faq", cancelToken: cancelToken)
+        .get(
+          "/faq",
+          cancelToken: cancelToken,
+          queryParameters: {"storeId": ref.watch(storeProvider).value},
+        )
         .then((resp) => resp.data)
         .onError<DioException>((e, s) {
           return [];
@@ -299,7 +313,11 @@ FutureProvider<List<SupportContactsModel>> supportContactsState =
         final CancelToken cancelToken = CancelToken();
         ref.onDispose(cancelToken.cancel);
         final response = await apiDio
-            .get("/support-contacts", cancelToken: cancelToken)
+            .get(
+              "/support-contacts",
+              cancelToken: cancelToken,
+              queryParameters: {"storeId": ref.watch(storeProvider).value},
+            )
             .then((resp) => resp.data)
             .onError<DioException>((e, s) {
               return [];
@@ -313,3 +331,31 @@ FutureProvider<List<SupportContactsModel>> supportContactsState =
         return [];
       }
     });
+FutureProvider<List<Stores>> storesState = FutureProvider.autoDispose((
+  ref,
+) async {
+  try {
+    final CancelToken cancelToken = CancelToken();
+    ref.onDispose(cancelToken.cancel);
+    final token = ref.watch(tokenProvider).value;
+
+    final response = await apiDio
+        .get(
+          "/store",
+          cancelToken: cancelToken,
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((resp) => resp.data)
+        .onError<DioException>((e, s) {
+          return [];
+        });
+
+    return List<Stores>.from(
+      response.map((e) {
+        return Stores.fromJson(e);
+      }),
+    );
+  } catch (e) {
+    return [];
+  }
+});

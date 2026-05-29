@@ -10,8 +10,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/services/push_message_handler.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
-import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/login/login.dart';
+import 'package:laundrylane/src/signup/email_verify.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
@@ -42,7 +42,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 48),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                 Center(
                   child: Container(
                     height: 80,
@@ -141,9 +141,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                         Navigator.of(
                                           context,
                                         ).pushNamedAndRemoveUntil(
-                                          HomePage.routeName,
+                                          EmailVerifyPage.routeName,
                                           ModalRoute.withName(
-                                            HomePage.routeName,
+                                            EmailVerifyPage.routeName,
                                           ),
                                         );
                                       }
@@ -262,9 +262,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                               Navigator.of(
                                                 context,
                                               ).pushNamedAndRemoveUntil(
-                                                HomePage.routeName,
+                                                EmailVerifyPage.routeName,
                                                 ModalRoute.withName(
-                                                  HomePage.routeName,
+                                                  EmailVerifyPage.routeName,
                                                 ),
                                               );
                                             }
@@ -519,7 +519,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         if (context.mounted) {
                           Navigator.of(
                             context,
-                          ).pushReplacementNamed(HomePage.routeName);
+                          ).pushReplacementNamed(EmailVerifyPage.routeName);
                         }
                       } else {
                         if (context.mounted) {

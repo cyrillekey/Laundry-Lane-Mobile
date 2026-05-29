@@ -12,8 +12,8 @@ import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/services/push_message_handler.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
-import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/signup/signup.dart';
+import 'package:laundrylane/src/stores/store_select.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
@@ -146,9 +146,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                         Navigator.of(
                                           context,
                                         ).pushNamedAndRemoveUntil(
-                                          HomePage.routeName,
+                                          StoreSelectPage.routeName,
                                           ModalRoute.withName(
-                                            HomePage.routeName,
+                                            StoreSelectPage.routeName,
                                           ),
                                         );
                                       }
@@ -268,9 +268,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                               Navigator.of(
                                                 context,
                                               ).pushNamedAndRemoveUntil(
-                                                HomePage.routeName,
+                                                StoreSelectPage.routeName,
                                                 ModalRoute.withName(
-                                                  HomePage.routeName,
+                                                  StoreSelectPage.routeName,
                                                 ),
                                               );
                                             }
@@ -448,8 +448,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         if (context.mounted) {
                           updateFcmToken();
                           Navigator.of(context).pushNamedAndRemoveUntil(
-                            HomePage.routeName,
-                            ModalRoute.withName(HomePage.routeName),
+                            StoreSelectPage.routeName,
+                            ModalRoute.withName(StoreSelectPage.routeName),
                           );
                         }
                       } else {

@@ -433,6 +433,8 @@ Future<DefaultResponse> createOrderMutation({
   required String washType,
   String? pickupDate,
   String? pickupTime,
+  num? weight,
+  String? paymentMethod,
 }) async {
   try {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -455,6 +457,8 @@ Future<DefaultResponse> createOrderMutation({
             "instructions": instructions,
             "pickupDate": pickupDate,
             "pickupTime": pickupTime,
+            "weight": weight,
+            "paymentMethod": paymentMethod,
           },
         )
         .then((resp) => DefaultResponse.fromJson(resp.data))
@@ -508,6 +512,60 @@ Future<DefaultResponse> setFcmToken(String fcmToken) async {
       message: "Error! Could not set fcm token",
       success: false,
       id: 0,
+    );
+  }
+}
+
+Future<DefaultResponse> requestVerifyEmailOtp(String email) async {
+  try {
+    final response = await apiDio
+        .post(
+          "/authentication/signup/resend-otp",
+          data: {"email": email},
+          options: Options(contentType: "application/json"),
+        )
+        .then((value) => value.data)
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
+        });
+    if (response == null) {
+      return DefaultResponse(
+        success: false,
+        message: "Error! Could not request password reset",
+      );
+    }
+    return DefaultResponse.fromJson((response));
+  } catch (e) {
+    return DefaultResponse(
+      message: "Error! Could not reset password",
+      success: false,
+    );
+  }
+}
+
+Future<AuthResponse> verifyEmailOtp(String email, String otp) async {
+  try {
+    final response = await apiDio
+        .post(
+          "/authentication/signup/verify-otp",
+          data: {"email": email, "otp": otp},
+          options: Options(contentType: "application/json"),
+        )
+        .then((value) => value.data)
+        .onError<DioException>((err, s) {
+          return (err.response?.data);
+        });
+    if (response == null) {
+      return AuthResponse(
+        success: false,
+        message: "Error! Could not request verification OTP",
+      );
+    }
+    return AuthResponse.fromJson((response));
+  } catch (e) {
+    return AuthResponse(
+      message: "Error! Could not request verification OTP",
+      success: false,
     );
   }
 }

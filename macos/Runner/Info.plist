@@ -47,5 +47,7 @@
 				</array>
 			</dict>
 		</array>
+		<key>NSLocationUsageDescription</key>
+		<string>Core app functionality</string>
 	</dict>
 </plist>

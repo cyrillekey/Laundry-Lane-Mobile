@@ -16,6 +16,7 @@ class UserModel {
   String? name;
   String? phone;
   String? role;
+  bool? isVerified;
   DateTime? lastLoginDate;
   DateTime? dateOfBirth;
   String? userName;
@@ -36,6 +37,7 @@ class UserModel {
     this.avatar,
     this.gender,
     this.createdat,
+    this.isVerified,
     this.updatedat,
   });
 
@@ -46,6 +48,7 @@ class UserModel {
     phone: json["phone"],
     role: json["role"],
     gender: json['gender'],
+    isVerified: json['isVerified'],
     lastLoginDate:
         json["lastLoginDate"] == null
             ? null
@@ -77,6 +80,7 @@ class UserModel {
     "userName": userName,
     "avatar": avatar,
     "gender": gender,
+    "isVerified": isVerified,
     "createdat": createdat?.toIso8601String(),
     "updatedat": updatedat?.toIso8601String(),
   };

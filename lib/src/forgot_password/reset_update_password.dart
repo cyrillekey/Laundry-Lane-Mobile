@@ -3,7 +3,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
-import 'package:laundrylane/src/home/home.dart';
+import 'package:laundrylane/src/stores/store_select.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
@@ -104,8 +104,8 @@ class _ResetUpdatePasswordState extends State<ResetUpdatePassword> {
                         saveUserModel(response.user!);
                         if (context.mounted) {
                           Navigator.of(context).pushNamedAndRemoveUntil(
-                            HomePage.routeName,
-                            ModalRoute.withName(HomePage.routeName),
+                            StoreSelectPage.routeName,
+                            ModalRoute.withName(StoreSelectPage.routeName),
                           );
                         }
                       } else {

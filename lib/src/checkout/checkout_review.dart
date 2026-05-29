@@ -116,6 +116,8 @@ class _OrderSubmitButton extends ConsumerWidget {
                 deliveryWindow: checkoutModel.deliveryWindow,
                 washType: checkoutModel.washingPreference,
                 instructions: formKey.currentState?.value["instructions"],
+                weight: checkoutModel.weight,
+                paymentMethod: formKey.currentState?.value['payment_method'],
               );
               if (response.success) {
                 if (context.mounted) {
@@ -179,13 +181,13 @@ class PaymentRadio extends StatelessWidget {
     List<Map> paymentMethods = [
       {
         "name": "Online Payment",
-        "value": "ONLINE_PAYMENT",
+        "value": "MOBILE",
         "description":
             "Pay online using M-Pesa,Airtel money or credit/debit card",
       },
       {
         "name": "Cash on Delivery",
-        "value": "CASH_ON_DELIVERY",
+        "value": "CASH",
         "description": "Make payment after delivery of your laundry",
       },
     ];

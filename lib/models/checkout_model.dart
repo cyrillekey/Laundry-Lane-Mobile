@@ -11,6 +11,7 @@ class CheckoutModel {
   final num? weight;
   final String washingPreference;
   final ServiceType serviceType;
+  final String? paymentMethod;
 
   CheckoutModel({
     required this.catalog,
@@ -21,6 +22,7 @@ class CheckoutModel {
     required this.washingPreference,
     required this.serviceType,
     this.weight,
+    this.paymentMethod,
   });
   Map<String, dynamic> toJson() => {
     "catalog": catalog.toJson(),
@@ -31,6 +33,7 @@ class CheckoutModel {
     "washingPreference": washingPreference,
     "serviceType": serviceType.toJson(),
     "weight": weight,
+    "paymentMethod": paymentMethod,
   };
 }
 
