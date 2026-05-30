@@ -1,5 +1,7 @@
 import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 const String apiUrl = "https://laundry-lane-server.onrender.com";
 
@@ -13,133 +15,16 @@ const List<Color> cartColors = [
   Color.fromRGBO(248, 247, 241, 1),
   Color.fromRGBO(238, 240, 253, 1),
 ];
-const clothingTypes = [
-  {
-    "name": "Tops",
-    "subtypes": [
-      "T-Shirt",
-      "Polo Shirt",
-      "Button-Down Shirt",
-      "Blouse",
-      "Tank Top",
-      "Crop Top",
-      "Henley Shirt",
-      "Tunic",
-      "Sweater",
-      "Pullover",
-      "Hoodie",
-      "Cardigan",
-      "Vest",
-    ],
-  },
-  {
-    "name": "Bottoms",
-    "subtypes": [
-      "Jeans",
-      "Trousers",
-      "Dress Pants",
-      "Chinos",
-      "Shorts",
-      "Cargo Pants",
-      "Leggings",
-      "Jeggings",
-      "Skirt",
-      "Mini Skirt",
-      "Midi Skirt",
-      "Maxi Skirt",
-    ],
-  },
-  {
-    "name": "Dresses",
-    "subtypes": [
-      "Casual Dress",
-      "Evening Dress",
-      "Cocktail Dress",
-      "Formal Dress",
-      "Maxi Dress",
-      "Mini Dress",
-      "Midi Dress",
-      "Bodycon Dress",
-      "Wrap Dress",
-      "A-Line Dress",
-      "Shift Dress",
-      "Shirt Dress",
-    ],
-  },
-  {
-    "name": "Outerwear",
-    "subtypes": [
-      "Jacket",
-      "Leather Jacket",
-      "Denim Jacket",
-      "Blazer",
-      "Coat",
-      "Trench Coat",
-      "Raincoat",
-      "Puffer Jacket",
-      "Windbreaker",
-      "Overcoat",
-    ],
-  },
-  {
-    "name": "Suits & Formal Wear",
-    "subtypes": [
-      "Two-Piece Suit",
-      "Three-Piece Suit",
-      "Suit Jacket",
-      "Suit Trousers",
-      "Tuxedo",
-      "Waistcoat",
-      "Formal Shirt",
-    ],
-  },
-  {
-    "name": "Traditional & Cultural Wear",
-    "subtypes": [
-      "Kitenge",
-      "Ankara",
-      "Dashiki",
-      "Kanzu",
-      "Kaftan",
-      "Saree",
-      "Salwar Kameez",
-      "Kimono",
-      "Agbada",
-    ],
-  },
-  {
-    "name": "Sportswear & Activewear",
-    "subtypes": [
-      "Tracksuit",
-      "Training Top",
-      "Sports T-Shirt",
-      "Sports Shorts",
-      "Joggers",
-      "Yoga Pants",
-      "Compression Wear",
-      "Sports Bra",
-      "Athletic Jacket",
-    ],
-  },
-  {
-    "name": "Sleepwear & Loungewear",
-    "subtypes": ["Pajamas", "Nightgown", "Sleep Shirt", "Lounge Pants", "Robe"],
-  },
-  {
-    "name": "Underwear",
-    "subtypes": [
-      "Briefs",
-      "Boxers",
-      "Boxer Briefs",
-      "Panties",
-      "Bra",
-      "Undershirt",
-      "Thermal Wear",
-    ],
-  },
-  {
-    "name": "Accessories",
-    "subtypes": ["Socks", "Tie", "Scarf", "Hat", "Cap", "Gloves", "Belt"],
-  },
+final serviceTypesIcons = [
+  {"title": "Self-Service Laundromat", "icon": Icons.local_laundry_service},
+  {"title": "Wash and Fold", "icon": TablerIcons.shirt},
+  {"title": "Dry Cleaning", "icon": CupertinoIcons.sparkles},
+  {"title": "Pickup and Delivery Laundry", "icon": Icons.delivery_dining},
+  {"title": "Commercial Laundry", "icon": Icons.business},
+  {"title": "Specialty Laundry", "icon": TablerIcons.diamond},
+  {"title": "Franchise Laundry", "icon": Icons.storefront},
+  {"title": "On-Demand Laundry", "icon": CupertinoIcons.device_phone_portrait},
+  {"title": "Ironing and Pressing", "icon": TablerIcons.ironing},
+  {"title": "Industrial Laundry", "icon": Icons.factory},
 ];
 final cloudinary = CloudinaryPublic("ddia14anf", 'laundry_lane', cache: false);

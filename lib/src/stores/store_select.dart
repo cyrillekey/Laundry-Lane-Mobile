@@ -8,6 +8,7 @@ import 'package:laundrylane/services/location_service.dart';
 import 'package:laundrylane/src/address/add_address.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/home/home.dart';
+import 'package:laundrylane/utils/constants.dart';
 import 'package:speech_balloon/speech_balloon.dart';
 import 'package:string_extensions/string_extensions.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
@@ -252,10 +253,13 @@ class StoreSelectItem extends StatelessWidget {
             children: [
               CircleAvatar(
                 minRadius: 28,
-                backgroundImage:
-                    store.logo != null
-                        ? NetworkImage(store.logo!)
-                        : AssetImage("assets/icons/favicon.png"),
+                child: Icon(
+                  (serviceTypesIcons
+                              .where((e) => e['title'] == store.category)
+                              .firstOrNull?['icon'] ??
+                          Icons.local_laundry_service)
+                      as IconData,
+                ),
               ),
               SizedBox(width: 10),
               Column(
