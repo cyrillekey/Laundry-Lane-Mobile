@@ -11,7 +11,6 @@ import 'package:laundrylane/models/home_address.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/models/goecode_reverse.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
-import 'package:laundrylane/theme/util.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 
 class AddAddressPage extends StatefulHookConsumerWidget {
@@ -50,7 +49,6 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ref.watch(themeProvider);
     return Scaffold(
       bottomSheet:
           state == Addressstate.create
@@ -75,46 +73,37 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
           SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            child: FutureBuilder(
-              future: getMapStyle(),
-              builder: (context, snapshot) {
-                return GoogleMap(
-                  liteModeEnabled: true,
-                  style: theme.value == ThemeMode.dark ? snapshot.data : null,
-                  onMapCreated: (controller) {
-                    mapController = controller;
-                  },
-                  markers:
-                      postion != null
-                          ? {
-                            Marker(
-                              markerId: MarkerId("postion"),
-                              position: postion!,
-                              infoWindow: InfoWindow(
-                                title: "Move pin to set your exact location",
-                              ),
-                            ),
-                          }
-                          : {},
-                  onTap: (argument) {
-                    setState(() {
-                      postion = argument;
-                    });
-                    mapController!.animateCamera(
-                      CameraUpdate.newLatLng(argument),
-                    );
-                  },
-                  mapType: MapType.terrain,
-                  compassEnabled: true,
-                  myLocationEnabled: true,
-                  buildingsEnabled: true,
-                  myLocationButtonEnabled: true,
-                  initialCameraPosition: CameraPosition(
-                    target: postion ?? LatLng(-1.242811, 36.655768),
-                    zoom: 14.4746,
-                  ),
-                );
+            child: GoogleMap(
+              onMapCreated: (controller) {
+                mapController = controller;
               },
+              markers:
+                  postion != null
+                      ? {
+                        Marker(
+                          markerId: MarkerId("postion"),
+                          position: postion!,
+                          infoWindow: InfoWindow(
+                            title: "Move pin to set your exact location",
+                          ),
+                        ),
+                      }
+                      : {},
+              onTap: (argument) {
+                setState(() {
+                  postion = argument;
+                });
+                mapController!.animateCamera(CameraUpdate.newLatLng(argument));
+              },
+              mapType: MapType.terrain,
+              compassEnabled: true,
+              myLocationEnabled: true,
+              buildingsEnabled: true,
+              myLocationButtonEnabled: true,
+              initialCameraPosition: CameraPosition(
+                target: postion ?? LatLng(-1.242811, 36.655768),
+                zoom: 14.4746,
+              ),
             ),
           ),
           Positioned(

@@ -104,66 +104,35 @@ class MyApp extends ConsumerWidget {
               ? theme.light()
               : theme.dark(),
       title: "Laundry Lane",
+      routes: {
+        OnboardingView.routeName: (context) => const OnboardingView(),
+        HomePage.routeName: (context) => HomePage(),
+        NotificationsView.routeName: (context) => const NotificationsView(),
+        ServiceSelect.routeName: (context) => const ServiceSelect(),
+        SignupPage.routeName: (context) => const SignupPage(),
+        LoginPage.routeName: (context) => const LoginPage(),
+        ForgotPassword.routeName: (context) => const ForgotPassword(),
+        OrderDetails.routeName: (context) => const OrderDetails(),
+        AddAddressPage.routeName: (context) => const AddAddressPage(),
+        AddCard.routeName: (context) => const AddCard(),
+        PaymentMethods.routeName: (context) => const PaymentMethods(),
+        CartPage.routeName: (context) => const CartPage(),
+        CheckoutPage.routeName: (context) => const CheckoutPage(),
+        PasswordResetOtp.routeName: (context) => const PasswordResetOtp(),
+        ResetUpdatePassword.routeName: (context) => const ResetUpdatePassword(),
+        UpdateProfile.routeName: (context) => const UpdateProfile(),
+        UpdatePassword.routeName: (context) => const UpdatePassword(),
+        CheckoutReview.routeName: (context) => const CheckoutReview(),
+        HelpCenter.routeName: (context) => const HelpCenter(),
+        AddressList.routeName: (context) => const AddressList(),
+        NotificationSettings.routeName:
+            (context) => const NotificationSettings(),
+        StoreSelectPage.routeName: (context) => const StoreSelectPage(),
+        EmailVerifyPage.routeName: (context) => const EmailVerifyPage(),
+      },
 
       // Define a function to handle named routes in order to support
       // Flutter web url navigation and deep linking.
-      onGenerateRoute: (RouteSettings routeSettings) {
-        return MaterialPageRoute<void>(
-          settings: routeSettings,
-          builder: (BuildContext context) {
-            switch (routeSettings.name) {
-              case OnboardingView.routeName:
-                return const OnboardingView();
-              case HomePage.routeName:
-                return HomePage();
-              case NotificationsView.routeName:
-                return NotificationsView();
-              case ServiceSelect.routeName:
-                return ServiceSelect();
-              case SignupPage.routeName:
-                return SignupPage();
-              case LoginPage.routeName:
-                return LoginPage();
-              case ForgotPassword.routeName:
-                return ForgotPassword();
-              case OrderDetails.routeName:
-                return OrderDetails();
-              case AddAddressPage.routeName:
-                return AddAddressPage();
-              case AddCard.routeName:
-                return AddCard();
-              case PaymentMethods.routeName:
-                return PaymentMethods();
-              case CartPage.routeName:
-                return CartPage();
-              case CheckoutPage.routeName:
-                return CheckoutPage();
-              case PasswordResetOtp.routeName:
-                return PasswordResetOtp();
-              case ResetUpdatePassword.routeName:
-                return ResetUpdatePassword();
-              case UpdateProfile.routeName:
-                return UpdateProfile();
-              case UpdatePassword.routeName:
-                return UpdatePassword();
-              case CheckoutReview.routeName:
-                return CheckoutReview();
-              case HelpCenter.routeName:
-                return HelpCenter();
-              case AddressList.routeName:
-                return AddressList();
-              case NotificationSettings.routeName:
-                return NotificationSettings();
-              case StoreSelectPage.routeName:
-                return StoreSelectPage();
-              case EmailVerifyPage.routeName:
-                return EmailVerifyPage();
-              default:
-                return const OnboardingView();
-            }
-          },
-        );
-      },
     );
   }
 }
