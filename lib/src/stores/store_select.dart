@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/store_model.dart';
@@ -73,14 +74,7 @@ class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
                           child: Row(
                             children: [
                               SizedBox(width: 12),
-                              CircleAvatar(
-                                foregroundImage:
-                                    store.logo == null ||
-                                            store.logo == "" ||
-                                            store.logo?.contains(".svg") == true
-                                        ? AssetImage("assets/icons/favicon.png")
-                                        : NetworkImage(stores[0].logo ?? ""),
-                              ),
+                              CircleAvatar(child: Icon(TablerIcons.location)),
                               SizedBox(width: 8),
                               Text(
                                 store.name,
@@ -101,7 +95,7 @@ class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
                   return GoogleMap(
                     zoomControlsEnabled: true,
                     scrollGesturesEnabled: true,
-                    liteModeEnabled: true,
+                    // liteModeEnabled: true,
                     style: snapshot.data,
                     onMapCreated: (controller) {
                       mapController = controller;
@@ -146,7 +140,7 @@ class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
                         CameraUpdate.newLatLng(argument),
                       );
                     },
-                    mapType: MapType.terrain,
+                    cloudMapId: "slsldlsd",
                     compassEnabled: true,
                     zoomGesturesEnabled: true,
                     myLocationEnabled: true,
