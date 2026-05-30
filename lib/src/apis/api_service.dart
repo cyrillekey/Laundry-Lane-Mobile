@@ -349,7 +349,6 @@ FutureProvider<List<Stores>> storesState = FutureProvider.autoDispose((
         .onError<DioException>((e, s) {
           return [];
         });
-
     return List<Stores>.from(
       response.map((e) {
         return Stores.fromJson(e);

@@ -65,13 +65,13 @@ class _ProgressButtonState extends State<ProgressButton> {
           widget.style ??
           ButtonStyle(
             backgroundColor: WidgetStatePropertyAll(
-              Color.fromRGBO(45, 111, 241, 1),
+              Theme.of(context).primaryColor,
             ),
             shape: WidgetStatePropertyAll(
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             fixedSize: WidgetStatePropertyAll(
-              Size(MediaQuery.of(context).size.width, 44),
+              Size(MediaQuery.of(context).size.width, 46),
             ),
           ),
       child:

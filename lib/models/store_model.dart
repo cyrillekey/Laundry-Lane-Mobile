@@ -9,8 +9,10 @@ String storesToJson(List<Stores> data) =>
 class Stores {
   final int id;
   final String name;
+  final String category;
   final num rating;
   final String? logo;
+  final String? coverImage;
   final String location;
   final num latitude;
   final num longitude;
@@ -18,6 +20,7 @@ class Stores {
   final String opening;
   final String closing;
   final List<int> daysOff;
+  final List<String> serviceNames;
   final int organisationId;
   final DateTime createdat;
   final DateTime updatedat;
@@ -27,6 +30,8 @@ class Stores {
     required this.name,
     required this.rating,
     this.logo,
+    this.coverImage,
+    required this.category,
     required this.location,
     required this.latitude,
     required this.longitude,
@@ -36,6 +41,7 @@ class Stores {
     required this.daysOff,
     required this.organisationId,
     required this.createdat,
+    required this.serviceNames,
     required this.updatedat,
   });
 
@@ -54,6 +60,12 @@ class Stores {
     organisationId: json["organisationId"],
     createdat: DateTime.parse(json["createdat"]),
     updatedat: DateTime.parse(json["updatedat"]),
+    coverImage: json["coverImage"],
+    category: json["category"] ?? "",
+    serviceNames:
+        json['serviceNames'] == null
+            ? []
+            : List<String>.from(json["serviceNames"].map((x) => x)),
   );
 
   Map<String, dynamic> toJson() => {
@@ -67,8 +79,11 @@ class Stores {
     "radius": radius,
     "opening": opening,
     "closing": closing,
+    "coverImage": coverImage,
     "daysOff": List<dynamic>.from(daysOff.map((x) => x)),
     "organisationId": organisationId,
+    "serviceNames": List<dynamic>.from(serviceNames.map((x) => x)),
+    "category": category,
     "createdat": createdat.toIso8601String(),
     "updatedat": updatedat.toIso8601String(),
   };
