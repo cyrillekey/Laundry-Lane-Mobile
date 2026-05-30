@@ -1,11 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/store_model.dart';
 import 'package:laundrylane/providers/store_provider.dart';
 import 'package:laundrylane/services/location_service.dart';
-import 'package:laundrylane/src/address/add_address.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/utils/constants.dart';
@@ -50,134 +52,119 @@ class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
     final watchStores = ref.watch(storesState);
     return Scaffold(
       appBar: AppBar(title: const Text("Select Store"), centerTitle: true),
-      body: FutureBuilder(
-        future: getMapStyle(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator.adaptive());
-          }
-
-          return watchStores.when(
-            data: (stores) {
-              return FutureBuilder(
-                future: Future.wait(
+      body: watchStores.when(
+        data: (stores) {
+          return FutureBuilder(
+            future: Future.wait(
+              stores.map(
+                (store) =>
+                    SpeechBalloon(
+                      width: 220,
+                      nipLocation: NipLocation.bottom,
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: 16,
+                      height: 60,
+                      innerBorderRadius: 10,
+                      child: Row(
+                        children: [
+                          SizedBox(width: 12),
+                          CircleAvatar(child: Icon(TablerIcons.location)),
+                          SizedBox(width: 8),
+                          Text(
+                            store.name,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ).toBitmapDescriptor(),
+              ),
+            ),
+            builder: (context, asyncSnapshot) {
+              return GoogleMap(
+                zoomControlsEnabled: true,
+                scrollGesturesEnabled: true,
+                onMapCreated: (controller) {
+                  mapController = controller;
+                },
+                markers: Set<Marker>.of(
                   stores.map(
-                    (store) =>
-                        SpeechBalloon(
-                          width: 220,
-                          nipLocation: NipLocation.bottom,
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: 16,
-                          height: 60,
-                          innerBorderRadius: 10,
-                          child: Row(
-                            children: [
-                              SizedBox(width: 12),
-                              CircleAvatar(
-                                foregroundImage:
-                                    store.logo == null ||
-                                            store.logo == "" ||
-                                            store.logo?.contains(".svg") == true
-                                        ? AssetImage("assets/icons/favicon.png")
-                                        : NetworkImage(stores[0].logo ?? ""),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                store.name,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyLarge?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
+                    (store) => Marker(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          useSafeArea: true,
+                          builder:
+                              (context) => Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24),
                                 ),
+                                insetPadding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                alignment: Alignment.bottomCenter,
+                                child: StoreSelectItem(store: store),
                               ),
-                            ],
-                          ),
-                        ).toBitmapDescriptor(),
-                  ),
-                ),
-                builder: (context, asyncSnapshot) {
-                  return GoogleMap(
-                    zoomControlsEnabled: true,
-                    scrollGesturesEnabled: true,
-                    liteModeEnabled: true,
-                    style: snapshot.data,
-                    onMapCreated: (controller) {
-                      mapController = controller;
-                    },
-                    markers: Set<Marker>.of(
-                      stores.map(
-                        (store) => Marker(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              useSafeArea: true,
-                              builder:
-                                  (context) => Dialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(24),
-                                    ),
-                                    insetPadding: EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    alignment: Alignment.bottomCenter,
-                                    child: StoreSelectItem(store: store),
-                                  ),
-                            );
-                          },
-                          markerId: MarkerId(store.id.toString()),
-                          icon:
-                              asyncSnapshot.data?[stores.indexOf(store)] ??
-                              BitmapDescriptor.defaultMarker,
+                        );
+                      },
+                      markerId: MarkerId(store.id.toString()),
+                      icon:
+                          asyncSnapshot.data?[stores.indexOf(store)] ??
+                          BitmapDescriptor.defaultMarker,
 
-                          position: LatLng(
-                            store.latitude.toDouble(),
-                            store.longitude.toDouble(),
-                          ),
-                        ),
+                      position: LatLng(
+                        store.latitude.toDouble(),
+                        store.longitude.toDouble(),
                       ),
                     ),
-                    onTap: (argument) {
-                      setState(() {
-                        postion = argument;
-                      });
-                      mapController!.animateCamera(
-                        CameraUpdate.newLatLng(argument),
-                      );
-                    },
-                    mapType: MapType.terrain,
-                    compassEnabled: true,
-                    zoomGesturesEnabled: true,
-                    myLocationEnabled: true,
-                    buildingsEnabled: true,
-                    myLocationButtonEnabled: true,
-                    initialCameraPosition: CameraPosition(
-                      target: postion ?? LatLng(-1.242811, 36.655768),
-                      zoom: 13.5,
-                    ),
+                  ),
+                ),
+                onTap: (argument) {
+                  setState(() {
+                    postion = argument;
+                  });
+                  mapController!.animateCamera(
+                    CameraUpdate.newLatLng(argument),
                   );
                 },
+                cloudMapId:
+                    Platform.isAndroid
+                        ? "835d79a7bbcf05a6db02109c"
+                        : "835d79a7bbcf05a610562e82",
+                compassEnabled: true,
+                zoomGesturesEnabled: true,
+                myLocationEnabled: true,
+                buildingsEnabled: true,
+                myLocationButtonEnabled: true,
+                initialCameraPosition: CameraPosition(
+                  target: postion ?? LatLng(-1.242811, 36.655768),
+                  zoom: 13.5,
+                ),
               );
             },
-            error: (err, _) {
-              // TODO: implement render view
-              return Center(child: Text(watchStores.error.toString()));
-            },
-            loading:
-                () => const Center(child: CircularProgressIndicator.adaptive()),
           );
         },
+        error: (err, _) {
+          // TODO: implement render view
+          return Center(child: Text(watchStores.error.toString()));
+        },
+        loading:
+            () => const Center(child: CircularProgressIndicator.adaptive()),
       ),
     );
   }
 }
 
-class StoreSelectItem extends StatelessWidget {
+class StoreSelectItem extends ConsumerWidget {
   const StoreSelectItem({super.key, required this.store});
   final Stores store;
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     final openningHours = TimeOfDay(
       hour: int.parse(store.opening.split(":").first),
       minute: int.parse(store.opening.split(":").last),
@@ -351,6 +338,7 @@ class StoreSelectItem extends StatelessWidget {
                       isOpen
                           ? () async {
                             await saveStoreId(store.id);
+                            ref.invalidate(storeProvider);
                             if (context.mounted) {
                               Navigator.pop(context);
                               Navigator.of(

@@ -71,122 +71,127 @@ class _ServiceSelectState extends ConsumerState<ServiceSelect> {
           ),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.3,
-            alignment: Alignment.topLeft,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/laundy_header.jpg"),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: SafeArea(
-              child: InkWell(
-                child: TextButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: Container(
-                    alignment: Alignment.center,
-                    height: 20,
-                    width: 20,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Icon(
-                      CupertinoIcons.back,
-                      size: 18,
-                      color: Colors.black,
-                    ),
-                  ),
-                  label: Text(
-                    "Laundry & Dry Cleaning",
-                    style: GoogleFonts.almarai(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(catalogState);
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height * 0.3,
+              alignment: Alignment.topLeft,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/laundy_header.jpg"),
+                  fit: BoxFit.cover,
                 ),
               ),
-            ),
-          ),
-          SizedBox(height: 40),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              "Select your services",
-              style: GoogleFonts.almarai(
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          SizedBox(height: 16),
-          catalogListener.when(
-            data: (services) {
-              return SizedBox(
-                height: MediaQuery.of(context).size.height * 0.50,
-                child: ListView.separated(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  separatorBuilder: (_, __) => SizedBox(height: 10),
-                  itemCount: services.length,
-                  itemBuilder: (_, index) {
-                    Catalog service = services[index];
-                    return ServiceItem(
-                      catalog: service,
-                      isSelected: selected == service.id,
-                      isDarkTheme: isDarkTheme,
-                      onSelected: (value) {
-                        setState(() {
-                          selected = value;
-                        });
-                      },
-                    );
-                  },
-                ),
-              );
-            },
-            error: (_, __) {
-              return Center(child: Text("Something went wrong"));
-            },
-            loading: () {
-              return SizedBox(
-                height: MediaQuery.of(context).size.height * 0.59,
-                child: ListView.separated(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  separatorBuilder: (_, __) => SizedBox(height: 10),
-                  itemCount: 6,
-                  itemBuilder: (_, index) {
-                    return Shimmer.fromColors(
-                      baseColor: Theme.of(context).scaffoldBackgroundColor,
-                      highlightColor: Theme.of(context).highlightColor,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey, width: 1.5),
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height * 0.18,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+              child: SafeArea(
+                child: InkWell(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    icon: Container(
+                      alignment: Alignment.center,
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                        borderRadius: BorderRadius.circular(30),
                       ),
-                    );
-                  },
+                      child: Icon(
+                        CupertinoIcons.back,
+                        size: 18,
+                        color: Colors.black,
+                      ),
+                    ),
+                    label: Text(
+                      "Laundry & Dry Cleaning",
+                      style: GoogleFonts.almarai(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
                 ),
-              );
-            },
-          ),
-        ],
+              ),
+            ),
+            SizedBox(height: 40),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                "Select your services",
+                style: GoogleFonts.almarai(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            catalogListener.when(
+              data: (services) {
+                return SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.50,
+                  child: ListView.separated(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    separatorBuilder: (_, __) => SizedBox(height: 10),
+                    itemCount: services.length,
+                    itemBuilder: (_, index) {
+                      Catalog service = services[index];
+                      return ServiceItem(
+                        catalog: service,
+                        isSelected: selected == service.id,
+                        isDarkTheme: isDarkTheme,
+                        onSelected: (value) {
+                          setState(() {
+                            selected = value;
+                          });
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
+              error: (_, __) {
+                return Center(child: Text("Something went wrong"));
+              },
+              loading: () {
+                return SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.59,
+                  child: ListView.separated(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    separatorBuilder: (_, __) => SizedBox(height: 10),
+                    itemCount: 6,
+                    itemBuilder: (_, index) {
+                      return Shimmer.fromColors(
+                        baseColor: Theme.of(context).scaffoldBackgroundColor,
+                        highlightColor: Theme.of(context).highlightColor,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey, width: 1.5),
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height * 0.18,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
