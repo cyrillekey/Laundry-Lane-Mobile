@@ -17,16 +17,19 @@ class OrdersTab extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final orderListener = ref.watch(ordersState);
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16).copyWith(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 18),
-          Text(
-            "My Orders",
-            style: GoogleFonts.almarai(
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Text(
+              "My Orders",
+              style: GoogleFonts.almarai(
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           SizedBox(height: 12),
@@ -76,6 +79,7 @@ class OrdersTab extends ConsumerWidget {
                     );
                   }
                   return ListView.separated(
+                    padding: const EdgeInsets.only(top: 12),
                     separatorBuilder: (context, index) => SizedBox(height: 6),
                     itemCount: data.length,
                     itemBuilder:
@@ -153,7 +157,7 @@ class OrderItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "5 Items, 9 Pieces",
+                        "5 Items, ${order.itemsCount} Pieces",
                         style: GoogleFonts.almarai(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -222,11 +226,11 @@ class OrderItem extends StatelessWidget {
                           SizedBox(width: 4),
                           Text(
                             Jiffy.parseFromDateTime(
-                              order.createdat!,
+                              order.date!,
                             ).format(pattern: "MMM dd,yyyy HH:mm a"),
                             style: GoogleFonts.almarai(
                               fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                              fontSize: 11,
                             ),
                           ),
                         ],
@@ -253,7 +257,7 @@ class OrderItem extends StatelessWidget {
                             Jiffy.now().format(pattern: "MMM dd,yyyy HH:mm a"),
                             style: GoogleFonts.almarai(
                               fontWeight: FontWeight.w400,
-                              fontSize: 14,
+                              fontSize: 11,
                             ),
                           ),
                         ],

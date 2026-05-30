@@ -42,34 +42,23 @@ class NotificationsViewState extends ConsumerState<NotificationsView> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          SizedBox(height: 20),
-          SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height * 0.78,
-            child: notifications.when(
-              data: (notifications) {
-                return ListView.separated(
-                  separatorBuilder: (context, index) => SizedBox(height: 20),
-                  padding: EdgeInsets.only(
-                    top: 8,
-                  ).copyWith(left: 16, right: 16),
-                  itemBuilder:
-                      (context, index) =>
-                          NotificationItem(notification: notifications[index]),
-                  itemCount: notifications.length,
-                );
-              },
-              error: (_, __) {
-                return SizedBox();
-              },
-              loading: () {
-                return CircularProgressIndicator.adaptive();
-              },
-            ),
-          ),
-        ],
+      body: notifications.when(
+        data: (notifications) {
+          return ListView.separated(
+            separatorBuilder: (context, index) => SizedBox(height: 20),
+            padding: EdgeInsets.only(top: 8).copyWith(left: 16, right: 16),
+            itemBuilder:
+                (context, index) =>
+                    NotificationItem(notification: notifications[index]),
+            itemCount: notifications.length,
+          );
+        },
+        error: (_, __) {
+          return SizedBox();
+        },
+        loading: () {
+          return Center(child: CircularProgressIndicator.adaptive());
+        },
       ),
     );
   }

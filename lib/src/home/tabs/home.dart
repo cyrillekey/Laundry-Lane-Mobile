@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -143,7 +144,7 @@ class HomeTab extends ConsumerWidget {
                   SizedBox(height: 12),
                   catalogListener.when(
                     data: (data) {
-                      final catalog = data.firstWhere(
+                      final catalog = data.firstWhereOrNull(
                         (element) => element.bulk == false,
                       );
                       return SizedBox(
@@ -310,7 +311,7 @@ class CategoryCard extends StatelessWidget {
   final String title;
   final ThemeMode? themeData;
   final String assetName;
-  final Catalog catalog;
+  final Catalog? catalog;
   @override
   Widget build(BuildContext context) {
     return InkWell(

@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/models/user_model.dart';
 import 'package:laundrylane/src/address/add_address.dart';
 import 'package:laundrylane/src/address/address_list.dart';
 import 'package:laundrylane/src/cart/cart_page.dart';
@@ -21,7 +24,9 @@ import 'package:laundrylane/src/profile/help_center.dart';
 import 'package:laundrylane/src/profile/update_password.dart';
 import 'package:laundrylane/src/profile/update_profile.dart';
 import 'package:laundrylane/src/request_order/service_select.dart';
+import 'package:laundrylane/src/signup/email_verify.dart';
 import 'package:laundrylane/src/signup/signup.dart';
+import 'package:laundrylane/src/stores/store_select.dart';
 import 'package:laundrylane/theme/theme.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,28 +59,22 @@ class MyApp extends ConsumerWidget {
 
     MaterialTheme theme = MaterialTheme(textTheme);
     final watchTheme = ref.watch(themeProvider).value;
+    // final storeId = sharedPreferences.get("store");
+    final userString = sharedPreferences.getString('user');
+    final user =
+        userString == null ? null : UserModel.fromJson(jsonDecode(userString));
 
     return MaterialApp(
       navigatorKey: navigatorKey,
       initialRoute:
-          !onboarded
+          onboarded == false
               ? OnboardingView.routeName
               : token == null
               ? LoginPage.routeName
-              : HomePage.routeName,
-      // theme: settingsController.themeMode == ThemeMode.light
-      //     ? theme.light()
-      //     : theme.dark(),
+              : user?.isVerified == false || user?.isVerified == null
+              ? EmailVerifyPage.routeName
+              : StoreSelectPage.routeName,
 
-      // Providing a restorationScopeId allows the Navigator built by the
-      // MaterialApp to restore the navigation stack when a user leaves and
-      // returns to the app after it has been killed while running in the
-      // background.
-      // restorationScopeId: 'app',
-
-      // Provide the generated AppLocalizations to the MaterialApp. This
-      // allows descendant Widgets to display the correct translations
-      // depending on the user's locale.
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -155,6 +154,10 @@ class MyApp extends ConsumerWidget {
                 return AddressList();
               case NotificationSettings.routeName:
                 return NotificationSettings();
+              case StoreSelectPage.routeName:
+                return StoreSelectPage();
+              case EmailVerifyPage.routeName:
+                return EmailVerifyPage();
               default:
                 return const OnboardingView();
             }

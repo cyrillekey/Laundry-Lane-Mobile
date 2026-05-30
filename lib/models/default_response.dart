@@ -9,6 +9,11 @@ class DefaultResponse {
     : message = json['message'],
       success = json['success'],
       id = json['id'];
+
+  @override
+  String toString() {
+    return "{message: $message, success: $success, id: $id}";
+  }
 }
 
 class AddCardResponse extends DefaultResponse {
@@ -32,4 +37,31 @@ class AddCardResponse extends DefaultResponse {
         accessUrl: json['accessUrl'],
         publickey: json['publickey'],
       );
+}
+
+class PushNotificationData {
+  final String title;
+  final String message;
+  final dynamic ref;
+  final String type;
+
+  PushNotificationData({
+    required this.title,
+    required this.message,
+    this.ref,
+    required this.type,
+  });
+
+  factory PushNotificationData.fromJson(Map<String, dynamic> json) =>
+      PushNotificationData(
+        title: json['title'],
+        message: json['message'],
+        ref: json['ref'],
+        type: json['type'],
+      );
+
+  @override
+  String toString() {
+    return "{title: $title, message: $message, ref: $ref, type: $type}";
+  }
 }

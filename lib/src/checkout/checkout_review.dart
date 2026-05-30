@@ -116,6 +116,8 @@ class _OrderSubmitButton extends ConsumerWidget {
                 deliveryWindow: checkoutModel.deliveryWindow,
                 washType: checkoutModel.washingPreference,
                 instructions: formKey.currentState?.value["instructions"],
+                weight: checkoutModel.weight,
+                paymentMethod: formKey.currentState?.value['payment_method'],
               );
               if (response.success) {
                 if (context.mounted) {
@@ -123,9 +125,12 @@ class _OrderSubmitButton extends ConsumerWidget {
                   ref.invalidate(ongoingOrderState);
                   ref.invalidate(notificationCountState);
                   ref.invalidate(notificationsState);
-                  showBottomSheet(
+                  showModalBottomSheet(
                     context: context,
-                    builder: (context) => SuccessSheet(orderId: response.id!),
+                    elevation: 1,
+                    showDragHandle: true,
+                    isDismissible: true,
+                    builder: (context) => SuccessSheet(orderId: 1),
                   );
                 }
               } else {
@@ -176,13 +181,13 @@ class PaymentRadio extends StatelessWidget {
     List<Map> paymentMethods = [
       {
         "name": "Online Payment",
-        "value": "ONLINE_PAYMENT",
+        "value": "MOBILE",
         "description":
             "Pay online using M-Pesa,Airtel money or credit/debit card",
       },
       {
         "name": "Cash on Delivery",
-        "value": "CASH_ON_DELIVERY",
+        "value": "CASH",
         "description": "Make payment after delivery of your laundry",
       },
     ];
@@ -526,56 +531,51 @@ class SuccessSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
       ),
+      padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SvgPicture.asset(
-              "assets/svgs/success.svg",
-              height: 100,
-              width: 100,
-            ),
-          ),
+          SvgPicture.asset("assets/svgs/success.svg", height: 140, width: 140),
+          SizedBox(height: 16),
           Text(
             "Your order has been placed",
             style: Theme.of(
               context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
+          SizedBox(height: 20),
           Text(
-            "Order ID: $orderId",
+            "Your order has been placed successfully. You will receive a notification once the order is processed and cleaning started.",
             style: Theme.of(
               context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+            textAlign: TextAlign.center,
           ),
-          Spacer(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ProgressButton(
-              onPress: () {
-                Navigator.pop(context);
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  OrderDetails.routeName,
-                  ModalRoute.withName(HomePage.routeName),
-                  arguments: orderId,
-                );
-              },
-              child: Text(
-                "View Order",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+          SizedBox(height: 20),
+          ProgressButton(
+            onPress: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                OrderDetails.routeName,
+                ModalRoute.withName(HomePage.routeName),
+                arguments: orderId,
+              );
+            },
+            child: Text(
+              "View Order",
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
+          SizedBox(height: 16),
         ],
       ),
     );
