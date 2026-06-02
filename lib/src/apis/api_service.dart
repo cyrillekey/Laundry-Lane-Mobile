@@ -179,7 +179,6 @@ FutureProvider<Order?> ongoingOrderState = FutureProvider((ref) async {
     List<Order> orders = data.map((e) => Order.fromJson(e)).toList();
     return orders.firstOrNull;
   } catch (e) {
-    print(e);
     return null;
   }
 });

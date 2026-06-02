@@ -3,12 +3,17 @@ import 'package:laundrylane/models/delivery_zone.dart';
 import 'package:laundrylane/models/order_model.dart';
 
 class FullOrderDetails {
-  final Order? order;
+  final Order order;
   final DeliveryZone? deliveryZone;
   final List<Statuses>? statuses;
   final List<OrderItem>? items;
 
-  FullOrderDetails({this.order, this.deliveryZone, this.statuses, this.items});
+  FullOrderDetails({
+    required this.order,
+    this.deliveryZone,
+    this.statuses,
+    this.items,
+  });
   factory FullOrderDetails.fromJson(Map<String, dynamic> json) {
     return FullOrderDetails(
       order: Order.fromJson(json),

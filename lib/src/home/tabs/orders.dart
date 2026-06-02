@@ -226,7 +226,7 @@ class OrderItem extends StatelessWidget {
                           SizedBox(width: 4),
                           Text(
                             Jiffy.parseFromDateTime(
-                              order.date!,
+                              order.date,
                             ).format(pattern: "MMM dd,yyyy HH:mm a"),
                             style: GoogleFonts.almarai(
                               fontWeight: FontWeight.w600,
@@ -242,7 +242,7 @@ class OrderItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${order.orderStatus}",
+                        order.orderStatus,
                         style: GoogleFonts.almarai(
                           fontSize: 12,
                           color: Color.fromRGBO(129, 129, 129, 1),

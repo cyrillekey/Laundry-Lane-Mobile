@@ -71,7 +71,7 @@ class CurrentOrder extends ConsumerWidget {
                               SizedBox(height: 6),
                               Text(
                                 Jiffy.parseFromDateTime(
-                                  data.date!,
+                                  data.date,
                                 ).format(pattern: "MMMM dd, yyyy / hh:mm a"),
                               ),
                             ],
@@ -86,7 +86,7 @@ class CurrentOrder extends ConsumerWidget {
                               color: Color.fromRGBO(254, 223, 106, 1),
                             ),
                             child: Text(
-                              "${data.orderStatus}",
+                              data.orderStatus,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Color.fromRGBO(157, 126, 36, 1),

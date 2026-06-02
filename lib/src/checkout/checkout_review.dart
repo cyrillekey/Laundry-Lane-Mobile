@@ -105,7 +105,6 @@ class _OrderSubmitButton extends ConsumerWidget {
         return ProgressButton(
           onPress: () async {
             if (formKey.currentState?.saveAndValidate() == true) {
-              print(formKey.currentState?.value['payment_method']);
               final address = ref.read(addressState).value;
               final response = await createOrderMutation(
                 storeId: ref.read(storeProvider).value!,
