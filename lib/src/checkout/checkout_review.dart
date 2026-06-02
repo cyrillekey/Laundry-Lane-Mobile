@@ -9,6 +9,7 @@ import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/checkout_model.dart';
 import 'package:laundrylane/models/service_model.dart';
 import 'package:laundrylane/providers/card_provider.dart';
+import 'package:laundrylane/providers/store_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
@@ -104,9 +105,11 @@ class _OrderSubmitButton extends ConsumerWidget {
         return ProgressButton(
           onPress: () async {
             if (formKey.currentState?.saveAndValidate() == true) {
+              print(formKey.currentState?.value['payment_method']);
               final address = ref.read(addressState).value;
               final response = await createOrderMutation(
-                addressId: address!.id!,
+                storeId: ref.read(storeProvider).value!,
+                addressId: address?.id,
                 serviceTypeId: checkoutModel.serviceType.id,
                 catalogId: checkoutModel.catalog.id!,
                 type: checkoutModel.orderType.value,
@@ -117,7 +120,8 @@ class _OrderSubmitButton extends ConsumerWidget {
                 washType: checkoutModel.washingPreference,
                 instructions: formKey.currentState?.value["instructions"],
                 weight: checkoutModel.weight,
-                paymentMethod: formKey.currentState?.value['payment_method'],
+                paymentMethod:
+                    formKey.currentState?.value['payment_method'] ?? "CASH",
               );
               if (response.success) {
                 if (context.mounted) {

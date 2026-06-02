@@ -157,26 +157,31 @@ FutureProvider<List<ClothingType>> clothingTypeState = FutureProvider((
 });
 
 FutureProvider<Order?> ongoingOrderState = FutureProvider((ref) async {
-  String? token = ref.watch(tokenProvider).value;
+  try {
+    String? token = ref.watch(tokenProvider).value;
 
-  final CancelToken cancelToken = CancelToken();
-  ref.onDispose(cancelToken.cancel);
-  final response = await apiDio
-      .get(
-        "/order",
-        cancelToken: cancelToken,
-        options: Options(headers: {"Authorization": "Bearer $token"}),
-        queryParameters: {"ongoing": true},
-      )
-      .then((resp) => resp.data)
-      .catchError((e) {
-        return [];
-      });
+    final CancelToken cancelToken = CancelToken();
+    ref.onDispose(cancelToken.cancel);
+    final response = await apiDio
+        .get(
+          "/order",
+          cancelToken: cancelToken,
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+          queryParameters: {"ongoing": true},
+        )
+        .then((resp) => resp.data)
+        .catchError((e) {
+          return [];
+        });
 
-  List data = List.from(response);
+    List data = List.from(response);
 
-  List<Order> orders = data.map((e) => Order.fromJson(e)).toList();
-  return orders.firstOrNull;
+    List<Order> orders = data.map((e) => Order.fromJson(e)).toList();
+    return orders.firstOrNull;
+  } catch (e) {
+    print(e);
+    return null;
+  }
 });
 
 FutureProvider<List> cardsState = FutureProvider.autoDispose((ref) async {

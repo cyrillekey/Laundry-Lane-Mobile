@@ -560,7 +560,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                                     formBuilderState: formBuiler,
                                   );
                                 },
-                                itemCount: 3,
+                                itemCount: services.length,
                               ),
                             );
                           },

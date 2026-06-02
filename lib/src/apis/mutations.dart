@@ -423,7 +423,7 @@ Future<DefaultResponse> changePassword(
 }
 
 Future<DefaultResponse> createOrderMutation({
-  required int addressId,
+  int? addressId,
   required int serviceTypeId,
   required int catalogId,
   required String type,
@@ -435,13 +435,15 @@ Future<DefaultResponse> createOrderMutation({
   String? pickupTime,
   num? weight,
   String? paymentMethod,
+  required int storeId,
 }) async {
   try {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String token = sharedPreferences.getString("token") ?? "";
+
     final response = await apiDio
         .post(
-          "/order",
+          "/order/$storeId",
           options: Options(
             contentType: "application/json",
             headers: {"Authorization": "Bearer $token"},
