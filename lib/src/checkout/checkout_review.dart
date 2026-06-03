@@ -224,7 +224,7 @@ class PaymentRadio extends StatelessWidget {
                                       : 1,
                               color:
                                   formBuilderState.value == item['value']
-                                      ? Theme.of(context).primaryColor
+                                      ? Theme.of(context).colorScheme.primary
                                       : Theme.of(context).unselectedWidgetColor,
                             ),
                           ),

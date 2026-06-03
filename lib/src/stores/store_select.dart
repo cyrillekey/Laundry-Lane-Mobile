@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -27,6 +28,7 @@ class StoreSelectPage extends StatefulHookConsumerWidget {
 
 class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
   GoogleMapController? mapController;
+
   LatLng? postion;
 
   void initPosition() async {
@@ -187,10 +189,13 @@ class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
                       CameraUpdate.newLatLng(argument),
                     );
                   },
-                  cloudMapId:
+                  markerType: GoogleMapMarkerType.advancedMarker,
+                  mapId:
                       Platform.isAndroid
                           ? "835d79a7bbcf05a6db02109c"
                           : "835d79a7bbcf05a610562e82",
+                  mapToolbarEnabled: true,
+                  mapType: MapType.normal,
                   compassEnabled: true,
                   zoomGesturesEnabled: true,
                   myLocationEnabled: true,
@@ -505,7 +510,7 @@ class StoreTile extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: Theme.of(context).colorScheme.secondaryFixed,
+          color: Theme.of(context).colorScheme.inversePrimary,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

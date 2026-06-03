@@ -43,39 +43,35 @@ class OrdersTab extends ConsumerWidget {
                 skipLoadingOnRefresh: true,
                 data: (data) {
                   if (data.isEmpty) {
-                    return SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height * 0.70,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 48),
-                          SvgPicture.asset(
-                            "assets/svgs/bag-svgrepo-com.svg",
-                            height: 100,
-                          ),
-                          SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Text(
-                              "You don't have any orders yet",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.almarai(
-                                fontSize: 17,
-                                color: Color.fromRGBO(152, 152, 152, 1),
-                                fontWeight: FontWeight.w600,
-                              ),
+                    return Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 48),
+                        SvgPicture.asset(
+                          "assets/svgs/bag-svgrepo-com.svg",
+                          height: 100,
+                        ),
+                        SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Text(
+                            "You don't have any orders yet",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.almarai(
+                              fontSize: 17,
+                              color: Color.fromRGBO(152, 152, 152, 1),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          SizedBox(height: 24),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 36),
-                            child: ProgressButton(label: "Place an Order"),
-                          ),
-                        ],
-                      ),
+                        ),
+                        SizedBox(height: 24),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 36),
+                          child: ProgressButton(label: "Place an Order"),
+                        ),
+                      ],
                     );
                   }
                   return ListView.separated(
@@ -90,35 +86,30 @@ class OrdersTab extends ConsumerWidget {
                   return Center(child: Text("Error"));
                 },
                 loading: () {
-                  return SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.90,
-                    child: ListView.separated(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      separatorBuilder: (_, __) => SizedBox(height: 10),
-                      itemCount: 6,
-                      itemBuilder: (_, index) {
-                        return Shimmer.fromColors(
-                          baseColor: Theme.of(context).scaffoldBackgroundColor,
-                          highlightColor: Theme.of(context).highlightColor,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey,
-                                width: 1.5,
-                              ),
-                              color: Theme.of(context).cardColor,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height * 0.18,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
+                  return ListView.separated(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    separatorBuilder: (_, __) => SizedBox(height: 10),
+                    itemCount: 6,
+                    shrinkWrap: true,
+                    itemBuilder: (_, index) {
+                      return Shimmer.fromColors(
+                        baseColor: Theme.of(context).scaffoldBackgroundColor,
+                        highlightColor: Theme.of(context).highlightColor,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey, width: 1.5),
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        );
-                      },
-                    ),
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height * 0.18,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),

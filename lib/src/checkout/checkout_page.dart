@@ -795,7 +795,7 @@ class WashItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(
                     width: 1.5,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 )
                 : Theme.of(context).cardTheme.shape,

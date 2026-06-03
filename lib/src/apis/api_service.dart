@@ -56,36 +56,35 @@ Future<List<GeocodeReverse>> autoCompleteApi(String location) async {
   }
 }
 
-FutureProvider<HomeAddress?> addressState =
-    FutureProvider.autoDispose<HomeAddress?>((ref) async {
-      try {
-        String? token = ref.watch(tokenProvider).value;
-
-        final CancelToken cancelToken = CancelToken();
-
-        ref.onDispose(cancelToken.cancel);
-        final response = await apiDio
-            .get(
-              "/address",
-              cancelToken: cancelToken,
-              options: Options(headers: {"Authorization": "Bearer $token"}),
-            )
-            .then((resp) => resp.data)
-            .catchError((e) {
-              return null;
-            });
-
-        if (response == null) return null;
-        HomeAddress homeAddress = HomeAddress.fromJson(response);
-
-        return homeAddress;
-      } catch (e) {
-        return null;
-      }
-    });
-FutureProvider<List<Order>> ordersState = FutureProvider.autoDispose((
+FutureProvider<HomeAddress?> addressState = FutureProvider<HomeAddress?>((
   ref,
 ) async {
+  try {
+    String? token = ref.watch(tokenProvider).value;
+
+    final CancelToken cancelToken = CancelToken();
+
+    ref.onDispose(cancelToken.cancel);
+    final response = await apiDio
+        .get(
+          "/address",
+          cancelToken: cancelToken,
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((resp) => resp.data)
+        .catchError((e) {
+          return null;
+        });
+
+    if (response == null) return null;
+    HomeAddress homeAddress = HomeAddress.fromJson(response);
+
+    return homeAddress;
+  } catch (e) {
+    return null;
+  }
+});
+FutureProvider<List<Order>> ordersState = FutureProvider((ref) async {
   String? token = ref.watch(tokenProvider).value;
 
   final CancelToken cancelToken = CancelToken();

@@ -23,14 +23,6 @@ class AddAddressPage extends StatefulHookConsumerWidget {
 
 enum Addressstate { create, submit }
 
-Future<String?> getMapStyle() async {
-  final darkModeStyle = await rootBundle.loadString(
-    "assets/styles/map_darkmode.json",
-  );
-
-  return darkModeStyle;
-}
-
 class _AddAddressPageState extends ConsumerState<AddAddressPage> {
   Addressstate state = Addressstate.create;
   GoogleMapController? mapController;
@@ -77,6 +69,9 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
               onMapCreated: (controller) {
                 mapController = controller;
               },
+              cloudMapId: "835d79a7bbcf05a610562e82",
+              mapToolbarEnabled: true,
+
               markers:
                   postion != null
                       ? {
@@ -232,33 +227,40 @@ class SelectAddress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.32,
-      width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).colorScheme.onInverseSurface,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(36),
-          topRight: Radius.circular(36),
+          topLeft: Radius.circular(18),
+          topRight: Radius.circular(18),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: 24),
+          SizedBox(height: 18),
+          Center(
+            child: Container(
+              height: 4,
+              width: MediaQuery.of(context).size.width * 0.15,
+              decoration: BoxDecoration(
+                color: Theme.of(context).highlightColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              "Confirm your laundry delivery location",
-              style: GoogleFonts.almarai(
-                fontSize: 17,
-                color: Color.fromRGBO(152, 152, 152, 1),
+              "Confirm your delivery location",
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontSize: 20,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          SizedBox(height: 12),
-          Divider(color: Color.fromRGBO(250, 250, 250, 1), thickness: 2),
-          Spacer(),
+          SizedBox(height: 28),
           FutureBuilder(
             future: reverseGeocode(position),
             builder: (context, result) {
@@ -272,9 +274,13 @@ class SelectAddress extends StatelessWidget {
                       width: 56,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        color: Color.fromRGBO(241, 241, 254, 1),
+                        color: Theme.of(context).colorScheme.inversePrimary,
                       ),
-                      child: Icon(TablerIcons.map_pin_filled),
+                      child: Icon(
+                        TablerIcons.map_pin_filled,
+                        size: 32,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                     SizedBox(width: 16),
                     Expanded(
@@ -291,7 +297,7 @@ class SelectAddress extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          // Spacer(),
+
                           SizedBox(
                             width: MediaQuery.of(context).size.width,
                             child: Text(
@@ -309,7 +315,7 @@ class SelectAddress extends StatelessWidget {
               );
             },
           ),
-          Spacer(),
+          SizedBox(height: 32),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextButton(
@@ -324,21 +330,15 @@ class SelectAddress extends StatelessWidget {
                   ),
                 ),
                 backgroundColor: WidgetStatePropertyAll(
-                  position == null
-                      ? Theme.of(context).disabledColor
-                      : Colors.black,
+                  Theme.of(context).colorScheme.primary,
                 ),
               ),
-
               child: Text(
                 "Confirm and add details",
-                style: GoogleFonts.almarai(
-                  color:
-                      position == null
-                          ? Theme.of(context).disabledColor
-                          : Colors.white,
-                  fontSize: 20,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  fontSize: 18,
                   letterSpacing: 1.2,
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
             ),
@@ -387,13 +387,12 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
   Widget build(BuildContext context) {
     final address = ref.watch(addressState);
     return Container(
-      height: MediaQuery.of(context).size.height * 0.66,
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(36),
-          topRight: Radius.circular(36),
+          topLeft: Radius.circular(18),
+          topRight: Radius.circular(18),
         ),
       ),
       child: SingleChildScrollView(
@@ -414,20 +413,18 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
                       children: [
                         Text(
                           "Address details",
-                          style: GoogleFonts.almarai(
-                            color: Colors.black,
-                            fontSize: 22,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineSmall?.copyWith(
+                            // fontSize: 22,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         SizedBox(height: 2),
                         Text(
                           "A complete address would assist us better in serving you",
-                          style: GoogleFonts.almarai(
-                            color: Colors.black,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(),
                         ),
                       ],
                     ),
@@ -447,7 +444,7 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
               ),
             ),
             SizedBox(height: 12),
-            Divider(color: Color.fromRGBO(246, 246, 246, 1), thickness: 2),
+
             SizedBox(height: 12),
             FormBuilder(
               initialValue: {
@@ -480,7 +477,7 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
                               width: 40,
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                  color: Color.fromRGBO(238, 238, 238, 1),
+                                  color: Theme.of(context).highlightColor,
                                   width: 1.5,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
@@ -515,12 +512,9 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
                                             color:
                                                 addressType ==
                                                         houseTypes[index]['name']
-                                                    ? Color.fromRGBO(
-                                                      239,
-                                                      239,
-                                                      253,
-                                                      1,
-                                                    )
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .primaryContainer
                                                     : Colors.transparent,
                                             borderRadius: BorderRadius.circular(
                                               10,
@@ -529,18 +523,12 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
                                               color:
                                                   addressType ==
                                                           houseTypes[index]['name']
-                                                      ? Color.fromRGBO(
-                                                        114,
-                                                        111,
-                                                        210,
-                                                        1,
-                                                      )
-                                                      : Color.fromRGBO(
-                                                        238,
-                                                        238,
-                                                        238,
-                                                        1,
-                                                      ),
+                                                      ? Theme.of(
+                                                        context,
+                                                      ).colorScheme.primary
+                                                      : Theme.of(
+                                                        context,
+                                                      ).hintColor,
                                               width: 1.5,
                                             ),
                                           ),
@@ -553,10 +541,10 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
                                               SizedBox(width: 8),
                                               Text(
                                                 houseTypes[index]['name'],
-                                                style: GoogleFonts.almarai(
-                                                  color: Colors.black,
-                                                  fontSize: 16,
-                                                ),
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .labelMedium
+                                                    ?.copyWith(fontSize: 16),
                                               ),
                                             ],
                                           ),
@@ -737,26 +725,11 @@ class _SubmitAddressState extends ConsumerState<SubmitAddress> {
                           }
                         }
                       },
-                      textStyle: GoogleFonts.almarai(
-                        color: Colors.white,
-                        fontSize: 20,
-                        letterSpacing: 1.2,
-                      ),
+
                       label:
                           address.value?.id != null
                               ? "Update Address"
                               : "Submit Address",
-                      style: ButtonStyle(
-                        fixedSize: WidgetStatePropertyAll(
-                          Size(MediaQuery.of(context).size.width, 50),
-                        ),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                        ),
-                        backgroundColor: WidgetStatePropertyAll(Colors.black),
-                      ),
                     ),
 
                     SizedBox(height: 24),

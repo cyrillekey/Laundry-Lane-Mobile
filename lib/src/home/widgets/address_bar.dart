@@ -19,7 +19,7 @@ class AddressBar extends ConsumerWidget {
             onTap:
                 () => Navigator.of(context).pushNamed(AddAddressPage.routeName),
             child: Container(
-              height: 60,
+              height: 64,
               padding: EdgeInsets.symmetric(horizontal: 12),
               alignment: Alignment.center,
               decoration: BoxDecoration(
@@ -34,12 +34,13 @@ class AddressBar extends ConsumerWidget {
                 children: [
                   Text(
                     "Set your address now",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: Colors.black,
                     ),
                   ),
-                  Icon(TablerIcons.plus),
+                  Icon(TablerIcons.plus, color: Colors.black),
                 ],
               ),
             ),
@@ -136,7 +137,7 @@ class AddressBar extends ConsumerWidget {
           onTap:
               () => Navigator.of(context).pushNamed(AddAddressPage.routeName),
           child: Container(
-            height: 60,
+            height: 64,
             padding: EdgeInsets.symmetric(horizontal: 12),
             alignment: Alignment.center,
             decoration: BoxDecoration(
@@ -151,12 +152,13 @@ class AddressBar extends ConsumerWidget {
               children: [
                 Text(
                   "Set your address now",
-                  style: GoogleFonts.almarai(
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
+                    color: Colors.black,
                   ),
                 ),
-                Icon(TablerIcons.plus),
+                Icon(TablerIcons.plus, color: Colors.black),
               ],
             ),
           ),
