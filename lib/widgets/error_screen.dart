@@ -28,6 +28,7 @@ class ErrorScreen extends StatelessWidget {
             ),
             SizedBox(height: 24),
             ProgressButton(
+              label: "Report Error",
               onPress:
                   () => Sentry.captureException(
                     details.exception,
@@ -35,6 +36,7 @@ class ErrorScreen extends StatelessWidget {
                     hint: Hint.withMap({"name": details.context?.name}),
                   ),
             ),
+            SizedBox(height: 24),
           ],
         ),
       ),

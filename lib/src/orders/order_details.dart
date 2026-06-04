@@ -29,8 +29,10 @@ class OrderDetails extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 OrderProgress(order: order.order),
-                OrderDetails(),
-                OrderTotal(),
+                SizedBox(height: 24),
+                Orderitems(),
+                SizedBox(height: 24),
+                OrderTotal(order: order.order),
               ],
             );
           },
@@ -51,6 +53,7 @@ class OrderProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card.filled(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Theme.of(context).colorScheme.surfaceContainer,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16.0),
@@ -66,7 +69,7 @@ class OrderProgress extends StatelessWidget {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).unselectedWidgetColor,
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: const EdgeInsets.symmetric(
@@ -90,11 +93,26 @@ class OrderProgress extends StatelessWidget {
 }
 
 class OrderTotal extends StatelessWidget {
-  const OrderTotal({super.key});
+  const OrderTotal({super.key, required this.order});
+  final Order order;
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Card.filled(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [Text("Subtotal")],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -103,6 +121,13 @@ class Orderitems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Card.filled(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(children: [Row(children: [])]),
+      ),
+    );
   }
 }

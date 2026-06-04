@@ -111,8 +111,11 @@ class CurrentOrder extends ConsumerWidget {
                                 TablerIcons.circle_check_filled,
                                 color: Color.fromRGBO(113, 196, 119, 1),
                               ),
-                              SizedBox(width: 4),
-                              Text("Washing", style: TextStyle(fontSize: 12)),
+                              SizedBox(width: 2),
+                              Text(
+                                "Submitted",
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
                             ],
                           ),
                           Row(
@@ -121,8 +124,11 @@ class CurrentOrder extends ConsumerWidget {
                                 TablerIcons.circle_check_filled,
                                 color: Color.fromRGBO(113, 196, 119, 1),
                               ),
-                              SizedBox(width: 4),
-                              Text("Drying", style: TextStyle(fontSize: 12)),
+                              SizedBox(width: 2),
+                              Text(
+                                "Washing",
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
                             ],
                           ),
                           Row(
@@ -131,21 +137,21 @@ class CurrentOrder extends ConsumerWidget {
                                 TablerIcons.circle_check_filled,
                                 color: Color.fromRGBO(113, 196, 119, 1),
                               ),
-                              SizedBox(width: 4),
+                              SizedBox(width: 2),
                               Text(
                                 "Ironing",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w400,
-                                ),
+                                style: Theme.of(context).textTheme.labelSmall,
                               ),
                             ],
                           ),
                           Row(
                             children: [
                               Icon(TablerIcons.circle),
-                              SizedBox(width: 4),
-                              Text("Delivery", style: TextStyle(fontSize: 12)),
+                              SizedBox(width: 2),
+                              Text(
+                                "Delivery",
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
                             ],
                           ),
                         ],

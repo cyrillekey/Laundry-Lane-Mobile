@@ -173,7 +173,7 @@ class NotificationItem extends StatelessWidget {
       splashColor: Theme.of(context).colorScheme.surface,
       borderRadius: BorderRadius.circular(12),
       onTap: () {
-        print(notification.type);
+        // TODO implement order ridirect by type
       },
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
