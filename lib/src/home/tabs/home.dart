@@ -11,6 +11,7 @@ import 'package:laundrylane/src/home/widgets/address_bar.dart';
 import 'package:laundrylane/src/home/widgets/current_order.dart';
 import 'package:laundrylane/src/notifications/notifications_view.dart';
 import 'package:laundrylane/src/notifications/service.dart';
+import 'package:laundrylane/src/request_order/service_select.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:shimmer/shimmer.dart';
@@ -310,10 +311,15 @@ class CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
-      onTap:
-          () => Navigator.of(
+      onTap: () {
+        if (catalog == null) {
+          Navigator.of(context).pushNamed(ServiceSelect.routeName);
+        } else {
+          Navigator.of(
             context,
-          ).pushNamed(CartPage.routeName, arguments: catalog),
+          ).pushNamed(CartPage.routeName, arguments: catalog);
+        }
+      },
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(

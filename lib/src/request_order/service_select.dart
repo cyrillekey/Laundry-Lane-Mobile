@@ -314,12 +314,12 @@ class ServiceItem extends StatelessWidget {
                       color:
                           isSelected
                               ? Color.fromRGBO(116, 19, 209, 1)
-                              : Colors.white,
+                              : Theme.of(context).colorScheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color:
                             isSelected
-                                ? Colors.white
+                                ? Color.fromRGBO(116, 19, 209, 1)
                                 : Color.fromRGBO(241, 241, 241, 1),
                       ),
                     ),
@@ -329,7 +329,7 @@ class ServiceItem extends StatelessWidget {
                       color:
                           isSelected
                               ? Colors.white
-                              : Color.fromRGBO(241, 241, 241, 1),
+                              : Theme.of(context).unselectedWidgetColor,
                     ),
                   ),
                 ],

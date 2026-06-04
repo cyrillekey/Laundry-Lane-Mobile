@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_import
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -69,9 +71,7 @@ class _AddAddressPageState extends ConsumerState<AddAddressPage> {
               onMapCreated: (controller) {
                 mapController = controller;
               },
-              cloudMapId: "835d79a7bbcf05a610562e82",
               mapToolbarEnabled: true,
-
               markers:
                   postion != null
                       ? {

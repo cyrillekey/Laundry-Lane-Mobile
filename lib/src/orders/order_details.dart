@@ -11,7 +11,13 @@ class OrderDetails extends ConsumerWidget {
     final int id = ModalRoute.of(context)!.settings.arguments as int;
     final watchOrderDetails = ref.watch(orderDetailsState(id));
     return Scaffold(
-      appBar: AppBar(title: Text("Order Details"), centerTitle: true),
+      appBar: AppBar(
+        title: Text("Order Details"),
+        centerTitle: true,
+        actions: [
+          IconButton(onPressed: () {}, icon: Icon(Icons.more_horiz_rounded)),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
         child: watchOrderDetails.when(
@@ -21,7 +27,11 @@ class OrderDetails extends ConsumerWidget {
             }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [OrderProgress(order: order.order)],
+              children: [
+                OrderProgress(order: order.order),
+                OrderDetails(),
+                OrderTotal(),
+              ],
             );
           },
           error: (e, s) => Center(child: Text(e.toString())),
@@ -76,5 +86,23 @@ class OrderProgress extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class OrderTotal extends StatelessWidget {
+  const OrderTotal({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+class Orderitems extends StatelessWidget {
+  const Orderitems({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }

@@ -44,13 +44,17 @@ class NotificationsViewState extends ConsumerState<NotificationsView> {
       ),
       body: notifications.when(
         data: (notifications) {
-          return ListView.separated(
-            separatorBuilder: (context, index) => SizedBox(height: 20),
-            padding: EdgeInsets.only(top: 8).copyWith(left: 16, right: 16),
-            itemBuilder:
-                (context, index) =>
-                    NotificationItem(notification: notifications[index]),
-            itemCount: notifications.length,
+          return RefreshIndicator.adaptive(
+            triggerMode: RefreshIndicatorTriggerMode.anywhere,
+            onRefresh: () async => ref.invalidate(notificationsState),
+            child: ListView.separated(
+              separatorBuilder: (context, index) => SizedBox(height: 20),
+              padding: EdgeInsets.only(top: 8).copyWith(left: 16, right: 16),
+              itemBuilder:
+                  (context, index) =>
+                      NotificationItem(notification: notifications[index]),
+              itemCount: notifications.length,
+            ),
           );
         },
         error: (_, __) {
@@ -164,52 +168,60 @@ class NotificationItem extends StatelessWidget {
   final AppNotification notification;
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Container(
-          padding: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            // color: Color.fromRGBO(246, 246, 246, 1),
-            color: Theme.of(context).splashColor,
-            borderRadius: BorderRadius.circular(46),
-          ),
-          child: Icon(TablerIcons.bell, size: 26),
-        ),
-        SizedBox(width: 18),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              notification.title,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+    return InkWell(
+      highlightColor: Theme.of(context).colorScheme.surface,
+      splashColor: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        print(notification.type);
+      },
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              // color: Color.fromRGBO(246, 246, 246, 1),
+              color: Theme.of(context).splashColor,
+              borderRadius: BorderRadius.circular(46),
             ),
-            SizedBox(height: 4),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.7,
-              child: Text(
-                notification.message,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            child: Icon(TablerIcons.bell, size: 26),
+          ),
+          SizedBox(width: 18),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                notification.title,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 4),
+              SizedBox(
+                width: MediaQuery.of(context).size.width * 0.7,
+                child: Text(
+                  notification.message,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Color.fromRGBO(112, 112, 112, 1),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 8),
+              Text(
+                Jiffy.parse(
+                  notification.createdat,
+                ).format(pattern: "dd, MMM, HH:mm a"),
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: Color.fromRGBO(112, 112, 112, 1),
                 ),
               ),
-            ),
-
-            SizedBox(height: 8),
-            Text(
-              Jiffy.parse(
-                notification.createdat,
-              ).format(pattern: "dd, MMM, HH:mm a"),
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Color.fromRGBO(112, 112, 112, 1),
-              ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

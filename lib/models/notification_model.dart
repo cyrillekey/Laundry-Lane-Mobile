@@ -16,6 +16,7 @@ class AppNotification {
   int id;
   String title;
   String message;
+  String? type;
   bool read;
   String? ref;
   String? attachment;
@@ -30,6 +31,7 @@ class AppNotification {
     required this.read,
     required this.ref,
     this.attachment,
+    this.type,
     required this.userId,
     required this.createdat,
     required this.updatedat,
@@ -46,6 +48,7 @@ class AppNotification {
         userId: json["userId"],
         createdat: json["createdat"],
         updatedat: json["updatedat"],
+        type: json['type'],
       );
 
   Map<String, dynamic> toJson() => {
@@ -58,5 +61,6 @@ class AppNotification {
     "userId": userId,
     "createdat": createdat,
     "updatedat": updatedat,
+    "type": type,
   };
 }
