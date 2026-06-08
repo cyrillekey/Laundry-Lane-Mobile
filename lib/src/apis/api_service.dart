@@ -8,6 +8,7 @@ import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/clothing_type.dart';
 import 'package:laundrylane/models/delivery_zone.dart';
 import 'package:laundrylane/models/store_model.dart';
+import 'package:laundrylane/models/store_payment_model.dart';
 import 'package:laundrylane/models/support_models.dart';
 import 'package:laundrylane/models/full_order_details.dart';
 import 'package:laundrylane/models/goecode_reverse.dart';
@@ -18,6 +19,7 @@ import 'package:laundrylane/models/service_model.dart';
 import 'package:laundrylane/providers/store_provider.dart';
 import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/utils/constants.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 final Dio apiDio = Dio(BaseOptions(baseUrl: apiUrl));
 Future<GeocodeReverse?> reverseGeocode(LatLng? latLang) async {
@@ -361,3 +363,34 @@ FutureProvider<List<Stores>> storesState = FutureProvider.autoDispose((
     return [];
   }
 });
+
+FutureProvider<List<StorePaymentMethod>> storePaymentMethodsProvider =
+    FutureProvider((ref) async {
+      try {
+        final token = ref.watch(tokenProvider).value;
+        final CancelToken cancelToken = CancelToken();
+        final storeId = ref.watch(storeProvider).value;
+        ref.onCancel(cancelToken.cancel);
+        final response = await apiDio
+            .get(
+              "/payments/store-method",
+              options: Options(headers: {"Authorization": "Bearer $token"}),
+              cancelToken: cancelToken,
+              queryParameters: {"storeId": storeId},
+            )
+            .then((resp) => resp.data)
+            .onError<DioException>((e, s) {
+              Sentry.captureException(e);
+              return [];
+            });
+        final paymentMethods = List<StorePaymentMethod>.from(
+          response.map((e) {
+            return StorePaymentMethod.fromJson(e);
+          }),
+        );
+        return paymentMethods;
+      } catch (e) {
+        Sentry.captureException(e);
+        return [];
+      }
+    });

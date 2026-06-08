@@ -56,68 +56,76 @@ class _CartPageState extends ConsumerState<CartPage> {
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               children: [
-                SizedBox(
-                  height: 72,
-                  child: ListView.separated(
-                    controller: controller,
-                    itemBuilder:
-                        (context, index) => InkWell(
-                          onTap: () {
-                            pageController.jumpToPage(index);
-                            setState(() {});
-                          },
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                types[index],
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                              ),
-                              SizedBox(height: 2),
-                              Consumer<CartProvider>(
-                                builder: (context, cart, child) {
-                                  int count = cart.items
-                                      .where((e) => e.type == types[index])
-                                      .fold(0, (a, b) => a + b.quantity);
-                                  if (count > 0) {
+                RefreshIndicator.adaptive(
+                  onRefresh: () async => ref.invalidate(clothingTypeState),
+                  child: SizedBox(
+                    height: 72,
+                    child: ListView.separated(
+                      controller: controller,
+                      itemBuilder:
+                          (context, index) => InkWell(
+                            onTap: () {
+                              pageController.jumpToPage(index);
+                              setState(() {});
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  types[index],
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                SizedBox(height: 2),
+                                Consumer<CartProvider>(
+                                  builder: (context, cart, child) {
+                                    int count = cart.items
+                                        .where((e) => e.type == types[index])
+                                        .fold(0, (a, b) => a + b.quantity);
+                                    if (count > 0) {
+                                      return Text(
+                                        "$count items",
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.labelSmall?.copyWith(
+                                          color: Color.fromRGBO(
+                                            19,
+                                            116,
+                                            234,
+                                            1,
+                                          ),
+                                        ),
+                                      );
+                                    }
                                     return Text(
-                                      "$count items",
+                                      "0 items",
                                       style: Theme.of(
                                         context,
                                       ).textTheme.labelSmall?.copyWith(
-                                        color: Color.fromRGBO(19, 116, 234, 1),
+                                        color: Color.fromRGBO(229, 176, 163, 1),
                                       ),
                                     );
-                                  }
-                                  return Text(
-                                    "0 items",
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.labelSmall?.copyWith(
-                                      color: Color.fromRGBO(229, 176, 163, 1),
-                                    ),
-                                  );
-                                },
-                              ),
-                              SizedBox(height: 6),
-                              if (currentPage == index)
-                                Container(
-                                  height: 10,
-                                  width: 10,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(30),
-                                    color: Color.fromRGBO(19, 116, 234, 1),
-                                  ),
+                                  },
                                 ),
-                            ],
+                                SizedBox(height: 6),
+                                if (currentPage == index)
+                                  Container(
+                                    height: 10,
+                                    width: 10,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(30),
+                                      color: Color.fromRGBO(19, 116, 234, 1),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                    separatorBuilder: (context, index) => SizedBox(width: 24),
-                    itemCount: types.length,
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
+                      separatorBuilder: (context, index) => SizedBox(width: 24),
+                      itemCount: types.length,
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                    ),
                   ),
                 ),
                 SizedBox(height: 24),

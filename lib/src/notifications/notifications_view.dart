@@ -117,7 +117,14 @@ class PushNotificationDialog extends StatelessWidget {
             ).textTheme.bodyLarge?.copyWith(color: Theme.of(context).hintColor),
           ),
           SizedBox(height: 20),
-          Container(height: MediaQuery.of(context).size.height * 0.22),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.22,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/notifications_push.png"),
+              ),
+            ),
+          ),
           TextButton(
             onPressed: () async {
               await Permission.notification.request();

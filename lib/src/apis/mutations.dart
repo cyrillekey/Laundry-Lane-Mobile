@@ -424,7 +424,7 @@ Future<DefaultResponse> changePassword(
 
 Future<DefaultResponse> createOrderMutation({
   int? addressId,
-  required int serviceTypeId,
+  int? serviceTypeId,
   required int catalogId,
   required String type,
   String? instructions,

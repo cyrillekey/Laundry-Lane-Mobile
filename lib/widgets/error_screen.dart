@@ -15,18 +15,23 @@ class ErrorScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-            Image.asset("assets/images/laundry_error.png"),
-            SizedBox(height: 12),
+            SizedBox(height: 48),
+            Image.asset(
+              "assets/images/laundry_error.png",
+              height: MediaQuery.of(context).size.height * 0.3,
+            ),
+
             Text(
-              "Opps! Something went wrong!",
+              "Oops!.Something went wrong!",
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            SizedBox(height: 12),
+            SizedBox(height: 32),
             Text(
               "We encountered an error in the application. Do not worry it is not your fault. The error has been logged and will be fixed soon.",
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyLarge,
+              textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24),
+            SizedBox(height: 36),
             ProgressButton(
               label: "Report Error",
               onPress:
@@ -36,7 +41,7 @@ class ErrorScreen extends StatelessWidget {
                     hint: Hint.withMap({"name": details.context?.name}),
                   ),
             ),
-            SizedBox(height: 24),
+            Spacer(),
           ],
         ),
       ),

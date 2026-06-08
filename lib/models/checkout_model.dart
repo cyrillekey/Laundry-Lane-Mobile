@@ -10,7 +10,7 @@ class CheckoutModel {
   final String? deliveryWindow;
   final num? weight;
   final String washingPreference;
-  final ServiceType serviceType;
+  final ServiceType? serviceType;
   final String? paymentMethod;
 
   CheckoutModel({
@@ -20,7 +20,7 @@ class CheckoutModel {
     this.pickupTime,
     this.deliveryWindow,
     required this.washingPreference,
-    required this.serviceType,
+    this.serviceType,
     this.weight,
     this.paymentMethod,
   });
@@ -31,7 +31,7 @@ class CheckoutModel {
     "pickupTime": pickupTime?.toString(),
     "deliveryWindow": deliveryWindow,
     "washingPreference": washingPreference,
-    "serviceType": serviceType.toJson(),
+    "serviceType": serviceType?.toJson(),
     "weight": weight,
     "paymentMethod": paymentMethod,
   };

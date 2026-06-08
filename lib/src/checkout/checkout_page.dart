@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,7 +30,6 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    final serviceListenter = ref.watch(serviceTypeState);
     final catalog = ModalRoute.of(context)?.settings.arguments as Catalog;
     return FormBuilder(
       initialValue: {"estimatedWeight": "1", "pickupSelf": false},
@@ -44,7 +44,7 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
               final service = ref
                   .read(serviceTypeState)
                   .value!
-                  .firstWhere((e) => e.id == formValues['serviceDays']);
+                  .firstWhereOrNull((e) => e.id == formValues['serviceDays']);
               String? deliveryWindow;
 
               if (formValues['pickupSelf'] == false &&
@@ -527,127 +527,8 @@ class _CheckoutPageState extends ConsumerState<CheckoutPage> {
                   ),
                   SizedBox(height: 16),
                 ],
-                Text(
-                  "Service Type",
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                SizedBox(height: 16),
-                FormBuilderField<int?>(
-                  builder: (formBuiler) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        serviceListenter.when(
-                          data: (services) {
-                            return SizedBox(
-                              height: 100,
-                              width: MediaQuery.of(context).size.width,
-                              child: ListView.separated(
-                                separatorBuilder:
-                                    (context, index) => SizedBox(width: 12),
-                                scrollDirection: Axis.horizontal,
-                                itemBuilder: (context, index) {
-                                  final service = services[index];
-                                  return ServiceDay(
-                                    id: service.id,
-                                    title: service.name ?? "",
-                                    days: service.serviceTimelines ?? "",
-                                    price:
-                                        service.price == 0
-                                            ? "No extra fee"
-                                            : "Extra Ksh ${service.price}",
-                                    formBuilderState: formBuiler,
-                                  );
-                                },
-                                itemCount: services.length,
-                              ),
-                            );
-                          },
-                          loading:
-                              () => SizedBox(
-                                height: 100,
-                                width: MediaQuery.of(context).size.width,
-                                child: ListView.separated(
-                                  separatorBuilder:
-                                      (context, index) => SizedBox(width: 4),
-                                  scrollDirection: Axis.horizontal,
-                                  itemBuilder: (context, index) {
-                                    return Shimmer.fromColors(
-                                      baseColor:
-                                          Theme.of(
-                                            context,
-                                          ).scaffoldBackgroundColor,
-                                      highlightColor:
-                                          Theme.of(context).highlightColor,
-                                      child: Container(
-                                        height: 100,
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                            0.3,
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).cardColor,
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  itemCount: 3,
-                                ),
-                              ),
-                          error:
-                              (error, stackTrace) => SizedBox(
-                                height: 80,
-                                width: MediaQuery.of(context).size.width,
-                                child: ListView.separated(
-                                  separatorBuilder:
-                                      (context, index) => SizedBox(width: 4),
-                                  scrollDirection: Axis.horizontal,
-                                  itemBuilder: (context, index) {
-                                    return Shimmer.fromColors(
-                                      baseColor:
-                                          Theme.of(
-                                            context,
-                                          ).scaffoldBackgroundColor,
-                                      highlightColor:
-                                          Theme.of(context).highlightColor,
-                                      child: Container(
-                                        height: 100,
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                            0.3,
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).cardColor,
-                                          borderRadius: BorderRadius.circular(
-                                            20,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  itemCount: 3,
-                                ),
-                              ),
-                        ),
+                ServiceType(),
 
-                        if (formBuiler.hasError) ...[
-                          SizedBox(height: 12),
-                          Text(
-                            formBuiler.errorText ?? "",
-                            style: TextStyle(color: Colors.red, fontSize: 12),
-                          ),
-                        ],
-                      ],
-                    );
-                  },
-                  name: "serviceDays",
-                  validator: FormBuilderValidators.required(),
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                ),
-
-                SizedBox(height: 18),
                 Text(
                   "Select Washing Preference",
                   style: Theme.of(context).textTheme.bodyLarge,
@@ -727,17 +608,19 @@ class ServiceDay extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           color:
               formBuilderState.value == id
-                  ? Theme.of(context).primaryColor
-                  : Color.fromRGBO(246, 246, 246, 1),
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).unselectedWidgetColor,
         ),
         child: Column(
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
                 color:
-                    formBuilderState.value == id ? Colors.white : Colors.black,
+                    formBuilderState.value == id
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).canvasColor,
               ),
             ),
             SizedBox(height: 2),
@@ -746,19 +629,19 @@ class ServiceDay extends StatelessWidget {
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color:
                     formBuilderState.value == id
-                        ? Colors.white
-                        : Color.fromRGBO(132, 137, 147, 1),
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).canvasColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
             SizedBox(height: 2),
             Text(
               price,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color:
                     formBuilderState.value == id
-                        ? Colors.white
-                        : Color.fromRGBO(132, 137, 147, 1),
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).canvasColor,
               ),
             ),
           ],
@@ -846,6 +729,122 @@ class WashItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ServiceType extends ConsumerWidget {
+  const ServiceType({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final serviceListenter = ref.watch(serviceTypeState);
+    return serviceListenter.when(
+      data: (services) {
+        if (services.isEmpty) {
+          return SizedBox.shrink();
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Service Type", style: Theme.of(context).textTheme.bodyLarge),
+            SizedBox(height: 16),
+            FormBuilderField<int?>(
+              builder: (formBuiler) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 100,
+                      width: MediaQuery.of(context).size.width,
+                      child: ListView.separated(
+                        separatorBuilder:
+                            (context, index) => SizedBox(width: 12),
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          final service = services[index];
+                          return ServiceDay(
+                            id: service.id,
+                            title: service.name ?? "",
+                            days: service.serviceTimelines ?? "",
+                            price:
+                                service.price == 0
+                                    ? "No extra fee"
+                                    : "Extra Ksh ${service.price}",
+                            formBuilderState: formBuiler,
+                          );
+                        },
+                        itemCount: services.length,
+                      ),
+                    ),
+
+                    if (formBuiler.hasError) ...[
+                      SizedBox(height: 12),
+                      Text(
+                        formBuiler.errorText ?? "",
+                        style: TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ],
+                    SizedBox(height: 18),
+                  ],
+                );
+              },
+              name: "serviceDays",
+              validator: FormBuilderValidators.required(),
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+            ),
+          ],
+        );
+      },
+      loading:
+          () => SizedBox(
+            height: 100,
+            width: MediaQuery.of(context).size.width,
+            child: ListView.separated(
+              separatorBuilder: (context, index) => SizedBox(width: 4),
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                return Shimmer.fromColors(
+                  baseColor: Theme.of(context).scaffoldBackgroundColor,
+                  highlightColor: Theme.of(context).highlightColor,
+                  child: Container(
+                    height: 100,
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                );
+              },
+              itemCount: 3,
+            ),
+          ),
+      error:
+          (error, stackTrace) => SizedBox(
+            height: 80,
+            width: MediaQuery.of(context).size.width,
+            child: ListView.separated(
+              separatorBuilder: (context, index) => SizedBox(width: 4),
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                return Shimmer.fromColors(
+                  baseColor: Theme.of(context).scaffoldBackgroundColor,
+                  highlightColor: Theme.of(context).highlightColor,
+                  child: Container(
+                    height: 100,
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                );
+              },
+              itemCount: 3,
+            ),
+          ),
     );
   }
 }
