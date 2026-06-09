@@ -42,8 +42,10 @@ class PaymentMethod {
   final String name;
   final dynamic description;
   final dynamic icon;
+  final ProviderType type;
 
   PaymentMethod({
+    required this.type,
     required this.id,
     required this.name,
     required this.description,
@@ -55,12 +57,27 @@ class PaymentMethod {
     name: json["name"],
     description: json["description"],
     icon: json["icon"],
+    type: ProviderType.fromString(json['type']),
   );
 
   Map<String, dynamic> toJson() => {
     "id": id,
     "name": name,
     "description": description,
+    "type": type,
     "icon": icon,
   };
+}
+
+enum ProviderType {
+  cash("CASH"),
+  card("CARD"),
+  mobile("MOBILE"),
+  offline("OFFLINE");
+
+  final String name;
+  const ProviderType(this.name);
+  static ProviderType fromString(String status) {
+    return ProviderType.values.firstWhere((element) => element.name == status);
+  }
 }

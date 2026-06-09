@@ -1,13 +1,14 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Consumer;
 import 'package:intl/intl.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/checkout_model.dart';
 import 'package:laundrylane/models/service_model.dart';
+import 'package:laundrylane/models/store_payment_model.dart';
 import 'package:laundrylane/providers/card_provider.dart';
 import 'package:laundrylane/providers/store_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
@@ -190,61 +191,111 @@ class PaymentRadio extends ConsumerWidget {
             return RadioGroup<int>(
               groupValue: formBuilderState.value,
               onChanged: (value) => formBuilderState.didChange(value),
-              child: Column(
-                children:
-                    paymentMethods
-                        .map(
-                          (item) => [
-                            RadioListTile<int>(
-                              horizontalTitleGap: 8,
-                              minVerticalPadding: 12,
-                              tileColor:
-                                  formBuilderState.value == item.id
-                                      ? Theme.of(
-                                        context,
-                                      ).primaryColor.withValues(alpha: 0.1)
-                                      : Colors.transparent,
-                              titleAlignment: ListTileTitleAlignment.top,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(
-                                  width:
-                                      formBuilderState.value == item.id
-                                          ? 1.5
-                                          : 1,
-                                  color:
-                                      formBuilderState.value == item.id
-                                          ? Theme.of(
-                                            context,
-                                          ).colorScheme.primary
-                                          : Theme.of(
-                                            context,
-                                          ).unselectedWidgetColor,
-                                ),
-                              ),
-                              value: item.id,
-                              title: Text(
-                                item.paymentMethod.name,
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.w400),
-                              ),
-                              subtitle: Text(item.paymentMethod.description),
+              child: SizedBox.fromSize(
+                child: Column(
+                  children:
+                      paymentMethods
+                          .map(
+                            (method) => PaymentRadioItem(
+                              paymentMethod: method,
+                              selectedId: formBuilderState.value,
+                              didChange: formBuilderState.didChange,
                             ),
-                            SizedBox(height: 12),
-                          ],
-                        )
-                        .flattened
-                        .toList(),
+                          )
+                          .toList(),
+                ),
               ),
             );
           },
         );
       },
       loading: () {
-        return const CircularProgressIndicator();
+        return Center(child: const CircularProgressIndicator());
       },
       error: (error, stackTrace) => Center(child: Text(error.toString())),
     );
+  }
+}
+
+class PaymentRadioItem extends StatelessWidget {
+  const PaymentRadioItem({
+    super.key,
+    required this.paymentMethod,
+    this.selectedId,
+    required this.didChange,
+  });
+  final StorePaymentMethod paymentMethod;
+  final int? selectedId;
+  final void Function(int?) didChange;
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => didChange(paymentMethod.id),
+      child: Card.filled(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+          side: BorderSide(
+            width: selectedId == paymentMethod.id ? 2 : 1,
+            color:
+                selectedId == paymentMethod.id
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).highlightColor,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Radio(value: paymentMethod.id),
+                  SizedBox(width: 4),
+                  Text(
+                    paymentMethod.paymentMethod.name,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+              if (selectedId == paymentMethod.id)
+                PaymentMethodForm(type: paymentMethod.paymentMethod.type),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PaymentMethodForm extends StatelessWidget {
+  const PaymentMethodForm({super.key, required this.type});
+  final ProviderType type;
+  @override
+  Widget build(BuildContext context) {
+    switch (type) {
+      case ProviderType.mobile:
+        return Column(
+          children: [
+            SizedBox(height: 6),
+            FormBuilderTextField(
+              name: "mobile",
+              decoration: InputDecoration.collapsed(hintText: "+254723456789"),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+                FormBuilderValidators.minLength(10),
+              ]),
+              keyboardType: TextInputType.phone,
+            ),
+            SizedBox(height: 6),
+          ],
+        );
+      case ProviderType.card:
+        return Column(children: []);
+      case ProviderType.cash:
+      case ProviderType.offline:
+        return SizedBox.shrink();
+    }
   }
 }
 
