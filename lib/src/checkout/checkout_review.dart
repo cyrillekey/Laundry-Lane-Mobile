@@ -16,6 +16,7 @@ import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/notifications/service.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
+import 'package:laundrylane/src/payments/pay.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:provider/provider.dart' show Consumer;
@@ -129,13 +130,23 @@ class _OrderSubmitButton extends ConsumerWidget {
                   ref.invalidate(ongoingOrderState);
                   ref.invalidate(notificationCountState);
                   ref.invalidate(notificationsState);
-                  showModalBottomSheet(
-                    context: context,
-                    elevation: 1,
-                    showDragHandle: true,
-                    isDismissible: true,
-                    builder: (context) => SuccessSheet(orderId: 1),
-                  );
+                  if (checkoutModel.catalog.bulk == true) {
+                    showModalBottomSheet(
+                      context: context,
+                      elevation: 1,
+                      showDragHandle: true,
+                      isDismissible: true,
+                      builder: (context) => SuccessSheet(orderId: 1),
+                    );
+                  }
+                } else {
+                  if (context.mounted) {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      MakePayment.routeName,
+                      ModalRoute.withName(HomePage.routeName),
+                      arguments: response.id,
+                    );
+                  }
                 }
               } else {
                 if (context.mounted) {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_new_badger/flutter_new_badger.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/user_model.dart';
 import 'package:laundrylane/src/address/add_address.dart';
@@ -19,6 +20,7 @@ import 'package:laundrylane/src/onboarding/onboarding_view.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
 import 'package:laundrylane/src/payments/add_card.dart';
+import 'package:laundrylane/src/payments/pay.dart';
 import 'package:laundrylane/src/payments/payment_methods.dart';
 import 'package:laundrylane/src/profile/help_center.dart';
 import 'package:laundrylane/src/profile/update_password.dart';
@@ -34,19 +36,35 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The Widget that configures your application.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatefulHookConsumerWidget {
   const MyApp({super.key, required this.sharedPreferences});
-
   final SharedPreferences sharedPreferences;
+
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<MyApp> createState() => MyAppState();
+}
+
+class MyAppState extends ConsumerState<MyApp> {
+  late AppLifecycleListener? appLifecycleState;
+  @override
+  void initState() {
+    super.initState();
+    appLifecycleState = AppLifecycleListener(
+      onResume: () {
+        FlutterNewBadger.removeBadge();
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Glue the SettingsController to the MaterialApp.
     //
     // The ListenableBuilder Widget listens to the SettingsController for changes.
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
-    String? token = (sharedPreferences.getString("token"));
-    bool onboarded = (sharedPreferences.getBool("onboarded") == true);
-    bool isThemeSet = sharedPreferences.getBool("isDark") != null;
+    String? token = (widget.sharedPreferences.getString("token"));
+    bool onboarded = (widget.sharedPreferences.getBool("onboarded") == true);
+    bool isThemeSet = widget.sharedPreferences.getBool("isDark") != null;
     // Retrieves the default theme for the platform
     //TextTheme textTheme = Theme.of(context).textTheme;
 
@@ -60,7 +78,7 @@ class MyApp extends ConsumerWidget {
     MaterialTheme theme = MaterialTheme(textTheme);
     final watchTheme = ref.watch(themeProvider).value;
     // final storeId = sharedPreferences.get("store");
-    final userString = sharedPreferences.getString('user');
+    final userString = widget.sharedPreferences.getString('user');
     final user =
         userString == null ? null : UserModel.fromJson(jsonDecode(userString));
 
@@ -129,6 +147,7 @@ class MyApp extends ConsumerWidget {
             (context) => const NotificationSettings(),
         StoreSelectPage.routeName: (context) => const StoreSelectPage(),
         EmailVerifyPage.routeName: (context) => const EmailVerifyPage(),
+        MakePayment.routeName: (context) => const MakePayment(),
       },
 
       // Define a function to handle named routes in order to support
