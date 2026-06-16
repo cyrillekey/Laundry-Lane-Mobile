@@ -1,14 +1,16 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Consumer;
 import 'package:intl/intl.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/checkout_model.dart';
 import 'package:laundrylane/models/service_model.dart';
+import 'package:laundrylane/models/store_payment_model.dart';
 import 'package:laundrylane/providers/card_provider.dart';
+import 'package:laundrylane/providers/store_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
@@ -50,11 +52,11 @@ class _CheckoutReviewState extends State<CheckoutReview> {
                   weight: checkoutModel.weight ?? 1,
                 ),
                 SizedBox(height: 12),
+
                 if (checkoutModel.orderType != OrderType.pickup) ...[
                   AddressWidget(),
                   SizedBox(height: 12),
                 ],
-
                 if (checkoutModel.catalog.bulk == false) ...[
                   SizedBox(height: 20),
                   Text("Choose Payment Method"),
@@ -106,8 +108,9 @@ class _OrderSubmitButton extends ConsumerWidget {
             if (formKey.currentState?.saveAndValidate() == true) {
               final address = ref.read(addressState).value;
               final response = await createOrderMutation(
-                addressId: address!.id!,
-                serviceTypeId: checkoutModel.serviceType.id,
+                storeId: ref.read(storeProvider).value!,
+                addressId: address?.id,
+                serviceTypeId: checkoutModel.serviceType?.id,
                 catalogId: checkoutModel.catalog.id!,
                 type: checkoutModel.orderType.value,
                 pickupDate: checkoutModel.pickupDate?.toString(),
@@ -117,7 +120,8 @@ class _OrderSubmitButton extends ConsumerWidget {
                 washType: checkoutModel.washingPreference,
                 instructions: formKey.currentState?.value["instructions"],
                 weight: checkoutModel.weight,
-                paymentMethod: formKey.currentState?.value['payment_method'],
+                paymentMethod:
+                    formKey.currentState?.value['payment_method'] ?? "CASH",
               );
               if (response.success) {
                 if (context.mounted) {
@@ -173,75 +177,125 @@ class _OrderSubmitButton extends ConsumerWidget {
   }
 }
 
-class PaymentRadio extends StatelessWidget {
+class PaymentRadio extends ConsumerWidget {
   const PaymentRadio({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    List<Map> paymentMethods = [
-      {
-        "name": "Online Payment",
-        "value": "MOBILE",
-        "description":
-            "Pay online using M-Pesa,Airtel money or credit/debit card",
-      },
-      {
-        "name": "Cash on Delivery",
-        "value": "CASH",
-        "description": "Make payment after delivery of your laundry",
-      },
-    ];
-    return FormBuilderField<String>(
-      name: "payment_method",
-      builder: (formBuilderState) {
-        return RadioGroup<String>(
-          groupValue: formBuilderState.value ?? "ONLINE_PAYMENT",
-          onChanged: (value) => formBuilderState.didChange(value),
-          child: Column(
-            children:
-                paymentMethods
-                    .map(
-                      (item) => [
-                        RadioListTile<String>(
-                          horizontalTitleGap: 8,
-                          minVerticalPadding: 12,
-                          tileColor:
-                              formBuilderState.value == item['value']
-                                  ? Theme.of(
-                                    context,
-                                  ).primaryColor.withValues(alpha: 0.1)
-                                  : Colors.transparent,
-                          titleAlignment: ListTileTitleAlignment.top,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                              width:
-                                  formBuilderState.value == item['value']
-                                      ? 1.5
-                                      : 1,
-                              color:
-                                  formBuilderState.value == item['value']
-                                      ? Theme.of(context).primaryColor
-                                      : Theme.of(context).unselectedWidgetColor,
+  Widget build(BuildContext context, ref) {
+    final paymentMethodsState = ref.watch(storePaymentMethodsProvider);
+    return paymentMethodsState.when(
+      data: (paymentMethods) {
+        return FormBuilderField<int>(
+          name: "payment_method",
+          builder: (formBuilderState) {
+            return RadioGroup<int>(
+              groupValue: formBuilderState.value,
+              onChanged: (value) => formBuilderState.didChange(value),
+              child: SizedBox.fromSize(
+                child: Column(
+                  children:
+                      paymentMethods
+                          .map(
+                            (method) => PaymentRadioItem(
+                              paymentMethod: method,
+                              selectedId: formBuilderState.value,
+                              didChange: formBuilderState.didChange,
                             ),
-                          ),
-                          value: item['value'],
-                          title: Text(
-                            item['name'],
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w400),
-                          ),
-                          subtitle: Text(item['description']),
-                        ),
-                        SizedBox(height: 12),
-                      ],
-                    )
-                    .flattened
-                    .toList(),
-          ),
+                          )
+                          .toList(),
+                ),
+              ),
+            );
+          },
         );
       },
+      loading: () {
+        return Center(child: const CircularProgressIndicator());
+      },
+      error: (error, stackTrace) => Center(child: Text(error.toString())),
     );
+  }
+}
+
+class PaymentRadioItem extends StatelessWidget {
+  const PaymentRadioItem({
+    super.key,
+    required this.paymentMethod,
+    this.selectedId,
+    required this.didChange,
+  });
+  final StorePaymentMethod paymentMethod;
+  final int? selectedId;
+  final void Function(int?) didChange;
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => didChange(paymentMethod.id),
+      child: Card.filled(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+          side: BorderSide(
+            width: selectedId == paymentMethod.id ? 2 : 1,
+            color:
+                selectedId == paymentMethod.id
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).highlightColor,
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Radio(value: paymentMethod.id),
+                  SizedBox(width: 4),
+                  Text(
+                    paymentMethod.paymentMethod.name,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+              if (selectedId == paymentMethod.id)
+                PaymentMethodForm(type: paymentMethod.paymentMethod.type),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PaymentMethodForm extends StatelessWidget {
+  const PaymentMethodForm({super.key, required this.type});
+  final ProviderType type;
+  @override
+  Widget build(BuildContext context) {
+    switch (type) {
+      case ProviderType.mobile:
+        return Column(
+          children: [
+            SizedBox(height: 6),
+            FormBuilderTextField(
+              name: "mobile",
+              decoration: InputDecoration.collapsed(hintText: "+254723456789"),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+                FormBuilderValidators.minLength(10),
+              ]),
+              keyboardType: TextInputType.phone,
+            ),
+            SizedBox(height: 6),
+          ],
+        );
+      case ProviderType.card:
+        return Column(children: []);
+      case ProviderType.cash:
+      case ProviderType.offline:
+        return SizedBox.shrink();
+    }
   }
 }
 
@@ -249,12 +303,12 @@ class Subtotal extends ConsumerWidget {
   const Subtotal({
     super.key,
     required this.catalog,
-    required this.serviceType,
+    this.serviceType,
     required this.weight,
   });
   final Catalog catalog;
   final num weight;
-  final ServiceType serviceType;
+  final ServiceType? serviceType;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -294,7 +348,7 @@ class Subtotal extends ConsumerWidget {
                 catalog.bulk == true
                     ? (catalog.price ?? 0) * weight
                     : cartTotal;
-            num serviceFee = serviceType.price;
+            num serviceFee = serviceType?.price ?? 0;
 
             num deliveryFee = zone?.price ?? 0;
             num total = subtotal + serviceFee;
@@ -442,6 +496,9 @@ class AddressWidget extends ConsumerWidget {
     final addressListener = ref.watch(addressState);
     return addressListener.when(
       data: (address) {
+        if (address == null) {
+          return Container();
+        }
         return Card.outlined(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,7 +529,7 @@ class AddressWidget extends ConsumerWidget {
               SizedBox(height: 16),
               FutureBuilder(
                 future: reverseGeocode(
-                  LatLng(address!.latitude!, address.longitude!),
+                  LatLng(address.latitude!, address.longitude!),
                 ),
                 builder: (context, asyncSnapshot) {
                   final reverseAddress = asyncSnapshot.data;

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ProgressButton extends StatefulWidget {
   const ProgressButton({
@@ -65,13 +64,13 @@ class _ProgressButtonState extends State<ProgressButton> {
           widget.style ??
           ButtonStyle(
             backgroundColor: WidgetStatePropertyAll(
-              Theme.of(context).primaryColor,
+              Theme.of(context).colorScheme.primary,
             ),
             shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             fixedSize: WidgetStatePropertyAll(
-              Size(MediaQuery.of(context).size.width, 46),
+              Size(MediaQuery.of(context).size.width, 50),
             ),
           ),
       child:
@@ -83,7 +82,11 @@ class _ProgressButtonState extends State<ProgressButton> {
               : widget.child ??
                   Text(
                     widget.label ?? "Submit",
-                    style: widget.textStyle ?? GoogleFonts.almarai(),
+                    style:
+                        widget.textStyle ??
+                        Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                   ),
     );
   }

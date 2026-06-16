@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -6,7 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/cart/cart_page.dart';
-import 'package:laundrylane/theme/util.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:string_extensions/string_extensions.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
@@ -25,8 +25,6 @@ class _ServiceSelectState extends ConsumerState<ServiceSelect> {
   @override
   Widget build(BuildContext context) {
     final catalogListener = ref.watch(catalogState);
-    final watchTheme = ref.watch(themeProvider).value;
-    final isDarkTheme = watchTheme == ThemeMode.dark;
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Visibility(
@@ -133,11 +131,11 @@ class _ServiceSelectState extends ConsumerState<ServiceSelect> {
               ),
             ),
             SizedBox(height: 16),
-            catalogListener.when(
-              data: (services) {
-                return SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.50,
-                  child: ListView.separated(
+            Expanded(
+              child: catalogListener.when(
+                data: (services) {
+                  return ListView.separated(
+                    shrinkWrap: true,
                     padding: EdgeInsets.symmetric(horizontal: 12),
                     separatorBuilder: (_, __) => SizedBox(height: 10),
                     itemCount: services.length,
@@ -146,7 +144,6 @@ class _ServiceSelectState extends ConsumerState<ServiceSelect> {
                       return ServiceItem(
                         catalog: service,
                         isSelected: selected == service.id,
-                        isDarkTheme: isDarkTheme,
                         onSelected: (value) {
                           setState(() {
                             selected = value;
@@ -154,41 +151,44 @@ class _ServiceSelectState extends ConsumerState<ServiceSelect> {
                         },
                       );
                     },
-                  ),
-                );
-              },
-              error: (_, __) {
-                return Center(child: Text("Something went wrong"));
-              },
-              loading: () {
-                return SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.59,
-                  child: ListView.separated(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    separatorBuilder: (_, __) => SizedBox(height: 10),
-                    itemCount: 6,
-                    itemBuilder: (_, index) {
-                      return Shimmer.fromColors(
-                        baseColor: Theme.of(context).scaffoldBackgroundColor,
-                        highlightColor: Theme.of(context).highlightColor,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey, width: 1.5),
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(20),
+                  );
+                },
+                error: (_, __) {
+                  return Center(child: Text("Something went wrong"));
+                },
+                loading: () {
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.59,
+                    child: ListView.separated(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      separatorBuilder: (_, __) => SizedBox(height: 10),
+                      itemCount: 6,
+                      itemBuilder: (_, index) {
+                        return Shimmer.fromColors(
+                          baseColor: Theme.of(context).scaffoldBackgroundColor,
+                          highlightColor: Theme.of(context).highlightColor,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.grey,
+                                width: 1.5,
+                              ),
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height * 0.18,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
                           ),
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height * 0.18,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -205,14 +205,12 @@ class ServiceItem extends StatelessWidget {
     required this.isSelected,
     required this.onSelected,
     required this.catalog,
-    required this.isDarkTheme,
   });
 
   final OnSelected onSelected;
   final bool isSelected;
 
   final Catalog catalog;
-  final bool isDarkTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -227,9 +225,9 @@ class ServiceItem extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(
             color:
-                isDarkTheme == true
-                    ? Theme.of(context).focusColor
-                    : Color.fromRGBO(243, 243, 245, 1),
+                isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).highlightColor,
             width: 1.5,
           ),
           color: Theme.of(context).cardTheme.color,
@@ -246,20 +244,20 @@ class ServiceItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CircleAvatar(
-                    backgroundColor:
-                        isDarkTheme
-                            ? Theme.of(context).primaryColorDark
-                            : Theme.of(context).primaryColor,
-                    child: SvgPicture.network(
-                      catalog.imageUrl!,
-                      height: 26,
-                      colorFilter: ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
+                  CachedNetworkImage(
+                    imageUrl: catalog.imageUrl ?? "",
+                    errorWidget:
+                        (context, url, error) => CircleAvatar(
+                          child: SvgPicture.asset(
+                            "assets/svgs/laundry-washer-svgrepo-com.svg",
+                            height: 32,
+                          ),
+                        ),
+                    imageBuilder:
+                        (context, imageProvider) =>
+                            CircleAvatar(backgroundImage: imageProvider),
                   ),
+
                   SizedBox(width: 6),
                   Column(
                     mainAxisSize: MainAxisSize.max,
@@ -316,12 +314,12 @@ class ServiceItem extends StatelessWidget {
                       color:
                           isSelected
                               ? Color.fromRGBO(116, 19, 209, 1)
-                              : Colors.white,
+                              : Theme.of(context).colorScheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(
                         color:
                             isSelected
-                                ? Colors.white
+                                ? Color.fromRGBO(116, 19, 209, 1)
                                 : Color.fromRGBO(241, 241, 241, 1),
                       ),
                     ),
@@ -331,7 +329,7 @@ class ServiceItem extends StatelessWidget {
                       color:
                           isSelected
                               ? Colors.white
-                              : Color.fromRGBO(241, 241, 241, 1),
+                              : Theme.of(context).unselectedWidgetColor,
                     ),
                   ),
                 ],

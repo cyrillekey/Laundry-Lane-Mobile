@@ -10,20 +10,20 @@ String orderToJson(List<Order> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class Order {
-  int? id;
-  DateTime? date;
+  int id;
+  DateTime date;
   DateTime? pickupDate;
   String? pickupTime;
-  String? orderStatus;
-  String? orderType;
+  String orderStatus;
+  String orderType;
   String? deliveryWindow;
   String? instructions;
   dynamic weight;
   String? washType;
   int? deliveryFee;
-  int? total;
+  int total;
   int? productCatalogId;
-  int? userId;
+  int userId;
   dynamic deliveryZoneId;
   int? serviceTypeId;
   dynamic addressId;
@@ -34,20 +34,20 @@ class Order {
   int? itemsCount;
 
   Order({
-    this.id,
-    this.date,
+    required this.id,
+    required this.date,
     this.pickupDate,
     this.pickupTime,
-    this.orderStatus,
-    this.orderType,
+    required this.orderStatus,
+    required this.orderType,
     this.deliveryWindow,
     this.instructions,
     this.weight,
     this.washType,
     this.deliveryFee,
-    this.total,
+    required this.total,
     this.productCatalogId,
-    this.userId,
+    required this.userId,
     this.deliveryZoneId,
     this.serviceTypeId,
     this.addressId,
@@ -60,7 +60,7 @@ class Order {
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
     id: json["id"],
-    date: json["date"] == null ? null : DateTime.parse(json["date"]),
+    date: json["date"] == null ? DateTime.now() : DateTime.parse(json["date"]),
     pickupDate:
         json["pickupDate"] == null ? null : DateTime.parse(json["pickupDate"]),
     pickupTime: json["pickupTime"],
@@ -94,7 +94,7 @@ class Order {
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "date": date?.toIso8601String(),
+    "date": date.toIso8601String(),
     "pickupDate": pickupDate?.toIso8601String(),
     "pickupTime": pickupTime,
     "orderStatus": orderStatus,

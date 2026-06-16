@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -25,6 +27,7 @@ class StoreSelectPage extends StatefulHookConsumerWidget {
 
 class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
   GoogleMapController? mapController;
+
   LatLng? postion;
 
   void initPosition() async {
@@ -51,7 +54,52 @@ class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
   Widget build(BuildContext context) {
     final watchStores = ref.watch(storesState);
     return Scaffold(
-      appBar: AppBar(title: const Text("Select Store"), centerTitle: true),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.of(context).pushNamed(HomePage.routeName);
+        },
+        icon: Icon(TablerIcons.player_skip_forward),
+        label: Text("Skip", style: Theme.of(context).textTheme.bodyLarge),
+      ),
+      appBar: AppBar(
+        title: const Text("Select Store"),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: StoreSearchDelegate(
+                  onSelected: (store) {
+                    Navigator.of(context).pop();
+                    postion = LatLng(
+                      store.latitude.toDouble(),
+                      store.longitude.toDouble(),
+                    );
+                    mapController?.animateCamera(
+                      CameraUpdate.newLatLng(postion!),
+                    );
+                    showDialog(
+                      context: context,
+                      useSafeArea: true,
+                      builder:
+                          (context) => Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            insetPadding: EdgeInsets.symmetric(horizontal: 8),
+                            alignment: Alignment.bottomCenter,
+                            child: StoreSelectItem(store: store),
+                          ),
+                    );
+                  },
+                ),
+              );
+            },
+            icon: Icon(TablerIcons.search),
+          ),
+        ],
+      ),
       body: watchStores.when(
         data: (stores) {
           return FutureBuilder(
@@ -67,17 +115,23 @@ class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
                       innerBorderRadius: 10,
                       child: Row(
                         children: [
-                          SizedBox(width: 12),
-                          CircleAvatar(child: Icon(TablerIcons.location)),
                           SizedBox(width: 8),
-                          Text(
-                            store.name,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                          CircleAvatar(
+                            radius: 18,
+                            child: Icon(TablerIcons.location),
+                          ),
+                          SizedBox(width: 6),
+                          SizedBox(
+                            width: 160,
+                            child: Text(
+                              store.name,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -86,64 +140,70 @@ class _StoreSelectPageState extends ConsumerState<StoreSelectPage> {
               ),
             ),
             builder: (context, asyncSnapshot) {
-              return GoogleMap(
-                zoomControlsEnabled: true,
-                scrollGesturesEnabled: true,
-                onMapCreated: (controller) {
-                  mapController = controller;
-                },
-                markers: Set<Marker>.of(
-                  stores.map(
-                    (store) => Marker(
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          useSafeArea: true,
-                          builder:
-                              (context) => Dialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
+              return RefreshIndicator.adaptive(
+                onRefresh: () async => ref.invalidate(storeProvider),
+                child: GoogleMap(
+                  zoomControlsEnabled: true,
+                  scrollGesturesEnabled: true,
+                  onMapCreated: (controller) {
+                    mapController = controller;
+                  },
+                  markers: Set<Marker>.of(
+                    stores.map(
+                      (store) => Marker(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            useSafeArea: true,
+                            builder:
+                                (context) => Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  insetPadding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  alignment: Alignment.bottomCenter,
+                                  child: StoreSelectItem(store: store),
                                 ),
-                                insetPadding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                alignment: Alignment.bottomCenter,
-                                child: StoreSelectItem(store: store),
-                              ),
-                        );
-                      },
-                      markerId: MarkerId(store.id.toString()),
-                      icon:
-                          asyncSnapshot.data?[stores.indexOf(store)] ??
-                          BitmapDescriptor.defaultMarker,
+                          );
+                        },
+                        markerId: MarkerId(store.id.toString()),
+                        icon:
+                            asyncSnapshot.data?[stores.indexOf(store)] ??
+                            BitmapDescriptor.defaultMarker,
 
-                      position: LatLng(
-                        store.latitude.toDouble(),
-                        store.longitude.toDouble(),
+                        position: LatLng(
+                          store.latitude.toDouble(),
+                          store.longitude.toDouble(),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                onTap: (argument) {
-                  setState(() {
-                    postion = argument;
-                  });
-                  mapController!.animateCamera(
-                    CameraUpdate.newLatLng(argument),
-                  );
-                },
-                cloudMapId:
-                    Platform.isAndroid
-                        ? "835d79a7bbcf05a6db02109c"
-                        : "835d79a7bbcf05a610562e82",
-                compassEnabled: true,
-                zoomGesturesEnabled: true,
-                myLocationEnabled: true,
-                buildingsEnabled: true,
-                myLocationButtonEnabled: true,
-                initialCameraPosition: CameraPosition(
-                  target: postion ?? LatLng(-1.242811, 36.655768),
-                  zoom: 13.5,
+                  onTap: (argument) {
+                    setState(() {
+                      postion = argument;
+                    });
+                    mapController!.animateCamera(
+                      CameraUpdate.newLatLng(argument),
+                    );
+                  },
+                  markerType: GoogleMapMarkerType.advancedMarker,
+                  mapId:
+                      Platform.isAndroid
+                          ? "835d79a7bbcf05a6db02109c"
+                          : "835d79a7bbcf05a610562e82",
+                  mapToolbarEnabled: true,
+                  mapType: MapType.normal,
+                  compassEnabled: true,
+                  zoomGesturesEnabled: true,
+                  myLocationEnabled: true,
+                  buildingsEnabled: true,
+                  myLocationButtonEnabled: true,
+                  initialCameraPosition: CameraPosition(
+                    target: postion ?? LatLng(-1.242811, 36.655768),
+                    zoom: 13.5,
+                  ),
                 ),
               );
             },
@@ -360,6 +420,204 @@ class StoreSelectItem extends ConsumerWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class StoreSearchDelegate extends SearchDelegate {
+  final void Function(Stores store)? onSelected;
+  StoreSearchDelegate({required this.onSelected});
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        onPressed: () {
+          query = "";
+        },
+        icon: Icon(TablerIcons.x),
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        close(context, null);
+      },
+      icon: Icon(TablerIcons.arrow_left),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return Container();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final watchStores = ref.watch(storesState);
+        return watchStores.when(
+          data: (stores) {
+            final filteredStores =
+                stores
+                    .where(
+                      (store) => store.name.toLowerCase().contains(
+                        query.toLowerCase(),
+                      ),
+                    )
+                    .toList();
+            return ListView.separated(
+              separatorBuilder: (context, index) => SizedBox(height: 8),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              itemBuilder:
+                  (context, index) => StoreTile(
+                    store: filteredStores[index],
+                    onTap: onSelected,
+                  ),
+              itemCount: filteredStores.length,
+            );
+          },
+          error: (err, _) => Center(child: Text(watchStores.error.toString())),
+          loading:
+              () => const Center(child: CircularProgressIndicator.adaptive()),
+        );
+      },
+    );
+  }
+}
+
+class StoreTile extends StatelessWidget {
+  const StoreTile({super.key, required this.store, this.onTap});
+  final Stores store;
+  final void Function(Stores store)? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () {
+        if (onTap != null) {
+          onTap!(store);
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Theme.of(context).colorScheme.inversePrimary,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: store.logo ?? "",
+                      errorWidget:
+                          (context, url, error) => Container(
+                            width: 56,
+                            height: 56,
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: SvgPicture.asset(
+                              "assets/svgs/laundry-washer-svgrepo-com.svg",
+                            ),
+                          ),
+                      imageBuilder:
+                          (context, imageProvider) => Container(
+                            width: 56,
+                            height: 56,
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                onError:
+                                    (exception, stackTrace) =>
+                                        AssetImage('assets/icons/favicon.png'),
+                                repeat: ImageRepeat.noRepeat,
+                                image: imageProvider,
+                                fit: BoxFit.cover,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                    ),
+                    SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          store.name,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          store.category,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).hintColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12),
+                SizedBox(
+                  height: 26,
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: ListView.separated(
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder:
+                        (context, index) => Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: Theme.of(
+                              context,
+                            ).unselectedWidgetColor.withValues(alpha: 0.2),
+                          ),
+                          child: Text(
+                            store.serviceNames[index],
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Colors.white),
+                          ),
+                        ),
+                    separatorBuilder: (context, index) => Container(width: 8),
+                    itemCount:
+                        store.serviceNames.length > 2
+                            ? 2
+                            : store.serviceNames.length,
+                    scrollDirection: Axis.horizontal,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
