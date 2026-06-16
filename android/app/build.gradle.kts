@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -27,7 +28,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions { jvmTarget = JavaVersion.VERSION_11.toString() }
 
     defaultConfig {
         applicationId = "com.example.laundrylane"
@@ -58,6 +58,11 @@ flutter {
     source = "../.."
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("11")
+    }
+}
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

@@ -25,7 +25,7 @@ void main() async {
     (options) {
       options.dsn =
           'https://082e9ac99359472594dab5c93d2c4c88@o4508483665330176.ingest.us.sentry.io/4511505965776896';
-      // Adds request headers and IP for users, for more info visit:
+      // Adds request heademrs and IP for users, for more info visit:
       // https://docs.sentry.io/platforms/dart/guides/flutter/data-management/data-collected/
       options.sendDefaultPii = true;
       options.enableLogs = true;
