@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/misc.dart';
+import 'package:laundrylane/models/billing_address.dart';
 import 'package:laundrylane/models/catalog_model.dart';
 import 'package:laundrylane/models/clothing_type.dart';
 import 'package:laundrylane/models/delivery_zone.dart';
@@ -392,5 +393,31 @@ FutureProvider<List<StorePaymentMethod>> storePaymentMethodsProvider =
       } catch (e) {
         Sentry.captureException(e);
         return [];
+      }
+    });
+
+FutureProvider<BillingAddress?> billingAddressState =
+    FutureProvider.autoDispose((ref) async {
+      try {
+        final token = ref.watch(tokenProvider).value;
+        final CancelToken cancelToken = CancelToken();
+        ref.onDispose(cancelToken.cancel);
+        final response = await apiDio
+            .get(
+              "/user/billing-address",
+              cancelToken: cancelToken,
+              options: Options(headers: {"Authorization": "Bearer $token"}),
+            )
+            .then((resp) => resp.data)
+            .onError<DioException>((e, s) {
+              Sentry.captureException(e);
+
+              return null;
+            });
+        if (response == null) return null;
+        return BillingAddress.fromJson(response);
+      } catch (e) {
+        Sentry.captureException(e);
+        return null;
       }
     });

@@ -1,6 +1,6 @@
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_new_badger/flutter_new_badger.dart';
 import 'package:laundrylane/models/default_response.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/app.dart';
@@ -38,7 +38,7 @@ void initPushNotificationService() async {
   );
 
   FirebaseMessaging.onMessage.listen((message) {
-    FlutterNewBadger.incrementBadgeCount();
+    AppBadgePlus.updateBadge(1);
     PushNotificationData data = PushNotificationData.fromJson(message.data);
     flutterLocalNotificationsPlugin.show(
       id: 0,
@@ -55,7 +55,7 @@ void initPushNotificationService() async {
 
 @pragma('vm:entry-point')
 Future<void> onPushBackgroundMessage(RemoteMessage message) async {
-  FlutterNewBadger.incrementBadgeCount();
+  AppBadgePlus.updateBadge(1);
 }
 
 void handleNotificationTap(String type, String? ref) {
@@ -66,7 +66,7 @@ void handleNotificationTap(String type, String? ref) {
         OrderDetails.routeName,
         arguments: ref,
       );
-      FlutterNewBadger.decrementBadgeCount();
+      AppBadgePlus.updateBadge(0);
       break;
     default:
   }

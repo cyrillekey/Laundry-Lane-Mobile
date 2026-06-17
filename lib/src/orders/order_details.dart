@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/order_model.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:laundrylane/src/payments/pay.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
 
 class OrderDetails extends ConsumerWidget {
   const OrderDetails({super.key});
@@ -33,6 +35,27 @@ class OrderDetails extends ConsumerWidget {
                 Orderitems(),
                 SizedBox(height: 24),
                 OrderTotal(order: order.order),
+                if (order.order.paymentStatus ==
+                        OrderPaymentStatus.partiallyPaid ||
+                    order.order.paymentStatus ==
+                        OrderPaymentStatus.readyForPayment ||
+                    (order.order.paymentStatus == OrderPaymentStatus.pending &&
+                        order.order.productCatalog?.bulk == false)) ...[
+                  SizedBox(height: 24),
+                  ProgressButton(
+                    onPress:
+                        () => Navigator.pushNamed(
+                          context,
+                          MakePayment.routeName,
+                          arguments: order.order.id,
+                        ),
+                    label: "Pay Now",
+                    textStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ],
             );
           },

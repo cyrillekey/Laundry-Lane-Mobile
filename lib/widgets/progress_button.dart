@@ -11,12 +11,14 @@ class ProgressButton extends StatefulWidget {
     this.child,
     this.textStyle,
     this.onPress,
+    this.size,
   });
   final Widget Function(bool isLoading, Function(bool state) setLoadingState)?
   builder;
   final ButtonStyle? style;
   final Widget? child;
   final String? label;
+  final Size? size;
   final FutureOr Function()? onPress;
   final TextStyle? textStyle;
 
@@ -70,7 +72,7 @@ class _ProgressButtonState extends State<ProgressButton> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             fixedSize: WidgetStatePropertyAll(
-              Size(MediaQuery.of(context).size.width, 50),
+              widget.size ?? Size(MediaQuery.of(context).size.width, 50),
             ),
           ),
       child:
@@ -86,6 +88,7 @@ class _ProgressButtonState extends State<ProgressButton> {
                         widget.textStyle ??
                         Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.w600,
                         ),
                   ),
     );

@@ -4,10 +4,12 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/models/default_response.dart';
 import 'package:laundrylane/models/payment_card.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
-import 'package:laundrylane/src/payments/add_card.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
+import 'package:paystack_flutter_sdk/paystack_flutter_sdk.dart';
 import 'package:string_extensions/string_extensions.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
@@ -75,7 +77,7 @@ class PaymentMethods extends ConsumerWidget {
                   loading: () => CircularProgressIndicator.adaptive(),
                 ),
                 SizedBox(height: 24),
-                TextButton.icon(
+                ProgressButton(
                   style: ButtonStyle(
                     fixedSize: WidgetStatePropertyAll(
                       Size(MediaQuery.of(context).size.width, 50),
@@ -84,18 +86,33 @@ class PaymentMethods extends ConsumerWidget {
                       Color.fromRGBO(241, 241, 250, 1),
                     ),
                   ),
-                  onPressed:
-                      () => Navigator.of(context).pushNamed(AddCard.routeName),
-                  label: Text(
+                  onPress: () async {
+                    AddCardResponse response = await addUserCard();
+                    if (response.success == true) {
+                      var paystack = Paystack();
+                      await paystack.initialize(response.publickey!, false);
+                      await paystack.launch(response.accessToken!);
+                      ref.invalidate(cardsState);
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(response.message),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: Text(
                     "Add New Card",
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: Theme.of(context).primaryColor,
                       fontWeight: FontWeight.w600,
                     ),
-                  ),
-                  icon: Icon(
-                    TablerIcons.plus,
-                    color: Theme.of(context).primaryColor,
                   ),
                 ),
               ],

@@ -555,15 +555,22 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         ).pushNamed(LoginPage.routeName),
                     child: RichText(
                       text: TextSpan(
-                        style: Theme.of(context).textTheme.bodyMedium,
                         children: [
-                          TextSpan(text: "Already have an account?"),
+                          TextSpan(
+                            text: "Already have an account? ",
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
                           TextSpan(
                             text: " Sign in",
                             style: Theme.of(
                               context,
                             ).textTheme.labelMedium?.copyWith(
-                              color: Theme.of(context).primaryColor,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
                               fontWeight: FontWeight.w600,
                               decoration: TextDecoration.underline,
                             ),

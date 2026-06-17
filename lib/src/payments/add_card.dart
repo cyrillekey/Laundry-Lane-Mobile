@@ -299,14 +299,7 @@ class _AddCardState extends ConsumerState<AddCard> {
               ProgressButton(
                 onPress: () async {
                   if (formState.currentState!.saveAndValidate()) {
-                    Map values = formState.currentState!.value;
-                    AddCardResponse response = await addUserCard(
-                      cardNumber: values['card_number'],
-                      cvv: values['cvv'],
-                      expiry: values['expiry_date'],
-                      holderName: values['name'],
-                      isDefault: values['save_creditcard'] == true,
-                    );
+                    AddCardResponse response = await addUserCard();
                     if (response.success == true) {
                       var paystack = Paystack();
                       await paystack.initialize(response.publickey!, false);
