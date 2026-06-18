@@ -185,7 +185,7 @@ FutureProvider<Order?> ongoingOrderState = FutureProvider((ref) async {
   }
 });
 
-FutureProvider<List> cardsState = FutureProvider.autoDispose((ref) async {
+FutureProvider<List> cardsState = FutureProvider((ref) async {
   final token = ref.watch(tokenProvider).value;
   final CancelToken cancelToken = CancelToken();
 

@@ -11,6 +11,7 @@ import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/utils/constants.dart';
+import 'package:laundrylane/utils/extenstions.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 
 class MakePayment extends ConsumerWidget {
@@ -31,7 +32,7 @@ class MakePayment extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(height: 36),
+                SizedBox(height: 48),
                 Text("Total Amount"),
                 SizedBox(height: 12),
                 Text(
@@ -40,9 +41,29 @@ class MakePayment extends ConsumerWidget {
                     locale: "en_US",
                     name: "KES",
                   ).format(order.order.total),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      TablerIcons.lock,
+                      size: 20,
+                      color: Color.fromRGBO(58, 154, 135, 1),
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      "Secure Payment",
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).unselectedWidgetColor,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -291,6 +312,7 @@ class _MakePaymentSheetState extends State<MakePaymentSheet> {
   Widget build(BuildContext context) {
     return FormBuilder(
       key: formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: SizedBox(
         width: double.infinity,
         child: Column(
@@ -503,33 +525,24 @@ class _MobilePaymentForm extends StatelessWidget {
         children: [
           FormBuilderTextField(
             name: "phone",
+            validator: FormBuilderValidators.compose([
+              FormBuilderValidators.required(
+                errorText: "Please enter phone number",
+              ),
+              FormBuilderValidators.phoneNumber(
+                regex: RegExp(r"^\d{8,9}[0-9]$"),
+              ),
+            ]),
+            keyboardType: TextInputType.phone,
             decoration: InputDecoration(
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
-              enabledBorder: OutlineInputBorder(),
-              hintText: "  712345678",
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              hintText: "+254712345678",
               prefixText: "+254",
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-              ),
-              color: Theme.of(context).colorScheme.inversePrimary,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            child: Row(
-              children: [
-                Icon(
-                  TablerIcons.cash,
-                  size: 24,
-                  color: Theme.of(context).colorScheme.onInverseSurface,
-                ),
-                SizedBox(width: 12),
-              ],
             ),
           ),
         ],
@@ -546,11 +559,25 @@ class _CardPaymentForm extends ConsumerWidget {
     final watchCard = ref.watch(cardsState);
     return watchCard.when(
       data: (cards) {
-        return ListView.separated(
-          shrinkWrap: true,
-          itemCount: cards.length,
-          separatorBuilder: (context, index) => const Divider(),
-          itemBuilder: (context, index) => CardItem(card: cards[index]),
+        return FormBuilderField<int?>(
+          name: "paymentCard",
+          builder: (formField) {
+            return RadioGroup<int?>(
+              groupValue: formField.value,
+              onChanged: (value) => formField.didChange(value),
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: cards.length,
+                separatorBuilder: (context, index) => SizedBox(height: 12),
+                itemBuilder:
+                    (context, index) => CardItem(
+                      card: cards[index],
+                      selected: formField.value == cards[index].id,
+                      onPress: (id) => formField.didChange(id),
+                    ),
+              ),
+            );
+          },
         );
       },
       loading: () => const Center(child: CircularProgressIndicator.adaptive()),
@@ -560,10 +587,104 @@ class _CardPaymentForm extends ConsumerWidget {
 }
 
 class CardItem extends StatelessWidget {
-  const CardItem({super.key, required this.card});
+  const CardItem({
+    super.key,
+    required this.card,
+    required this.selected,
+    required this.onPress,
+  });
   final PaymentCard card;
+  final bool selected;
+  final void Function(int id) onPress;
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () => onPress(card.id!),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow:
+              selected == true
+                  ? [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary,
+                      blurRadius: 2,
+                      blurStyle: BlurStyle.outer,
+                    ),
+                  ]
+                  : null,
+          border: Border.all(
+            color:
+                selected == true
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).highlightColor,
+            width: 1.5,
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 1),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).highlightColor,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Image.asset("assets/icons/visa.png", height: 40),
+            ),
+            SizedBox(width: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      card.brand?.capitalize() ?? "N/A",
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      "** ${card.number}",
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 2),
+                Text(
+                  "Expires ${card.expiryDate}",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).unselectedWidgetColor,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ],
+            ),
+            Spacer(),
+            Icon(
+              selected != true
+                  ? TablerIcons.circle
+                  : TablerIcons.circle_dot_filled,
+              color:
+                  selected == true
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurface,
+            ),
+            // Radio(value: card.id),
+          ],
+        ),
+      ),
+    );
   }
 }
