@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:laundrylane/models/order_model.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
@@ -164,7 +165,10 @@ class OrderItem extends StatelessWidget {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        "\$${order.total}",
+                        NumberFormat.currency(
+                          locale: "en_US",
+                          name: "KES",
+                        ).format(order.total),
                         style: GoogleFonts.almarai(
                           fontSize: 18,
                           color: Color.fromRGBO(20, 132, 242, 1),

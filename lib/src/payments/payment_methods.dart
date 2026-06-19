@@ -78,14 +78,6 @@ class PaymentMethods extends ConsumerWidget {
                 ),
                 SizedBox(height: 24),
                 ProgressButton(
-                  style: ButtonStyle(
-                    fixedSize: WidgetStatePropertyAll(
-                      Size(MediaQuery.of(context).size.width, 50),
-                    ),
-                    backgroundColor: WidgetStatePropertyAll(
-                      Color.fromRGBO(241, 241, 250, 1),
-                    ),
-                  ),
                   onPress: () async {
                     AddCardResponse response = await addUserCard();
                     if (response.success == true) {
@@ -93,9 +85,6 @@ class PaymentMethods extends ConsumerWidget {
                       await paystack.initialize(response.publickey!, false);
                       await paystack.launch(response.accessToken!);
                       ref.invalidate(cardsState);
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
                     } else {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -107,13 +96,7 @@ class PaymentMethods extends ConsumerWidget {
                       }
                     }
                   },
-                  child: Text(
-                    "Add New Card",
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  label: "Add New Card",
                 ),
               ],
             ),
@@ -129,6 +112,7 @@ class PaymentCardItem extends ConsumerWidget {
   final PaymentCard card;
   @override
   Widget build(BuildContext context, ref) {
+    // TODO implement loading indicator and success notification on card deletion
     return Slidable(
       closeOnScroll: true,
       endActionPane: ActionPane(
@@ -137,8 +121,19 @@ class PaymentCardItem extends ConsumerWidget {
           SlidableAction(
             autoClose: true,
             onPressed: (a) async {
-              await deleteCard(cardId: card.id!);
-              ref.invalidate(cardsState);
+              final response = await deleteCard(cardId: card.id!);
+              if (response.success) {
+                ref.invalidate(cardsState);
+              } else {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(response.message),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
             icon: TablerIcons.trash,
           ),

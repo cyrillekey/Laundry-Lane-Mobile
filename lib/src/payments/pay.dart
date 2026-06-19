@@ -10,6 +10,7 @@ import 'package:laundrylane/models/payment_card.dart';
 import 'package:laundrylane/providers/token_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
+import 'package:laundrylane/src/payments/widgets/payment_loading.dart';
 import 'package:laundrylane/utils/constants.dart';
 import 'package:laundrylane/utils/extenstions.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
@@ -21,59 +22,61 @@ class MakePayment extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     int id = ModalRoute.of(context)!.settings.arguments as int;
     final watchorderDetails = ref.watch(orderDetailsState(id));
-    return Scaffold(
-      appBar: AppBar(title: const Text("Complete Payment")),
-      body: watchorderDetails.when(
-        data: (order) {
-          if (order == null) {
-            return const Center(child: Text("Order not found"));
-          }
-          return Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: 48),
-                Text("Total Amount"),
-                SizedBox(height: 12),
-                Text(
-                  NumberFormat.currency(
-                    decimalDigits: 2,
-                    locale: "en_US",
-                    name: "KES",
-                  ).format(order.order.total),
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+    return PopScope(
+      child: Scaffold(
+        appBar: AppBar(title: const Text("Complete Payment")),
+        body: watchorderDetails.when(
+          data: (order) {
+            if (order == null) {
+              return const Center(child: Text("Order not found"));
+            }
+            return Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 48),
+                  Text("Total Amount"),
+                  SizedBox(height: 12),
+                  Text(
+                    NumberFormat.currency(
+                      decimalDigits: 2,
+                      locale: "en_US",
+                      name: "KES",
+                    ).format(order.order.total),
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      TablerIcons.lock,
-                      size: 20,
-                      color: Color.fromRGBO(58, 154, 135, 1),
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      "Secure Payment",
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).unselectedWidgetColor,
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        TablerIcons.lock,
+                        size: 20,
+                        color: Color.fromRGBO(58, 154, 135, 1),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-        loading:
-            () => const Center(child: CircularProgressIndicator.adaptive()),
-        error: (error, stackTrace) => Center(child: Text(error.toString())),
+                      SizedBox(width: 4),
+                      Text(
+                        "Secure Payment",
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).unselectedWidgetColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+          loading:
+              () => const Center(child: CircularProgressIndicator.adaptive()),
+          error: (error, stackTrace) => Center(child: Text(error.toString())),
+        ),
+        bottomSheet: PaymentSheet(),
       ),
-      bottomSheet: PaymentSheet(),
     );
   }
 }
@@ -384,31 +387,49 @@ class _MakePaymentSheetState extends State<MakePaymentSheet> {
             SizedBox(height: 12),
             FormBuilderField(
               name: "paymentMethod",
-              validator: FormBuilderValidators.required(),
+              validator: FormBuilderValidators.required(
+                errorText: "Please select payment method",
+              ),
               builder: (formField) {
-                return Row(
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    PaymentItem(
-                      title: "Card",
-                      id: "CARD",
-                      icon: TablerIcons.credit_card_pay,
-                      selected: paymentMethod == "CARD",
-                      onPress: (id) {
-                        setState(() => paymentMethod = id);
-                        formField.didChange(id);
-                      },
+                    Row(
+                      children: [
+                        PaymentItem(
+                          title: "Card",
+                          id: "CARD",
+                          icon: TablerIcons.credit_card_pay,
+                          selected: paymentMethod == "CARD",
+                          onPress: (id) {
+                            setState(() => paymentMethod = id);
+                            formField.didChange(id);
+                          },
+                        ),
+                        SizedBox(width: 18),
+                        PaymentItem(
+                          icon: Icons.phone_android_rounded,
+                          title: "Mobile Money",
+                          id: "MOBILE",
+                          selected: paymentMethod == "MOBILE",
+                          onPress: (id) {
+                            setState(() => paymentMethod = id);
+                            formField.didChange(id);
+                          },
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 18),
-                    PaymentItem(
-                      icon: Icons.phone_android_rounded,
-                      title: "Mobile Money",
-                      id: "MOBILE",
-                      selected: paymentMethod == "MOBILE",
-                      onPress: (id) {
-                        setState(() => paymentMethod = id);
-                        formField.didChange(id);
-                      },
-                    ),
+                    if (formField.hasError) ...[
+                      SizedBox(height: 10),
+                      Text(
+                        formField.errorText!,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ],
                   ],
                 );
               },
@@ -419,9 +440,25 @@ class _MakePaymentSheetState extends State<MakePaymentSheet> {
             SizedBox(height: 16),
             SafeArea(
               child: ProgressButton(
-                onPress: () {
+                onPress: () async {
                   if (formKey.currentState?.saveAndValidate() == true) {
-                    formKey.currentState?.save();
+                    final formData = formKey.currentState?.value;
+                    int orderId =
+                        ModalRoute.of(context)!.settings.arguments as int;
+                    showModalBottomSheet(
+                      context: context,
+                      showDragHandle: true,
+                      isScrollControlled: true,
+                      isDismissible: false,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      builder:
+                          (context) => CompletePaymentModal(
+                            orderId: orderId,
+                            phone: formData?['phone'],
+                            cardId: formData?['cardId'],
+                            paymentMethod: formData?['paymentMethod'],
+                          ),
+                    );
                   }
                 },
                 label: "Continue",
@@ -530,7 +567,7 @@ class _MobilePaymentForm extends StatelessWidget {
                 errorText: "Please enter phone number",
               ),
               FormBuilderValidators.phoneNumber(
-                regex: RegExp(r"^\d{8,9}[0-9]$"),
+                regex: RegExp(r"^\d{9,10}[0-9]$"),
               ),
             ]),
             keyboardType: TextInputType.phone,
@@ -541,8 +578,7 @@ class _MobilePaymentForm extends StatelessWidget {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              hintText: "+254712345678",
-              prefixText: "+254",
+              hintText: "0712345678",
             ),
           ),
         ],
