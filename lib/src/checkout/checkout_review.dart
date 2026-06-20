@@ -106,7 +106,7 @@ class _OrderSubmitButton extends ConsumerWidget {
                 serviceTypeId: checkoutModel.serviceType?.id,
                 catalogId: checkoutModel.catalog.id!,
                 type: checkoutModel.orderType.value,
-                pickupDate: checkoutModel.pickupDate?.toString(),
+                pickupDate: checkoutModel.pickupDate?.toIso8601String(),
                 pickupTime: checkoutModel.pickupTime?.toString(),
                 items: cart.items,
                 deliveryWindow: checkoutModel.deliveryWindow,
@@ -130,14 +130,14 @@ class _OrderSubmitButton extends ConsumerWidget {
                       isDismissible: true,
                       builder: (context) => SuccessSheet(orderId: 1),
                     );
-                  }
-                } else {
-                  if (context.mounted) {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      MakePayment.routeName,
-                      ModalRoute.withName(HomePage.routeName),
-                      arguments: response.id,
-                    );
+                  } else {
+                    if (context.mounted) {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        MakePayment.routeName,
+                        ModalRoute.withName(HomePage.routeName),
+                        arguments: response.id,
+                      );
+                    }
                   }
                 }
               } else {

@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/models/default_response.dart';
+import 'package:laundrylane/models/order_pay_response.dart';
 import 'package:laundrylane/providers/card_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final signupMutation = Mutation<AuthResponse>();
@@ -611,6 +615,48 @@ Future<DefaultResponse> createBillingAddress(
       message: "Error! Could not create billing address",
       success: false,
       id: 0,
+    );
+  }
+}
+
+Future<OrderPayResponse> payForOrder({
+  required int orderId,
+  required String paymentMethod,
+  String? phone,
+  int? cardId,
+}) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String token = sharedPreferences.getString("token") ?? "";
+    final response = await apiDio
+        .post(
+          "/order/$orderId/pay",
+          data: {
+            "paymentType": paymentMethod,
+            "phone": phone,
+            "cardId": cardId,
+          },
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((resp) => OrderPayResponse.fromJson(resp.data))
+        .onError<DioException>((e, d) {
+          if (e.response != null) {
+            return OrderPayResponse.fromJson(
+              jsonDecode(e.response!.data.toString()),
+            );
+          }
+          return OrderPayResponse(
+            success: false,
+            message: "Error! Could not pay for order",
+          );
+        });
+    return response;
+  } catch (e) {
+    print(e);
+    Sentry.captureException(e);
+    return OrderPayResponse(
+      success: false,
+      message: "Error! Could not pay for order",
     );
   }
 }
