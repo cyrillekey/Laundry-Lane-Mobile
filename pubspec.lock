@@ -137,14 +137,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
-  confetti:
-    dependency: "direct main"
-    description:
-      name: confetti
-      sha256: "79376a99648efbc3f23582f5784ced0fe239922bd1a0fb41f582051eba750751"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.8.0"
   convert:
     dependency: transitive
     description:
@@ -390,14 +382,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.1"
-  flutter_confetti:
-    dependency: "direct main"
-    description:
-      name: flutter_confetti
-      sha256: "8a1b89b73398453b0a8216f0af3bf2a25ea7ce14234fbf47011061e889fca85b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.2"
   flutter_form_builder:
     dependency: "direct main"
     description:
@@ -483,14 +467,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.3"
-  flutter_spinkit:
-    dependency: "direct main"
-    description:
-      name: flutter_spinkit
-      sha256: "77850df57c00dc218bfe96071d576a8babec24cf58b2ed121c83cca4a2fdce7f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.2.2"
   flutter_svg:
     dependency: "direct main"
     description:
