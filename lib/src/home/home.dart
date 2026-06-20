@@ -47,7 +47,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       floatingActionButton:
           currentIndex == 0
               ? FloatingActionButton.extended(
-                onPressed: () {
+                onPressed: () async {
                   Navigator.of(context).pushNamed(ServiceSelect.routeName);
                 },
 

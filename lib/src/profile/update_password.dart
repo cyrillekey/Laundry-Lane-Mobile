@@ -17,7 +17,6 @@ class _UpdatePasswordState extends State<UpdatePassword> {
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
   @override
   Widget build(BuildContext context) {
-    // print(formKey.currentState?.getRawValue("newPassword"));
     return Scaffold(
       appBar: AppBar(centerTitle: true, title: Text("Update Password")),
       body: FormBuilder(

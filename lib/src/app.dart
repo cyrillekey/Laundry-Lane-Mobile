@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_new_badger/flutter_new_badger.dart';
+
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/user_model.dart';
 import 'package:laundrylane/src/address/add_address.dart';
@@ -51,7 +52,7 @@ class MyAppState extends ConsumerState<MyApp> {
     super.initState();
     appLifecycleState = AppLifecycleListener(
       onResume: () {
-        FlutterNewBadger.removeBadge();
+        AppBadgePlus.updateBadge(0);
       },
     );
   }

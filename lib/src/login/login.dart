@@ -104,7 +104,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               style: ButtonStyle(
                                 elevation: WidgetStatePropertyAll(0),
                                 backgroundColor: WidgetStatePropertyAll(
-                                  Theme.of(context).colorScheme.inversePrimary,
+                                  Theme.of(context).colorScheme.secondary,
                                 ),
                                 shape: WidgetStatePropertyAll(
                                   RoundedRectangleBorder(
@@ -197,12 +197,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               label: Text(
                                 "X(Twitter)",
                                 style: GoogleFonts.almarai(
-                                  color: Colors.black,
+                                  color:
+                                      Theme.of(context).colorScheme.onSecondary,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
                               ),
-                              icon: Icon(TablerIcons.brand_twitter, weight: 12),
+                              icon: Icon(
+                                TablerIcons.brand_twitter,
+                                weight: 12,
+                                color:
+                                    Theme.of(context).colorScheme.onSecondary,
+                              ),
                             ),
                       ),
                     ),
@@ -213,7 +219,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           child: TextButton.icon(
                             style: ButtonStyle(
                               backgroundColor: WidgetStatePropertyAll(
-                                Theme.of(context).colorScheme.inversePrimary,
+                                Theme.of(context).colorScheme.secondaryFixed,
                               ),
                               shape: WidgetStatePropertyAll(
                                 RoundedRectangleBorder(
@@ -316,7 +322,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     : Text(
                                       "Google",
                                       style: GoogleFonts.almarai(
-                                        color: Colors.black,
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.onSecondary,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16,
                                       ),
@@ -324,7 +333,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             icon:
                                 isLoading
                                     ? SizedBox.shrink()
-                                    : Icon(TablerIcons.brand_google),
+                                    : Icon(
+                                      TablerIcons.brand_google,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onSecondary,
+                                    ),
                           ),
                         );
                       },
@@ -487,13 +502,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ).pushNamed(SignupPage.routeName),
                     child: RichText(
                       text: TextSpan(
-                        style: GoogleFonts.almarai(color: Colors.black),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                         children: [
-                          TextSpan(text: "Dont have an account?"),
+                          TextSpan(text: "Dont have an account? "),
                           TextSpan(
                             text: " Sign up",
-                            style: GoogleFonts.almarai(
-                              color: Colors.blue,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
                               fontWeight: FontWeight.w600,
                               decoration: TextDecoration.underline,
                             ),

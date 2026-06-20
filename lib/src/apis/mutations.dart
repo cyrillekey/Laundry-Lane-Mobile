@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/models/default_response.dart';
+import 'package:laundrylane/models/order_pay_response.dart';
 import 'package:laundrylane/providers/card_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final signupMutation = Mutation<AuthResponse>();
@@ -319,26 +323,13 @@ Future<AuthResponse> updateUser({
   }
 }
 
-Future<AddCardResponse> addUserCard({
-  required String cardNumber,
-  required String cvv,
-  required String expiry,
-  required String holderName,
-  required bool isDefault,
-}) async {
+Future<AddCardResponse> addUserCard() async {
   try {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String token = sharedPreferences.getString("token") ?? "";
     final response = await apiDio
         .post(
           "/payments/card",
-          data: {
-            "cardNumber": cardNumber,
-            "expiryDate": expiry,
-            "cvv": cvv,
-            "isDefault": isDefault,
-            "name": holderName,
-          },
           options: Options(headers: {"Authorization": "Bearer $token"}),
         )
         .then((resp) => resp.data)
@@ -568,6 +559,103 @@ Future<AuthResponse> verifyEmailOtp(String email, String otp) async {
     return AuthResponse(
       message: "Error! Could not request verification OTP",
       success: false,
+    );
+  }
+}
+
+Future<DefaultResponse> createBillingAddress(
+  String email,
+  String name,
+  String? address,
+  String? city,
+  String? state,
+  String? zip,
+  String? country,
+  String? phone,
+  String? taxId,
+) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String token = sharedPreferences.getString("token") ?? "";
+
+    final response = await apiDio
+        .post(
+          "/user/billing-address",
+          options: Options(
+            contentType: "application/json",
+            headers: {"Authorization": "Bearer $token"},
+          ),
+          data: {
+            "recipientName": name,
+            "street": address,
+            "city": city,
+            "state": state,
+            "zip": zip,
+            "country": country,
+            "phone": phone,
+            "taxId": taxId,
+            "email": email,
+          },
+        )
+        .then((resp) => DefaultResponse.fromJson(resp.data))
+        .onError<DioException>((e, d) {
+          if (e.response != null) {
+            return DefaultResponse.fromJson(e.response!.data);
+          }
+          return DefaultResponse(
+            message: "Error! Could not create billing address",
+            success: false,
+            id: 0,
+          );
+        });
+
+    return response;
+  } catch (e) {
+    return DefaultResponse(
+      message: "Error! Could not create billing address",
+      success: false,
+      id: 0,
+    );
+  }
+}
+
+Future<OrderPayResponse> payForOrder({
+  required int orderId,
+  required String paymentMethod,
+  String? phone,
+  int? cardId,
+}) async {
+  try {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String token = sharedPreferences.getString("token") ?? "";
+    final response = await apiDio
+        .post(
+          "/order/$orderId/pay",
+          data: {
+            "paymentType": paymentMethod,
+            "phone": phone,
+            "cardId": cardId,
+          },
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((resp) => OrderPayResponse.fromJson(resp.data))
+        .onError<DioException>((e, d) {
+          if (e.response != null) {
+            return OrderPayResponse.fromJson(
+              jsonDecode(e.response!.data.toString()),
+            );
+          }
+          return OrderPayResponse(
+            success: false,
+            message: "Error! Could not pay for order",
+          );
+        });
+    return response;
+  } catch (e) {
+    Sentry.captureException(e);
+    return OrderPayResponse(
+      success: false,
+      message: "Error! Could not pay for order",
     );
   }
 }

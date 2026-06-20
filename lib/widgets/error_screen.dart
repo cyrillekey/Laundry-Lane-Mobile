@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
@@ -8,7 +9,12 @@ class ErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: BackButton(
+          onPressed: () => Navigator.pushNamed(context, HomePage.routeName),
+        ),
+        title: Text("Error"),
+      ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 12),
         child: Column(
@@ -34,12 +40,20 @@ class ErrorScreen extends StatelessWidget {
             SizedBox(height: 36),
             ProgressButton(
               label: "Report Error",
-              onPress:
-                  () => Sentry.captureException(
-                    details.exception,
-                    stackTrace: details.stack,
-                    hint: Hint.withMap({"name": details.context?.name}),
+              onPress: () {
+                Sentry.captureException(
+                  details.exception,
+                  stackTrace: details.stack,
+                  hint: Hint.withMap({"name": details.context?.name}),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Error reported successfully"),
+                    backgroundColor: Colors.green,
                   ),
+                );
+                Navigator.pushNamed(context, HomePage.routeName);
+              },
             ),
             Spacer(),
           ],

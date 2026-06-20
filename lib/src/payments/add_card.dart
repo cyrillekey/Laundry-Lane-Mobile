@@ -299,22 +299,13 @@ class _AddCardState extends ConsumerState<AddCard> {
               ProgressButton(
                 onPress: () async {
                   if (formState.currentState!.saveAndValidate()) {
-                    Map values = formState.currentState!.value;
-                    AddCardResponse response = await addUserCard(
-                      cardNumber: values['card_number'],
-                      cvv: values['cvv'],
-                      expiry: values['expiry_date'],
-                      holderName: values['name'],
-                      isDefault: values['save_creditcard'] == true,
-                    );
+                    AddCardResponse response = await addUserCard();
                     if (response.success == true) {
                       var paystack = Paystack();
                       await paystack.initialize(response.publickey!, false);
                       await paystack.launch(response.accessToken!);
+
                       ref.invalidate(cardsState);
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                      }
                     } else {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -327,15 +318,6 @@ class _AddCardState extends ConsumerState<AddCard> {
                     }
                   }
                 },
-                style: ButtonStyle(
-                  foregroundColor: WidgetStatePropertyAll(Colors.white),
-                  backgroundColor: WidgetStatePropertyAll(
-                    Color.fromRGBO(6, 11, 156, 1),
-                  ),
-                  fixedSize: WidgetStatePropertyAll(
-                    Size(MediaQuery.of(context).size.width, 46),
-                  ),
-                ),
                 label: "Save",
               ),
             ],

@@ -85,6 +85,7 @@ void showPushNotificationPermissionDialog(BuildContext context) async {
           ),
         ),
         showDragHandle: true,
+        isScrollControlled: true,
         requestFocus: true,
       );
     }
@@ -100,7 +101,7 @@ class PushNotificationDialog extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(height: 6),
           Text(
@@ -121,10 +122,11 @@ class PushNotificationDialog extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 0.22,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/images/notifications_push.png"),
+                image: AssetImage("assets/images/notifications_push-clear.png"),
               ),
             ),
           ),
+          SizedBox(height: 20),
           TextButton(
             onPressed: () async {
               await Permission.notification.request();
@@ -152,9 +154,14 @@ class PushNotificationDialog extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 12),
           Center(
             child: TextButton(
+              style: ButtonStyle(
+                fixedSize: WidgetStatePropertyAll(
+                  Size(MediaQuery.of(context).size.width * 0.92, 46),
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -164,6 +171,7 @@ class PushNotificationDialog extends StatelessWidget {
               ),
             ),
           ),
+          SizedBox(height: 12),
         ],
       ),
     );

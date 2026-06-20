@@ -278,12 +278,12 @@ class ServiceItem extends StatelessWidget {
                             children: [
                               TextSpan(text: "From "),
                               TextSpan(
-                                text: 'Ksh ${catalog.price}/kg ',
+                                text: 'Ksh ${catalog.price} ',
                                 style: GoogleFonts.almarai(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              TextSpan(text: "price"),
+                              TextSpan(text: "per kg"),
                             ],
                           ),
                         ),
@@ -294,12 +294,12 @@ class ServiceItem extends StatelessWidget {
                             children: [
                               TextSpan(text: "From "),
                               TextSpan(
-                                text: 'Ksh ${catalog.price}/item ',
+                                text: 'Ksh ${catalog.price} ',
                                 style: GoogleFonts.almarai(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              TextSpan(text: "price."),
+                              TextSpan(text: "per item"),
                             ],
                           ),
                         ),

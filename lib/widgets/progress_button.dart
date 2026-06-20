@@ -11,14 +11,22 @@ class ProgressButton extends StatefulWidget {
     this.child,
     this.textStyle,
     this.onPress,
+    this.size,
+    this.disabled = false,
+    this.borderRadius,
+    this.backgroundColor,
   });
   final Widget Function(bool isLoading, Function(bool state) setLoadingState)?
   builder;
   final ButtonStyle? style;
   final Widget? child;
+  final Color? backgroundColor;
   final String? label;
+  final Size? size;
+  final bool disabled;
   final FutureOr Function()? onPress;
   final TextStyle? textStyle;
+  final double? borderRadius;
 
   @override
   State<ProgressButton> createState() => _ProgressButtonState();
@@ -64,13 +72,18 @@ class _ProgressButtonState extends State<ProgressButton> {
           widget.style ??
           ButtonStyle(
             backgroundColor: WidgetStatePropertyAll(
-              Theme.of(context).colorScheme.primary,
+              widget.disabled == true
+                  ? Theme.of(context).unselectedWidgetColor
+                  : widget.backgroundColor ??
+                      Theme.of(context).colorScheme.primary,
             ),
             shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(widget.borderRadius ?? 16),
+              ),
             ),
             fixedSize: WidgetStatePropertyAll(
-              Size(MediaQuery.of(context).size.width, 50),
+              widget.size ?? Size(MediaQuery.of(context).size.width, 50),
             ),
           ),
       child:
@@ -85,7 +98,11 @@ class _ProgressButtonState extends State<ProgressButton> {
                     style:
                         widget.textStyle ??
                         Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color:
+                              widget.disabled
+                                  ? Colors.black
+                                  : Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.w600,
                         ),
                   ),
     );

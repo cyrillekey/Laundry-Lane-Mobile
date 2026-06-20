@@ -22,6 +22,7 @@ class Order {
   String? washType;
   int? deliveryFee;
   int total;
+  bool weighed;
   int? productCatalogId;
   int userId;
   dynamic deliveryZoneId;
@@ -32,6 +33,7 @@ class Order {
   ServiceType? serviceType;
   Catalog? productCatalog;
   int? itemsCount;
+  OrderPaymentStatus? paymentStatus;
 
   Order({
     required this.id,
@@ -56,6 +58,8 @@ class Order {
     this.serviceType,
     this.productCatalog,
     this.itemsCount,
+    this.paymentStatus,
+    this.weighed = false,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -69,6 +73,7 @@ class Order {
     deliveryWindow: json["deliveryWindow"],
     instructions: json["instructions"],
     weight: json["weight"],
+    weighed: json["weighed"],
     washType: json["washType"],
     deliveryFee: json["deliveryFee"],
     total: json["total"],
@@ -78,6 +83,10 @@ class Order {
     serviceTypeId: json["serviceTypeId"],
     addressId: json["addressId"],
     itemsCount: json["itemsCount"],
+    paymentStatus:
+        json["paymentStatus"] == null
+            ? null
+            : OrderPaymentStatus.fromString(json["paymentStatus"]),
     createdat:
         json["createdat"] == null ? null : DateTime.parse(json["createdat"]),
     updatedat:
@@ -115,4 +124,29 @@ class Order {
     "serviceType": serviceType?.toJson(),
     "productCatalog": productCatalog?.toJson(),
   };
+}
+
+enum OrderPaymentStatus {
+  pending("PENDING"),
+  readyForPayment("READY_FOR_PAYMENT"),
+  partiallyPaid("PARTIALLY_PAID"),
+  paid("PAID");
+
+  const OrderPaymentStatus(this.name);
+  final String name;
+
+  static OrderPaymentStatus fromString(String status) {
+    switch (status) {
+      case "PENDING":
+        return OrderPaymentStatus.pending;
+      case "READY_FOR_PAYMENT":
+        return OrderPaymentStatus.readyForPayment;
+      case "PARTIALLY_PAID":
+        return OrderPaymentStatus.partiallyPaid;
+      case "PAID":
+        return OrderPaymentStatus.paid;
+      default:
+        return OrderPaymentStatus.pending;
+    }
+  }
 }
