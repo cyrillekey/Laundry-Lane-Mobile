@@ -652,7 +652,6 @@ Future<OrderPayResponse> payForOrder({
         });
     return response;
   } catch (e) {
-    print(e);
     Sentry.captureException(e);
     return OrderPayResponse(
       success: false,
