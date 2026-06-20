@@ -596,7 +596,7 @@ class _CardPaymentForm extends ConsumerWidget {
     return watchCard.when(
       data: (cards) {
         return FormBuilderField<int?>(
-          name: "paymentCard",
+          name: "cardId",
           builder: (formField) {
             return RadioGroup<int?>(
               groupValue: formField.value,
@@ -664,7 +664,8 @@ class CardItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 1),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Theme.of(context).highlightColor,
@@ -672,7 +673,14 @@ class CardItem extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Image.asset("assets/icons/visa.png", height: 40),
+              child: Image.asset(
+                card.brand == "visa"
+                    ? "assets/icons/visa.png"
+                    : "assets/icons/mastercard.png",
+                height: 30,
+                fit: BoxFit.fitHeight,
+                width: 36,
+              ),
             ),
             SizedBox(width: 16),
             Column(

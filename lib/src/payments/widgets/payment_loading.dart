@@ -8,6 +8,7 @@ import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:laundrylane/widgets/quarter_spinner.dart';
+import 'package:paystack_flutter_sdk/paystack_flutter_sdk.dart';
 
 class CompletePaymentModal extends StatefulWidget {
   const CompletePaymentModal({
@@ -28,6 +29,7 @@ class CompletePaymentModal extends StatefulWidget {
 
 class _CompletePaymentModalState extends State<CompletePaymentModal> {
   PaymentStatus paymentStatus = PaymentStatus.pending;
+  String? errorMessage;
   @override
   void initState() {
     makePayment();
@@ -43,8 +45,29 @@ class _CompletePaymentModalState extends State<CompletePaymentModal> {
     );
     if (response.success == true) {
       paymentStatus = response.status!;
+      if (paymentStatus == PaymentStatus.pending) {
+        if (response.paystack?.accessToken != null) {
+          final paystack = Paystack();
+          await paystack.initialize(response.paystack!.publicKey!, false);
+          final paymentRespose = await paystack.launch(
+            response.paystack!.accessToken!,
+          );
+          if (paymentRespose.status == "success") {
+            paymentStatus = PaymentStatus.successfull;
+            setState(() {});
+          } else {
+            paymentStatus = PaymentStatus.failed;
+            errorMessage = paymentRespose.message;
+            setState(() {});
+          }
+        } else {
+          paymentStatus = PaymentStatus.failed;
+          errorMessage = response.message;
+        }
+      }
     } else {
       paymentStatus = response.status ?? PaymentStatus.failed;
+      errorMessage = response.message;
     }
     setState(() {});
   }
@@ -64,7 +87,7 @@ class _CompletePaymentModalState extends State<CompletePaymentModal> {
                 case PaymentStatus.successfull:
                   return SuccessfullPayment();
                 case PaymentStatus.failed:
-                  return const FailedPayment();
+                  return FailedPayment(errorMessage: errorMessage);
                 case PaymentStatus.cancelled:
                   return const CancelledPayment();
                 case PaymentStatus.pending:
@@ -156,8 +179,8 @@ class PendingPayment extends StatelessWidget {
 }
 
 class FailedPayment extends StatelessWidget {
-  const FailedPayment({super.key});
-
+  const FailedPayment({super.key, this.errorMessage});
+  final String? errorMessage;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -177,7 +200,8 @@ class FailedPayment extends StatelessWidget {
         ),
         SizedBox(height: 20),
         Text(
-          "Your order payment has failed. Please try again to complete the payment",
+          errorMessage ??
+              "Your order payment has failed. Please try again to complete the payment",
           style: Theme.of(
             context,
           ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),

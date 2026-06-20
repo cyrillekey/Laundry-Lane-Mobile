@@ -11,7 +11,7 @@ class OrderPayResponse {
   final bool? success;
   final String? message;
   final PaymentStatus? status;
-  final Paystack? paystack;
+  final PaystackModel? paystack;
 
   OrderPayResponse({
     this.id,
@@ -30,7 +30,7 @@ class OrderPayResponse {
         paystack:
             json["paystack"] == null
                 ? null
-                : Paystack.fromJson(json["paystack"]),
+                : PaystackModel.fromJson(json["paystack"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -42,14 +42,14 @@ class OrderPayResponse {
   };
 }
 
-class Paystack {
+class PaystackModel {
   final String? accessToken;
   final String? publicKey;
   final String? accessUrl;
 
-  Paystack({this.accessToken, this.publicKey, this.accessUrl});
+  PaystackModel({this.accessToken, this.publicKey, this.accessUrl});
 
-  factory Paystack.fromJson(Map<String, dynamic> json) => Paystack(
+  factory PaystackModel.fromJson(Map<String, dynamic> json) => PaystackModel(
     accessToken: json["accessToken"],
     publicKey: json["publicKey"],
     accessUrl: json["accessUrl"],

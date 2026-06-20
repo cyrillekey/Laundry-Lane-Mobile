@@ -9,6 +9,7 @@ import 'package:laundrylane/models/payment_card.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
+import 'package:laundrylane/widgets/progress_widget.dart';
 import 'package:paystack_flutter_sdk/paystack_flutter_sdk.dart';
 import 'package:string_extensions/string_extensions.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
@@ -113,93 +114,115 @@ class PaymentCardItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     // TODO implement loading indicator and success notification on card deletion
-    return Slidable(
-      closeOnScroll: true,
-      endActionPane: ActionPane(
-        motion: ScrollMotion(),
-        children: [
-          SlidableAction(
-            autoClose: true,
-            onPressed: (a) async {
-              final response = await deleteCard(cardId: card.id!);
-              if (response.success) {
-                ref.invalidate(cardsState);
-              } else {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(response.message),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            },
-            icon: TablerIcons.trash,
+    return ProgressWidget(
+      builder: (isLoading, toggleIsLoading) {
+        return Slidable(
+          closeOnScroll: true,
+          enabled: !isLoading,
+          endActionPane: ActionPane(
+            motion: ScrollMotion(),
+            children: [
+              SlidableAction(
+                autoClose: true,
+                onPressed: (a) async {
+                  toggleIsLoading();
+                  final response = await deleteCard(cardId: card.id!);
+                  if (response.success) {
+                    ref.invalidate(cardsState);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(response.message),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                  toggleIsLoading();
+                },
+                icon: TablerIcons.trash,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 24, horizontal: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Color.fromRGBO(71, 37, 103, 1),
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Text(
-                  "Debit Card",
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 24, horizontal: 14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Color.fromRGBO(71, 37, 103, 1),
                 ),
-                Spacer(),
-                Text(
-                  "**** ${card.number?.last(n: 4)}",
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 24),
-            Row(
-              children: [
-                Text(
-                  card.name ?? "",
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                Spacer(),
-                Row(
+                child: Column(
                   children: [
-                    Icon(
-                      card.brand == "visa"
-                          ? TablerIcons.brand_visa
-                          : TablerIcons.brand_mastercard,
-                      size: 28,
+                    Row(
+                      children: [
+                        Text(
+                          "Debit Card",
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Spacer(),
+                        Text(
+                          "**** ${card.number?.last(n: 4)}",
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(width: 12),
-                    Text(
-                      "${card.expiryDate}",
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Text(
+                          card.name ?? "",
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        Spacer(),
+                        Row(
+                          children: [
+                            Icon(
+                              card.brand == "visa"
+                                  ? TablerIcons.brand_visa
+                                  : TablerIcons.brand_mastercard,
+                              size: 28,
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              "${card.expiryDate}",
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
+              ),
+              if (isLoading)
+                Positioned(child: CircularProgressIndicator.adaptive()),
+            ],
+          ),
+        );
+      },
     );
   }
 }
