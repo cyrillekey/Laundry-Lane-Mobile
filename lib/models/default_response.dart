@@ -40,17 +40,12 @@ class AddCardResponse extends DefaultResponse {
 }
 
 class PushNotificationData {
-  final String title;
-  final String message;
+  final String? title;
+  final String? message;
   final dynamic ref;
-  final String type;
+  final String? type;
 
-  PushNotificationData({
-    required this.title,
-    required this.message,
-    this.ref,
-    required this.type,
-  });
+  PushNotificationData({this.title, this.message, this.ref, this.type});
 
   factory PushNotificationData.fromJson(Map<String, dynamic> json) =>
       PushNotificationData(

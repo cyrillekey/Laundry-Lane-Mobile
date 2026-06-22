@@ -2,6 +2,8 @@ package com.example.laundrylane
 import  io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.media.RingtoneManager
+import android.net.Uri
 
 
 class MainActivity : FlutterFragmentActivity() {
@@ -17,7 +19,12 @@ class MainActivity : FlutterFragmentActivity() {
             }
              else if (call.method == "clearNotifications") {
                 // TODO implement clear notifications count
-            } else {
+             } else if (call.method == "notificationSound") {
+                val notificationUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val ringtone = RingtoneManager.getRingtone(this, notificationUri)
+                ringtone.play();
+            }
+            else {
                 result.notImplemented();
             }
         }

@@ -30,6 +30,7 @@ import 'package:laundrylane/src/request_order/service_select.dart';
 import 'package:laundrylane/src/signup/email_verify.dart';
 import 'package:laundrylane/src/signup/signup.dart';
 import 'package:laundrylane/src/stores/store_select.dart';
+import 'package:laundrylane/src/support/chat_support.dart';
 import 'package:laundrylane/theme/theme.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -149,6 +150,7 @@ class MyAppState extends ConsumerState<MyApp> {
         StoreSelectPage.routeName: (context) => const StoreSelectPage(),
         EmailVerifyPage.routeName: (context) => const EmailVerifyPage(),
         MakePayment.routeName: (context) => const MakePayment(),
+        ChatSupportPage.routeName: (context) => const ChatSupportPage(),
       },
 
       // Define a function to handle named routes in order to support

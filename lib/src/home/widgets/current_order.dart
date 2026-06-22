@@ -113,7 +113,7 @@ class CurrentOrder extends ConsumerWidget {
                               ),
                               SizedBox(width: 2),
                               Text(
-                                "Submitted",
+                                "Received",
                                 style: Theme.of(context).textTheme.labelSmall,
                               ),
                             ],
@@ -126,7 +126,7 @@ class CurrentOrder extends ConsumerWidget {
                               ),
                               SizedBox(width: 2),
                               Text(
-                                "Washing",
+                                "Cleaning",
                                 style: Theme.of(context).textTheme.labelSmall,
                               ),
                             ],

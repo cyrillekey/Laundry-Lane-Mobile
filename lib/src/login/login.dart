@@ -104,7 +104,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               style: ButtonStyle(
                                 elevation: WidgetStatePropertyAll(0),
                                 backgroundColor: WidgetStatePropertyAll(
-                                  Theme.of(context).colorScheme.secondary,
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.secondaryContainer,
                                 ),
                                 shape: WidgetStatePropertyAll(
                                   RoundedRectangleBorder(

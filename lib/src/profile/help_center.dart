@@ -4,6 +4,7 @@ import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/support_models.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:laundrylane/src/support/chat_support.dart';
 
 class HelpCenter extends StatefulWidget {
   const HelpCenter({super.key});
@@ -19,6 +20,15 @@ class _HelpCenterState extends State<HelpCenter> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        floatingActionButton: FloatingActionButton.extended(
+          label: Text(
+            "Chat Support",
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          icon: Icon(TablerIcons.message),
+          onPressed:
+              () => Navigator.of(context).pushNamed(ChatSupportPage.routeName),
+        ),
         appBar: AppBar(title: Text("Support Center"), centerTitle: true),
         body: Container(
           padding: EdgeInsets.symmetric(horizontal: 16),

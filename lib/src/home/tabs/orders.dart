@@ -18,7 +18,9 @@ class OrdersTab extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final orderListener = ref.watch(ordersState);
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16).copyWith(top: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.03,
+      ).copyWith(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -157,7 +159,7 @@ class OrderItem extends StatelessWidget {
                       ),
                       SizedBox(height: 1),
                       Text(
-                        "Dry cleaning",
+                        order.productCatalog?.name ?? "Dry Cleaningr",
                         style: GoogleFonts.almarai(
                           fontSize: 14,
                           color: Color.fromRGBO(129, 129, 129, 1),
@@ -194,7 +196,7 @@ class OrderItem extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 12),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.005),
               Divider(),
               SizedBox(height: 8),
               Row(
