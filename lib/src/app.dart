@@ -8,6 +8,7 @@ import 'package:laundrylane/models/user_model.dart';
 import 'package:laundrylane/src/address/add_address.dart';
 import 'package:laundrylane/src/address/address_list.dart';
 import 'package:laundrylane/src/cart/cart_page.dart';
+import 'package:laundrylane/src/chat/chat_window.dart';
 import 'package:laundrylane/src/checkout/checkout_page.dart';
 import 'package:laundrylane/src/checkout/checkout_review.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
@@ -30,7 +31,7 @@ import 'package:laundrylane/src/request_order/service_select.dart';
 import 'package:laundrylane/src/signup/email_verify.dart';
 import 'package:laundrylane/src/signup/signup.dart';
 import 'package:laundrylane/src/stores/store_select.dart';
-import 'package:laundrylane/src/support/chat_support.dart';
+import 'package:laundrylane/src/chat/chat_list.dart';
 import 'package:laundrylane/theme/theme.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -151,6 +152,7 @@ class MyAppState extends ConsumerState<MyApp> {
         EmailVerifyPage.routeName: (context) => const EmailVerifyPage(),
         MakePayment.routeName: (context) => const MakePayment(),
         ChatSupportPage.routeName: (context) => const ChatSupportPage(),
+        ChatWindow.routeName: (context) => const ChatWindow(),
       },
 
       // Define a function to handle named routes in order to support

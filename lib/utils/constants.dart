@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 
 const String apiUrl = "https://laundry-lane-server.onrender.com";
+const String websocketUrl = "wss://laundry-lane-server.onrender.com";
 
 const List<Color> cartColors = [
   Color.fromRGBO(235, 240, 254, 1),

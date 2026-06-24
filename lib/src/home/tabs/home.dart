@@ -54,7 +54,7 @@ class HomeTab extends ConsumerWidget {
                           image:
                               user?.avatar?.isNotEmpty == true
                                   ? NetworkImage(user!.avatar!)
-                                  : AssetImage("assets/icons/user-icon.png"),
+                                  : AssetImage("assets/icons/user.png"),
                         ),
                         borderRadius: const BorderRadius.all(
                           Radius.circular(16),

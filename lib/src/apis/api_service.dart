@@ -6,6 +6,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/misc.dart';
 import 'package:laundrylane/models/billing_address.dart';
 import 'package:laundrylane/models/catalog_model.dart';
+import 'package:laundrylane/models/chat_message.dart';
+import 'package:laundrylane/models/chat_session.dart';
 import 'package:laundrylane/models/clothing_type.dart';
 import 'package:laundrylane/models/delivery_zone.dart';
 import 'package:laundrylane/models/store_model.dart';
@@ -287,9 +289,7 @@ FutureProviderFamily<FullOrderDetails?, int> orderDetailsState = FutureProvider
       }
     });
 
-FutureProvider<List<FaqModel>> faqsState = FutureProvider.autoDispose((
-  ref,
-) async {
+FutureProvider<List<FaqModel>> faqsState = FutureProvider((ref) async {
   try {
     final CancelToken cancelToken = CancelToken();
     ref.onDispose(cancelToken.cancel);
@@ -314,7 +314,7 @@ FutureProvider<List<FaqModel>> faqsState = FutureProvider.autoDispose((
 });
 
 FutureProvider<List<SupportContactsModel>> supportContactsState =
-    FutureProvider.autoDispose((ref) async {
+    FutureProvider((ref) async {
       try {
         final CancelToken cancelToken = CancelToken();
         ref.onDispose(cancelToken.cancel);
@@ -419,5 +419,58 @@ FutureProvider<BillingAddress?> billingAddressState =
       } catch (e) {
         Sentry.captureException(e);
         return null;
+      }
+    });
+FutureProvider<List<ChatSession>> chatSessionProvider = FutureProvider((
+  ref,
+) async {
+  try {
+    final token = ref.watch(tokenProvider).value;
+    final CancelToken cancelToken = CancelToken();
+    ref.onDispose(cancelToken.cancel);
+    final response = await apiDio
+        .get(
+          "/chat/sessions",
+          cancelToken: cancelToken,
+          options: Options(headers: {"Authorization": "Bearer $token"}),
+        )
+        .then((resp) => resp.data)
+        .onError<DioException>((e, s) {
+          return [];
+        });
+    return List<ChatSession>.from(
+      response.map((e) {
+        return ChatSession.fromJson(e);
+      }),
+    );
+  } catch (e) {
+    Sentry.captureException(e);
+    return [];
+  }
+});
+FutureProviderFamily<List<ChatMessage>, int> chatsProvider =
+    FutureProvider.family((ref, sessionId) async {
+      try {
+        final token = ref.watch(tokenProvider).value;
+        final CancelToken cancelToken = CancelToken();
+        ref.onDispose(cancelToken.cancel);
+        final response = await apiDio
+            .get(
+              "/chat/session/$sessionId/messages",
+              cancelToken: cancelToken,
+              options: Options(headers: {"Authorization": "Bearer $token"}),
+            )
+            .then((resp) => resp.data)
+            .onError<DioException>((e, s) {
+              return [];
+            });
+        return List<ChatMessage>.from(
+          response.map((e) {
+            return ChatMessage.fromJson(e);
+          }),
+        );
+      } catch (e) {
+        Sentry.captureException(e);
+        return [];
       }
     });

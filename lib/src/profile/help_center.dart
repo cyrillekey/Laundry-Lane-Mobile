@@ -4,7 +4,7 @@ import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/support_models.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
-import 'package:laundrylane/src/support/chat_support.dart';
+import 'package:laundrylane/src/chat/chat_list.dart';
 
 class HelpCenter extends StatefulWidget {
   const HelpCenter({super.key});
@@ -132,19 +132,29 @@ class ContactItem extends StatelessWidget {
     return ExpansionTile(
       collapsedShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(width: 1.5, color: Theme.of(context).primaryColor),
+        side: BorderSide(
+          width: 1.5,
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
       title: Text(
         title,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.w600,
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
         ),
       ),
-      leading: Icon(icon, size: 28, color: Theme.of(context).primaryColor),
+      leading: Icon(
+        icon,
+        size: 28,
+        color: Theme.of(context).colorScheme.onPrimaryContainer,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(width: 1.5, color: Theme.of(context).primaryColor),
+        side: BorderSide(
+          width: 1.5,
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+        ),
       ),
 
       children: [
@@ -165,7 +175,7 @@ class ContactItem extends StatelessWidget {
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).hintColor,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
             ],

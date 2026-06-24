@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -27,14 +28,26 @@ class ProfileScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 24),
-          Center(
-            child: CircleAvatar(
-              minRadius: 50,
-              foregroundImage:
-                  user?.avatar == null || user?.avatar == ""
-                      ? null
-                      : NetworkImage("${user?.avatar}"),
-            ),
+          CachedNetworkImage(
+            imageUrl: user?.avatar ?? "",
+            errorWidget:
+                (context, url, error) => Center(
+                  child: CircleAvatar(
+                    radius: 50,
+                    child: Image(
+                      image: AssetImage("assets/icons/user.png"),
+                      height: 100,
+                    ),
+                  ),
+                ),
+
+            imageBuilder:
+                (context, imageProvider) => Center(
+                  child: CircleAvatar(
+                    minRadius: 50,
+                    foregroundImage: imageProvider,
+                  ),
+                ),
           ),
           SizedBox(height: 12),
           Center(
