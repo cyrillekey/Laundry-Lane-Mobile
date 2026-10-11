@@ -1,0 +1,390 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/providers/token_provider.dart';
+import 'package:laundrylane/src/address/address_list.dart';
+import 'package:laundrylane/src/login/login.dart';
+import 'package:laundrylane/src/notifications/notification_settings.dart';
+import 'package:laundrylane/src/payments/payment_methods.dart';
+import 'package:laundrylane/src/profile/help_center.dart';
+import 'package:laundrylane/src/profile/update_password.dart';
+import 'package:laundrylane/src/profile/update_profile.dart';
+import 'package:laundrylane/src/security/security_page.dart';
+import 'package:laundrylane/theme/util.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
+
+class ProfileScreen extends ConsumerWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final theme = ref.watch(themeProvider).value;
+    final user = ref.watch(userProvider).value;
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 12).copyWith(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 24),
+          CachedNetworkImage(
+            imageUrl: user?.avatar ?? "",
+            errorWidget:
+                (context, url, error) => Center(
+                  child: CircleAvatar(
+                    radius: 50,
+                    child: Image(
+                      image: AssetImage("assets/icons/user.png"),
+                      height: 100,
+                    ),
+                  ),
+                ),
+
+            imageBuilder:
+                (context, imageProvider) => Center(
+                  child: CircleAvatar(
+                    minRadius: 50,
+                    foregroundImage: imageProvider,
+                  ),
+                ),
+          ),
+          SizedBox(height: 12),
+          Center(
+            child: Text(
+              "${user?.name}",
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(height: 2),
+          Center(
+            child: Text(
+              "${user?.email}",
+              style: GoogleFonts.almarai(
+                color: Color.fromRGBO(158, 150, 150, 1),
+                fontSize: 14,
+              ),
+            ),
+          ),
+          SizedBox(height: 24),
+          Card(
+            color:
+                theme == ThemeMode.light
+                    ? Colors.white
+                    : Theme.of(context).cardTheme.color,
+            elevation: 0.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                children: [
+                  SettingItem(
+                    label: "Profile Details",
+                    icon: TablerIcons.user_circle,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(UpdateProfile.routeName),
+                  ),
+                  Divider(),
+                  SettingItem(
+                    label: "Login and security",
+                    icon: TablerIcons.lock_access,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(SecurityPage.routeName),
+                  ),
+                  Divider(),
+                  SettingItem(
+                    label: "Notification",
+                    icon: TablerIcons.bell,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(NotificationSettings.routeName),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
+          Card(
+            color:
+                theme == ThemeMode.light
+                    ? Colors.white
+                    : Theme.of(context).cardTheme.color,
+            elevation: 0.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                children: [
+                  SettingItem(
+                    label: "Password",
+                    icon: TablerIcons.lock,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(UpdatePassword.routeName),
+                  ),
+                  Divider(),
+                  SettingItem(
+                    label: "Payment Methods",
+                    icon: TablerIcons.credit_card,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(PaymentMethods.routeName),
+                  ),
+                  Divider(),
+                  SettingItem(
+                    label: "Addresses",
+                    icon: TablerIcons.map_2,
+                    onClick:
+                        () => Navigator.of(
+                          context,
+                        ).pushNamed(AddressList.routeName),
+                  ),
+                  Divider(),
+                  ThemeSwitch(),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 12),
+          Card(
+            color:
+                theme == ThemeMode.light
+                    ? Colors.white
+                    : Theme.of(context).cardTheme.color,
+            elevation: 0.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                children: [
+                  SettingItem(
+                    label: "Support",
+                    icon: TablerIcons.help,
+                    onClick: () {
+                      Navigator.of(context).pushNamed(HelpCenter.routeName);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 12),
+          Card(
+            color:
+                theme == ThemeMode.light
+                    ? Colors.white
+                    : Theme.of(context).cardTheme.color,
+            elevation: 0.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                children: [
+                  SettingItem(
+                    label: "Logout",
+                    iconColor: Colors.red,
+                    icon: TablerIcons.logout,
+                    onClick: () {
+                      showModalBottomSheet(
+                        context: context,
+                        showDragHandle: true,
+                        builder: (context) => LogoutSheet(),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SettingItem extends StatelessWidget {
+  const SettingItem({
+    super.key,
+    this.onClick,
+    required this.label,
+    required this.icon,
+    this.iconColor,
+  });
+  final void Function()? onClick;
+  final String label;
+  final Color? iconColor;
+  final IconData icon;
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onClick,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Icon(icon, size: 20, color: iconColor),
+            SizedBox(width: 12),
+            Text(
+              label,
+              style: GoogleFonts.almarai(
+                fontWeight: FontWeight.w400,
+                fontSize: 16,
+              ),
+            ),
+            Spacer(),
+            Icon(TablerIcons.chevron_right),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ThemeSwitch extends ConsumerWidget {
+  const ThemeSwitch({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final watchTheme = ref.watch(themeProvider).value;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(
+            watchTheme == ThemeMode.dark ? TablerIcons.sun : TablerIcons.moon,
+            size: 20,
+          ),
+          SizedBox(width: 12),
+          Text(
+            "Switch theme",
+            style: GoogleFonts.almarai(
+              fontWeight: FontWeight.w400,
+              fontSize: 16,
+            ),
+          ),
+          Spacer(),
+          SizedBox(
+            height: 16,
+            child: Switch.adaptive(
+              value: watchTheme == ThemeMode.dark,
+              onChanged: (value) async {
+                (await SharedPreferences.getInstance()).setBool(
+                  "isDark",
+                  watchTheme == ThemeMode.dark ? false : true,
+                );
+
+                ref.invalidate(themeProvider);
+              },
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              thumbIcon: WidgetStatePropertyAll(Icon(TablerIcons.bulb)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LogoutSheet extends StatelessWidget {
+  const LogoutSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Logout",
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: 12),
+          Text(
+            "Are you sure you want to logout?",
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(
+                      Theme.of(context).splashColor,
+                    ),
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    fixedSize: WidgetStatePropertyAll(
+                      Size(MediaQuery.of(context).size.width, 44),
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Cancel"),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: ProgressButton(
+                  onPress: () async {
+                    SharedPreferences preferences =
+                        await SharedPreferences.getInstance();
+                    await preferences.remove("userId");
+                    await preferences.remove("token");
+                    await preferences.remove("user");
+                    if (context.mounted) {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        LoginPage.routeName,
+                        (route) => route.isFirst,
+                      );
+                    }
+                  },
+                  child: Text(
+                    "Logout",
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 36),
+        ],
+      ),
+    );
+  }
+}

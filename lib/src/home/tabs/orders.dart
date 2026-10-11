@@ -1,0 +1,272 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:jiffy/jiffy.dart';
+import 'package:laundrylane/models/order_model.dart';
+import 'package:laundrylane/src/apis/api_service.dart';
+import 'package:laundrylane/src/orders/order_details.dart';
+import 'package:laundrylane/widgets/progress_button.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:flutter_tabler_icons/flutter_tabler_icons.dart';
+
+class OrdersTab extends ConsumerWidget {
+  const OrdersTab({super.key});
+
+  @override
+  Widget build(BuildContext context, ref) {
+    final orderListener = ref.watch(ordersState);
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.03,
+      ).copyWith(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 18),
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Text(
+              "My Orders",
+              style: GoogleFonts.almarai(
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          SizedBox(height: 12),
+          Expanded(
+            child: RefreshIndicator.adaptive(
+              onRefresh: () async {
+                ref.invalidate(ordersState);
+              },
+              child: orderListener.when(
+                skipLoadingOnReload: true,
+                skipLoadingOnRefresh: true,
+                data: (data) {
+                  if (data.isEmpty) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 48),
+                        SvgPicture.asset(
+                          "assets/svgs/bag-svgrepo-com.svg",
+                          height: 100,
+                        ),
+                        SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Text(
+                            "You don't have any orders yet",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.almarai(
+                              fontSize: 17,
+                              color: Color.fromRGBO(152, 152, 152, 1),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 24),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 36),
+                          child: ProgressButton(label: "Place an Order"),
+                        ),
+                      ],
+                    );
+                  }
+                  return ListView.separated(
+                    padding: const EdgeInsets.only(top: 12),
+                    separatorBuilder: (context, index) => SizedBox(height: 6),
+                    itemCount: data.length,
+                    itemBuilder:
+                        (context, index) => OrderItem(order: data[index]),
+                  );
+                },
+                error: (_, __) {
+                  return Center(child: Text("Error"));
+                },
+                loading: () {
+                  return ListView.separated(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    separatorBuilder: (_, __) => SizedBox(height: 10),
+                    itemCount: 6,
+                    shrinkWrap: true,
+                    itemBuilder: (_, index) {
+                      return Shimmer.fromColors(
+                        baseColor: Theme.of(context).scaffoldBackgroundColor,
+                        highlightColor: Theme.of(context).highlightColor,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey, width: 1.5),
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height * 0.18,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OrderItem extends StatelessWidget {
+  const OrderItem({super.key, required this.order});
+  final Order order;
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(24),
+      onTap:
+          () => Navigator.of(
+            context,
+          ).pushNamed(OrderDetails.routeName, arguments: order.id),
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 0.0,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Column(
+            children: [
+              SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${order.itemsCount} Pieces",
+                        style: GoogleFonts.almarai(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(height: 1),
+                      Text(
+                        order.productCatalog?.name ?? "Dry Cleaningr",
+                        style: GoogleFonts.almarai(
+                          fontSize: 14,
+                          color: Color.fromRGBO(129, 129, 129, 1),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        NumberFormat.currency(
+                          locale: "en_US",
+                          name: "KES",
+                        ).format(order.total),
+                        style: GoogleFonts.almarai(
+                          fontSize: 18,
+                          color: Color.fromRGBO(20, 132, 242, 1),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        "Details",
+                        style: GoogleFonts.almarai(
+                          fontWeight: FontWeight.w600,
+                          color: Color.fromRGBO(20, 132, 242, 1),
+                        ),
+                      ),
+                      Icon(
+                        TablerIcons.chevrons_right,
+                        color: Color.fromRGBO(20, 132, 242, 1),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.005),
+              Divider(),
+              SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Ordered",
+                        style: GoogleFonts.almarai(
+                          fontSize: 13,
+                          color: Color.fromRGBO(129, 129, 129, 1),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            TablerIcons.calendar_due,
+                            size: 20,
+                            color: Color.fromRGBO(20, 132, 242, 1),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            Jiffy.parseFromDateTime(
+                              order.date,
+                            ).format(pattern: "MMM dd,yyyy HH:mm a"),
+                            style: GoogleFonts.almarai(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Spacer(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        order.orderStatus,
+                        style: GoogleFonts.almarai(
+                          fontSize: 12,
+                          color: Color.fromRGBO(129, 129, 129, 1),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(TablerIcons.rotate_clockwise_2, size: 20),
+                          SizedBox(width: 4),
+                          Text(
+                            Jiffy.now().format(pattern: "MMM dd,yyyy HH:mm a"),
+                            style: GoogleFonts.almarai(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
