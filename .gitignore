@@ -48,4 +48,4 @@ firebase.json
 **/GoogleService-Info.plist
 **/google-services.json
 **/Secrets.xcconfig
-sentry.properties
+**/sentry.properties

@@ -51,9 +51,10 @@ class HomeTab extends ConsumerWidget {
                       decoration: BoxDecoration(
                         image: DecorationImage(
                           fit: BoxFit.cover,
-                          image: user?.avatar?.isNotEmpty == true
-                              ? NetworkImage(user!.avatar!)
-                              : AssetImage("assets/icons/user.png"),
+                          image:
+                              user?.avatar?.isNotEmpty == true
+                                  ? NetworkImage(user!.avatar!)
+                                  : AssetImage("assets/icons/user.png"),
                         ),
                         borderRadius: const BorderRadius.all(
                           Radius.circular(16),
@@ -81,11 +82,12 @@ class HomeTab extends ConsumerWidget {
                           const SizedBox(height: 1),
                           Text(
                             "${user?.name}",
-                            style: Theme.of(context).textTheme.headlineMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                             textAlign: TextAlign.start,
                           ),
                         ],
@@ -220,9 +222,8 @@ class HomeTab extends ConsumerWidget {
                         itemCount: 8,
                         itemBuilder: (context, index) {
                           return Shimmer.fromColors(
-                            baseColor: Theme.of(
-                              context,
-                            ).scaffoldBackgroundColor,
+                            baseColor:
+                                Theme.of(context).scaffoldBackgroundColor,
                             highlightColor: Theme.of(context).highlightColor,
                             child: Container(
                               decoration: BoxDecoration(
@@ -258,9 +259,8 @@ class HomeTab extends ConsumerWidget {
                           itemCount: 8,
                           itemBuilder: (context, index) {
                             return Shimmer.fromColors(
-                              baseColor: Theme.of(
-                                context,
-                              ).scaffoldBackgroundColor,
+                              baseColor:
+                                  Theme.of(context).scaffoldBackgroundColor,
                               highlightColor: Theme.of(context).highlightColor,
                               child: Container(
                                 decoration: BoxDecoration(
@@ -323,9 +323,10 @@ class CategoryCard extends StatelessWidget {
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: themeData == ThemeMode.light
-              ? Colors.white
-              : Color.fromRGBO(29, 30, 77, 1),
+          color:
+              themeData == ThemeMode.light
+                  ? Colors.white
+                  : Color.fromRGBO(29, 30, 77, 1),
 
           borderRadius: BorderRadius.circular(16),
         ),
@@ -336,9 +337,10 @@ class CategoryCard extends StatelessWidget {
               assetName,
               height: 40,
               width: 40,
-              colorFilter: themeData == ThemeMode.light
-                  ? null
-                  : ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              colorFilter:
+                  themeData == ThemeMode.light
+                      ? null
+                      : ColorFilter.mode(Colors.white, BlendMode.srcIn),
             ),
             SizedBox(height: 2),
             Text(
