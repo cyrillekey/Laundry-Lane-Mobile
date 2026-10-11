@@ -1,19 +1,19 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' hide Consumer;
 import 'package:intl/intl.dart';
-import 'package:laundrylane/models/catalog_model.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:laundrylane/models/checkout_model.dart';
-import 'package:laundrylane/models/service_model.dart';
-import 'package:laundrylane/providers/card_provider.dart';
+import 'package:laundrylane/providers/cart_provider.dart';
+import 'package:laundrylane/providers/store_provider.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/notifications/service.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
+import 'package:laundrylane/src/payments/pay.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
 import 'package:provider/provider.dart' show Consumer;
@@ -45,21 +45,15 @@ class _CheckoutReviewState extends State<CheckoutReview> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Subtotal(
-                  catalog: checkoutModel.catalog,
-                  serviceType: checkoutModel.serviceType,
+                  model: checkoutModel,
                   weight: checkoutModel.weight ?? 1,
                 ),
+                SizedBox(height: 12),
+                _ItemsList(),
                 SizedBox(height: 12),
                 if (checkoutModel.orderType != OrderType.pickup) ...[
                   AddressWidget(),
                   SizedBox(height: 12),
-                ],
-
-                if (checkoutModel.catalog.bulk == false) ...[
-                  SizedBox(height: 20),
-                  Text("Choose Payment Method"),
-                  SizedBox(height: 12),
-                  PaymentRadio(),
                 ],
                 SizedBox(height: 12),
                 FormBuilderTextField(
@@ -106,16 +100,20 @@ class _OrderSubmitButton extends ConsumerWidget {
             if (formKey.currentState?.saveAndValidate() == true) {
               final address = ref.read(addressState).value;
               final response = await createOrderMutation(
-                addressId: address!.id!,
-                serviceTypeId: checkoutModel.serviceType.id,
+                storeId: ref.read(storeProvider).value!,
+                addressId: address?.id,
+                serviceTypeId: checkoutModel.serviceType?.id,
                 catalogId: checkoutModel.catalog.id!,
                 type: checkoutModel.orderType.value,
-                pickupDate: checkoutModel.pickupDate?.toString(),
+                pickupDate: checkoutModel.pickupDate?.toIso8601String(),
                 pickupTime: checkoutModel.pickupTime?.toString(),
                 items: cart.items,
                 deliveryWindow: checkoutModel.deliveryWindow,
                 washType: checkoutModel.washingPreference,
                 instructions: formKey.currentState?.value["instructions"],
+                weight: checkoutModel.weight,
+                paymentMethod:
+                    formKey.currentState?.value['payment_method'] ?? "CASH",
               );
               if (response.success) {
                 if (context.mounted) {
@@ -123,10 +121,25 @@ class _OrderSubmitButton extends ConsumerWidget {
                   ref.invalidate(ongoingOrderState);
                   ref.invalidate(notificationCountState);
                   ref.invalidate(notificationsState);
-                  showBottomSheet(
-                    context: context,
-                    builder: (context) => SuccessSheet(orderId: response.id!),
-                  );
+                  // clear cart
+                  cart.removeAll();
+                  if (checkoutModel.catalog.bulk == true) {
+                    showModalBottomSheet(
+                      context: context,
+                      elevation: 1,
+                      showDragHandle: true,
+                      isDismissible: true,
+                      builder: (context) => SuccessSheet(orderId: 1),
+                    );
+                  } else {
+                    if (context.mounted) {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        MakePayment.routeName,
+                        ModalRoute.withName(HomePage.routeName),
+                        arguments: response.id,
+                      );
+                    }
+                  }
                 }
               } else {
                 if (context.mounted) {
@@ -168,88 +181,10 @@ class _OrderSubmitButton extends ConsumerWidget {
   }
 }
 
-class PaymentRadio extends StatelessWidget {
-  const PaymentRadio({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    List<Map> paymentMethods = [
-      {
-        "name": "Online Payment",
-        "value": "ONLINE_PAYMENT",
-        "description":
-            "Pay online using M-Pesa,Airtel money or credit/debit card",
-      },
-      {
-        "name": "Cash on Delivery",
-        "value": "CASH_ON_DELIVERY",
-        "description": "Make payment after delivery of your laundry",
-      },
-    ];
-    return FormBuilderField<String>(
-      name: "payment_method",
-      builder: (formBuilderState) {
-        return RadioGroup<String>(
-          groupValue: formBuilderState.value ?? "ONLINE_PAYMENT",
-          onChanged: (value) => formBuilderState.didChange(value),
-          child: Column(
-            children:
-                paymentMethods
-                    .map(
-                      (item) => [
-                        RadioListTile<String>(
-                          horizontalTitleGap: 8,
-                          minVerticalPadding: 12,
-                          tileColor:
-                              formBuilderState.value == item['value']
-                                  ? Theme.of(
-                                    context,
-                                  ).primaryColor.withValues(alpha: 0.1)
-                                  : Colors.transparent,
-                          titleAlignment: ListTileTitleAlignment.top,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                              width:
-                                  formBuilderState.value == item['value']
-                                      ? 1.5
-                                      : 1,
-                              color:
-                                  formBuilderState.value == item['value']
-                                      ? Theme.of(context).primaryColor
-                                      : Theme.of(context).unselectedWidgetColor,
-                            ),
-                          ),
-                          value: item['value'],
-                          title: Text(
-                            item['name'],
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w400),
-                          ),
-                          subtitle: Text(item['description']),
-                        ),
-                        SizedBox(height: 12),
-                      ],
-                    )
-                    .flattened
-                    .toList(),
-          ),
-        );
-      },
-    );
-  }
-}
-
 class Subtotal extends ConsumerWidget {
-  const Subtotal({
-    super.key,
-    required this.catalog,
-    required this.serviceType,
-    required this.weight,
-  });
-  final Catalog catalog;
+  const Subtotal({super.key, required this.model, required this.weight});
+  final CheckoutModel model;
   final num weight;
-  final ServiceType serviceType;
 
   @override
   Widget build(BuildContext context, ref) {
@@ -286,14 +221,15 @@ class Subtotal extends ConsumerWidget {
               (a, b) => a + b.quantity * b.price,
             );
             num subtotal =
-                catalog.bulk == true
-                    ? (catalog.price ?? 0) * weight
+                model.catalog.bulk == true
+                    ? (model.catalog.price ?? 0) * weight
                     : cartTotal;
-            num serviceFee = serviceType.price;
+            num serviceFee = model.serviceType?.price ?? 0;
 
             num deliveryFee = zone?.price ?? 0;
             num total = subtotal + serviceFee;
             return Card.outlined(
+              shadowColor: Theme.of(context).shadowColor,
               child: Column(
                 children: [
                   SizedBox(height: 24),
@@ -375,7 +311,9 @@ class Subtotal extends ConsumerWidget {
                     child: Row(
                       children: [
                         Text(
-                          "Subtotal",
+                          model.catalog.bulk == true
+                              ? "Estimated Total"
+                              : "Total",
                           style: Theme.of(context).textTheme.bodyLarge
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
@@ -388,6 +326,68 @@ class Subtotal extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  if (model.pickupDate != null && model.pickupTime != null) ...[
+                    SizedBox(height: 12),
+                    Padding(
+                      padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                TablerIcons.truck_delivery,
+                                size: 22,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                "Pickup Date:",
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                          Spacer(),
+                          Text(
+                            "${DateFormat('dd/MM/yyyy').format(model.pickupDate!)} at ${model.pickupTime?.format(context)}",
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (model.deliveryWindow != null) ...[
+                    SizedBox(height: 12),
+                    Padding(
+                      padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                TablerIcons.clock,
+                                size: 22,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                "Delivery:",
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                          Spacer(),
+                          Text(
+                            "${Jiffy.parse(model.deliveryWindow!).format(pattern: "dd/MM/yyyy")} at ${Jiffy.parse(model.deliveryWindow!).format(pattern: "HH:mm")}",
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   SizedBox(height: 8),
                 ],
               ),
@@ -437,6 +437,9 @@ class AddressWidget extends ConsumerWidget {
     final addressListener = ref.watch(addressState);
     return addressListener.when(
       data: (address) {
+        if (address == null) {
+          return Container();
+        }
         return Card.outlined(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -467,7 +470,7 @@ class AddressWidget extends ConsumerWidget {
               SizedBox(height: 16),
               FutureBuilder(
                 future: reverseGeocode(
-                  LatLng(address!.latitude!, address.longitude!),
+                  LatLng(address.latitude!, address.longitude!),
                 ),
                 builder: (context, asyncSnapshot) {
                   final reverseAddress = asyncSnapshot.data;
@@ -526,58 +529,139 @@ class SuccessSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
       ),
+      padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SvgPicture.asset(
-              "assets/svgs/success.svg",
-              height: 100,
-              width: 100,
-            ),
-          ),
+          SvgPicture.asset("assets/svgs/success.svg", height: 140, width: 140),
+          SizedBox(height: 16),
           Text(
             "Your order has been placed",
             style: Theme.of(
               context,
-            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
+          SizedBox(height: 20),
           Text(
-            "Order ID: $orderId",
+            "Your order has been placed successfully. You will receive a notification once the order is processed and cleaning started.",
             style: Theme.of(
               context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
+            textAlign: TextAlign.center,
           ),
-          Spacer(),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ProgressButton(
-              onPress: () {
-                Navigator.pop(context);
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  OrderDetails.routeName,
-                  ModalRoute.withName(HomePage.routeName),
-                  arguments: orderId,
-                );
-              },
-              child: Text(
-                "View Order",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
+          SizedBox(height: 20),
+          ProgressButton(
+            onPress: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                OrderDetails.routeName,
+                ModalRoute.withName(HomePage.routeName),
+                arguments: orderId,
+              );
+            },
+            child: Text(
+              "View Order",
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
+          SizedBox(height: 16),
         ],
       ),
+    );
+  }
+}
+
+class _ItemsList extends ConsumerWidget {
+  const _ItemsList();
+
+  @override
+  Widget build(BuildContext context, ref) {
+    return Consumer<CartProvider>(
+      builder: (context, cart, child) {
+        final items = cart.items;
+        final groupIds = items.map((e) => e.type).toSet().toList();
+        return Card.outlined(
+          shadowColor: Theme.of(context).shadowColor,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 24),
+              Column(
+                children:
+                    groupIds.map((e) {
+                      final groupId = e;
+                      final groupItems =
+                          items.where((e) => e.type == groupId).toList();
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  TablerIcons.package,
+                                  size: 22,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  groupId,
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              groupItems.length > 1
+                                  ? "${groupItems.length} Items"
+                                  : "1 Item",
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+              ),
+              SizedBox(height: 8),
+              Divider(),
+              SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Total Items",
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      "${items.length} Items",
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
     );
   }
 }

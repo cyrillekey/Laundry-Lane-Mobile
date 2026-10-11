@@ -17,8 +17,8 @@ class DeliveryZone {
   String? location;
   double? latitude;
   double? longitude;
-  int? radius;
-  int? price;
+  num? radius;
+  num? price;
   DateTime? startTime;
   DateTime? endTime;
   DateTime? createdat;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:laundrylane/models/order_model.dart';
 import 'package:laundrylane/src/apis/api_service.dart';
@@ -17,16 +18,21 @@ class OrdersTab extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     final orderListener = ref.watch(ordersState);
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * 0.03,
+      ).copyWith(top: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 18),
-          Text(
-            "My Orders",
-            style: GoogleFonts.almarai(
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Text(
+              "My Orders",
+              style: GoogleFonts.almarai(
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           SizedBox(height: 12),
@@ -40,42 +46,39 @@ class OrdersTab extends ConsumerWidget {
                 skipLoadingOnRefresh: true,
                 data: (data) {
                   if (data.isEmpty) {
-                    return SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height * 0.70,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 48),
-                          SvgPicture.asset(
-                            "assets/svgs/bag-svgrepo-com.svg",
-                            height: 100,
-                          ),
-                          SizedBox(height: 16),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            child: Text(
-                              "You don't have any orders yet",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.almarai(
-                                fontSize: 17,
-                                color: Color.fromRGBO(152, 152, 152, 1),
-                                fontWeight: FontWeight.w600,
-                              ),
+                    return Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 48),
+                        SvgPicture.asset(
+                          "assets/svgs/bag-svgrepo-com.svg",
+                          height: 100,
+                        ),
+                        SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Text(
+                            "You don't have any orders yet",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.almarai(
+                              fontSize: 17,
+                              color: Color.fromRGBO(152, 152, 152, 1),
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          SizedBox(height: 24),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 36),
-                            child: ProgressButton(label: "Place an Order"),
-                          ),
-                        ],
-                      ),
+                        ),
+                        SizedBox(height: 24),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 36),
+                          child: ProgressButton(label: "Place an Order"),
+                        ),
+                      ],
                     );
                   }
                   return ListView.separated(
+                    padding: const EdgeInsets.only(top: 12),
                     separatorBuilder: (context, index) => SizedBox(height: 6),
                     itemCount: data.length,
                     itemBuilder:
@@ -86,35 +89,30 @@ class OrdersTab extends ConsumerWidget {
                   return Center(child: Text("Error"));
                 },
                 loading: () {
-                  return SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.90,
-                    child: ListView.separated(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
-                      separatorBuilder: (_, __) => SizedBox(height: 10),
-                      itemCount: 6,
-                      itemBuilder: (_, index) {
-                        return Shimmer.fromColors(
-                          baseColor: Theme.of(context).scaffoldBackgroundColor,
-                          highlightColor: Theme.of(context).highlightColor,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey,
-                                width: 1.5,
-                              ),
-                              color: Theme.of(context).cardColor,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height * 0.18,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
+                  return ListView.separated(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    separatorBuilder: (_, __) => SizedBox(height: 10),
+                    itemCount: 6,
+                    shrinkWrap: true,
+                    itemBuilder: (_, index) {
+                      return Shimmer.fromColors(
+                        baseColor: Theme.of(context).scaffoldBackgroundColor,
+                        highlightColor: Theme.of(context).highlightColor,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey, width: 1.5),
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        );
-                      },
-                    ),
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height * 0.18,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
@@ -153,7 +151,7 @@ class OrderItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "5 Items, 9 Pieces",
+                        "${order.itemsCount} Pieces",
                         style: GoogleFonts.almarai(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -161,7 +159,7 @@ class OrderItem extends StatelessWidget {
                       ),
                       SizedBox(height: 1),
                       Text(
-                        "Dry cleaning",
+                        order.productCatalog?.name ?? "Dry Cleaningr",
                         style: GoogleFonts.almarai(
                           fontSize: 14,
                           color: Color.fromRGBO(129, 129, 129, 1),
@@ -169,7 +167,10 @@ class OrderItem extends StatelessWidget {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        "\$${order.total}",
+                        NumberFormat.currency(
+                          locale: "en_US",
+                          name: "KES",
+                        ).format(order.total),
                         style: GoogleFonts.almarai(
                           fontSize: 18,
                           color: Color.fromRGBO(20, 132, 242, 1),
@@ -195,7 +196,7 @@ class OrderItem extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 12),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.005),
               Divider(),
               SizedBox(height: 8),
               Row(
@@ -222,11 +223,11 @@ class OrderItem extends StatelessWidget {
                           SizedBox(width: 4),
                           Text(
                             Jiffy.parseFromDateTime(
-                              order.createdat!,
+                              order.date,
                             ).format(pattern: "MMM dd,yyyy HH:mm a"),
                             style: GoogleFonts.almarai(
                               fontWeight: FontWeight.w600,
-                              fontSize: 13,
+                              fontSize: 11,
                             ),
                           ),
                         ],
@@ -238,7 +239,7 @@ class OrderItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${order.orderStatus}",
+                        order.orderStatus,
                         style: GoogleFonts.almarai(
                           fontSize: 12,
                           color: Color.fromRGBO(129, 129, 129, 1),
@@ -253,7 +254,7 @@ class OrderItem extends StatelessWidget {
                             Jiffy.now().format(pattern: "MMM dd,yyyy HH:mm a"),
                             style: GoogleFonts.almarai(
                               fontWeight: FontWeight.w400,
-                              fontSize: 14,
+                              fontSize: 11,
                             ),
                           ),
                         ],

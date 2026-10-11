@@ -206,9 +206,9 @@ class Rank {
 class Timezone {
   String? name;
   String? offsetStd;
-  int? offsetStdSeconds;
+  num? offsetStdSeconds;
   String? offsetDst;
-  int? offsetDstSeconds;
+  num? offsetDstSeconds;
   String? abbreviationStd;
   String? abbreviationDst;
 

@@ -1,8 +1,14 @@
+import 'dart:convert';
+
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:flutter/material.dart';
+
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:laundrylane/models/user_model.dart';
 import 'package:laundrylane/src/address/add_address.dart';
 import 'package:laundrylane/src/address/address_list.dart';
 import 'package:laundrylane/src/cart/cart_page.dart';
+import 'package:laundrylane/src/chat/chat_window.dart';
 import 'package:laundrylane/src/checkout/checkout_page.dart';
 import 'package:laundrylane/src/checkout/checkout_review.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
@@ -16,12 +22,18 @@ import 'package:laundrylane/src/onboarding/onboarding_view.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:laundrylane/src/orders/order_details.dart';
 import 'package:laundrylane/src/payments/add_card.dart';
+import 'package:laundrylane/src/payments/pay.dart';
 import 'package:laundrylane/src/payments/payment_methods.dart';
 import 'package:laundrylane/src/profile/help_center.dart';
 import 'package:laundrylane/src/profile/update_password.dart';
 import 'package:laundrylane/src/profile/update_profile.dart';
 import 'package:laundrylane/src/request_order/service_select.dart';
+import 'package:laundrylane/src/review/add_review.dart';
+import 'package:laundrylane/src/security/security_page.dart';
+import 'package:laundrylane/src/signup/email_verify.dart';
 import 'package:laundrylane/src/signup/signup.dart';
+import 'package:laundrylane/src/stores/store_select.dart';
+import 'package:laundrylane/src/chat/chat_list.dart';
 import 'package:laundrylane/theme/theme.dart';
 import 'package:laundrylane/theme/util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,19 +41,35 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// The Widget that configures your application.
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-class MyApp extends ConsumerWidget {
+class MyApp extends StatefulHookConsumerWidget {
   const MyApp({super.key, required this.sharedPreferences});
-
   final SharedPreferences sharedPreferences;
+
   @override
-  Widget build(BuildContext context, ref) {
+  ConsumerState<MyApp> createState() => MyAppState();
+}
+
+class MyAppState extends ConsumerState<MyApp> {
+  late AppLifecycleListener? appLifecycleState;
+  @override
+  void initState() {
+    super.initState();
+    appLifecycleState = AppLifecycleListener(
+      onResume: () {
+        AppBadgePlus.updateBadge(0);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Glue the SettingsController to the MaterialApp.
     //
     // The ListenableBuilder Widget listens to the SettingsController for changes.
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
-    String? token = (sharedPreferences.getString("token"));
-    bool onboarded = (sharedPreferences.getBool("onboarded") == true);
-    bool isThemeSet = sharedPreferences.getBool("isDark") != null;
+    String? token = (widget.sharedPreferences.getString("token"));
+    bool onboarded = (widget.sharedPreferences.getBool("onboarded") == true);
+    bool isThemeSet = widget.sharedPreferences.getBool("isDark") != null;
     // Retrieves the default theme for the platform
     //TextTheme textTheme = Theme.of(context).textTheme;
 
@@ -54,28 +82,22 @@ class MyApp extends ConsumerWidget {
 
     MaterialTheme theme = MaterialTheme(textTheme);
     final watchTheme = ref.watch(themeProvider).value;
+    // final storeId = sharedPreferences.get("store");
+    final userString = widget.sharedPreferences.getString('user');
+    final user =
+        userString == null ? null : UserModel.fromJson(jsonDecode(userString));
 
     return MaterialApp(
       navigatorKey: navigatorKey,
       initialRoute:
-          !onboarded
+          onboarded == false
               ? OnboardingView.routeName
               : token == null
               ? LoginPage.routeName
-              : HomePage.routeName,
-      // theme: settingsController.themeMode == ThemeMode.light
-      //     ? theme.light()
-      //     : theme.dark(),
+              : user?.isVerified == false || user?.isVerified == null
+              ? EmailVerifyPage.routeName
+              : StoreSelectPage.routeName,
 
-      // Providing a restorationScopeId allows the Navigator built by the
-      // MaterialApp to restore the navigation stack when a user leaves and
-      // returns to the app after it has been killed while running in the
-      // background.
-      // restorationScopeId: 'app',
-
-      // Provide the generated AppLocalizations to the MaterialApp. This
-      // allows descendant Widgets to display the correct translations
-      // depending on the user's locale.
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -105,62 +127,40 @@ class MyApp extends ConsumerWidget {
               ? theme.light()
               : theme.dark(),
       title: "Laundry Lane",
+      routes: {
+        OnboardingView.routeName: (context) => const OnboardingView(),
+        HomePage.routeName: (context) => HomePage(),
+        NotificationsView.routeName: (context) => const NotificationsView(),
+        ServiceSelect.routeName: (context) => const ServiceSelect(),
+        SignupPage.routeName: (context) => const SignupPage(),
+        LoginPage.routeName: (context) => const LoginPage(),
+        ForgotPassword.routeName: (context) => const ForgotPassword(),
+        OrderDetails.routeName: (context) => const OrderDetails(),
+        AddAddressPage.routeName: (context) => const AddAddressPage(),
+        AddCard.routeName: (context) => const AddCard(),
+        PaymentMethods.routeName: (context) => const PaymentMethods(),
+        CartPage.routeName: (context) => const CartPage(),
+        CheckoutPage.routeName: (context) => const CheckoutPage(),
+        PasswordResetOtp.routeName: (context) => const PasswordResetOtp(),
+        ResetUpdatePassword.routeName: (context) => const ResetUpdatePassword(),
+        UpdateProfile.routeName: (context) => const UpdateProfile(),
+        UpdatePassword.routeName: (context) => const UpdatePassword(),
+        CheckoutReview.routeName: (context) => const CheckoutReview(),
+        HelpCenter.routeName: (context) => const HelpCenter(),
+        AddressList.routeName: (context) => const AddressList(),
+        NotificationSettings.routeName:
+            (context) => const NotificationSettings(),
+        StoreSelectPage.routeName: (context) => const StoreSelectPage(),
+        EmailVerifyPage.routeName: (context) => const EmailVerifyPage(),
+        MakePayment.routeName: (context) => const MakePayment(),
+        ChatSupportPage.routeName: (context) => const ChatSupportPage(),
+        ChatWindow.routeName: (context) => const ChatWindow(),
+        SecurityPage.routeName: (context) => const SecurityPage(),
+        AddReview.routeName: (context) => const AddReview(),
+      },
 
       // Define a function to handle named routes in order to support
       // Flutter web url navigation and deep linking.
-      onGenerateRoute: (RouteSettings routeSettings) {
-        return MaterialPageRoute<void>(
-          settings: routeSettings,
-          builder: (BuildContext context) {
-            switch (routeSettings.name) {
-              case OnboardingView.routeName:
-                return const OnboardingView();
-              case HomePage.routeName:
-                return HomePage();
-              case NotificationsView.routeName:
-                return NotificationsView();
-              case ServiceSelect.routeName:
-                return ServiceSelect();
-              case SignupPage.routeName:
-                return SignupPage();
-              case LoginPage.routeName:
-                return LoginPage();
-              case ForgotPassword.routeName:
-                return ForgotPassword();
-              case OrderDetails.routeName:
-                return OrderDetails();
-              case AddAddressPage.routeName:
-                return AddAddressPage();
-              case AddCard.routeName:
-                return AddCard();
-              case PaymentMethods.routeName:
-                return PaymentMethods();
-              case CartPage.routeName:
-                return CartPage();
-              case CheckoutPage.routeName:
-                return CheckoutPage();
-              case PasswordResetOtp.routeName:
-                return PasswordResetOtp();
-              case ResetUpdatePassword.routeName:
-                return ResetUpdatePassword();
-              case UpdateProfile.routeName:
-                return UpdateProfile();
-              case UpdatePassword.routeName:
-                return UpdatePassword();
-              case CheckoutReview.routeName:
-                return CheckoutReview();
-              case HelpCenter.routeName:
-                return HelpCenter();
-              case AddressList.routeName:
-                return AddressList();
-              case NotificationSettings.routeName:
-                return NotificationSettings();
-              default:
-                return const OnboardingView();
-            }
-          },
-        );
-      },
     );
   }
 }

@@ -10,7 +10,8 @@ class CheckoutModel {
   final String? deliveryWindow;
   final num? weight;
   final String washingPreference;
-  final ServiceType serviceType;
+  final ServiceType? serviceType;
+  final String? paymentMethod;
 
   CheckoutModel({
     required this.catalog,
@@ -19,18 +20,20 @@ class CheckoutModel {
     this.pickupTime,
     this.deliveryWindow,
     required this.washingPreference,
-    required this.serviceType,
+    this.serviceType,
     this.weight,
+    this.paymentMethod,
   });
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson(BuildContext context) => {
     "catalog": catalog.toJson(),
     "orderType": orderType.value,
     "pickupDate": pickupDate?.toIso8601String(),
-    "pickupTime": pickupTime?.toString(),
+    "pickupTime": pickupTime?.format(context),
     "deliveryWindow": deliveryWindow,
     "washingPreference": washingPreference,
-    "serviceType": serviceType.toJson(),
+    "serviceType": serviceType?.toJson(),
     "weight": weight,
+    "paymentMethod": paymentMethod,
   };
 }
 

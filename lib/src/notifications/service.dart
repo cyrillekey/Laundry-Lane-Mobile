@@ -31,9 +31,7 @@ final FutureProvider<List<AppNotification>> notificationsState =
         return [];
       }
     });
-final FutureProvider<int> notificationCountState = FutureProvider.autoDispose((
-  ref,
-) async {
+final FutureProvider<int> notificationCountState = FutureProvider((ref) async {
   try {
     final token = ref.watch(tokenProvider).value;
     CancelToken cancelToken = CancelToken();

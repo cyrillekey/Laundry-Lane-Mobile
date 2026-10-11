@@ -10,20 +10,21 @@ String orderToJson(List<Order> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class Order {
-  int? id;
-  DateTime? date;
+  int id;
+  DateTime date;
   DateTime? pickupDate;
   String? pickupTime;
-  String? orderStatus;
-  String? orderType;
+  String orderStatus;
+  String orderType;
   String? deliveryWindow;
   String? instructions;
   dynamic weight;
   String? washType;
-  int? deliveryFee;
-  int? total;
+  num? deliveryFee;
+  num? total;
+  bool weighed;
   int? productCatalogId;
-  int? userId;
+  int userId;
   dynamic deliveryZoneId;
   int? serviceTypeId;
   dynamic addressId;
@@ -31,22 +32,24 @@ class Order {
   DateTime? updatedat;
   ServiceType? serviceType;
   Catalog? productCatalog;
+  int? itemsCount;
+  OrderPaymentStatus? paymentStatus;
 
   Order({
-    this.id,
-    this.date,
+    required this.id,
+    required this.date,
     this.pickupDate,
     this.pickupTime,
-    this.orderStatus,
-    this.orderType,
+    required this.orderStatus,
+    required this.orderType,
     this.deliveryWindow,
     this.instructions,
     this.weight,
     this.washType,
     this.deliveryFee,
-    this.total,
+    required this.total,
     this.productCatalogId,
-    this.userId,
+    required this.userId,
     this.deliveryZoneId,
     this.serviceTypeId,
     this.addressId,
@@ -54,11 +57,14 @@ class Order {
     this.updatedat,
     this.serviceType,
     this.productCatalog,
+    this.itemsCount,
+    this.paymentStatus,
+    this.weighed = false,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
     id: json["id"],
-    date: json["date"] == null ? null : DateTime.parse(json["date"]),
+    date: json["date"] == null ? DateTime.now() : DateTime.parse(json["date"]),
     pickupDate:
         json["pickupDate"] == null ? null : DateTime.parse(json["pickupDate"]),
     pickupTime: json["pickupTime"],
@@ -67,6 +73,7 @@ class Order {
     deliveryWindow: json["deliveryWindow"],
     instructions: json["instructions"],
     weight: json["weight"],
+    weighed: json["weighed"],
     washType: json["washType"],
     deliveryFee: json["deliveryFee"],
     total: json["total"],
@@ -75,6 +82,11 @@ class Order {
     deliveryZoneId: json["deliveryZoneId"],
     serviceTypeId: json["serviceTypeId"],
     addressId: json["addressId"],
+    itemsCount: json["itemsCount"],
+    paymentStatus:
+        json["paymentStatus"] == null
+            ? null
+            : OrderPaymentStatus.fromString(json["paymentStatus"]),
     createdat:
         json["createdat"] == null ? null : DateTime.parse(json["createdat"]),
     updatedat:
@@ -91,7 +103,7 @@ class Order {
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "date": date?.toIso8601String(),
+    "date": date.toIso8601String(),
     "pickupDate": pickupDate?.toIso8601String(),
     "pickupTime": pickupTime,
     "orderStatus": orderStatus,
@@ -112,4 +124,29 @@ class Order {
     "serviceType": serviceType?.toJson(),
     "productCatalog": productCatalog?.toJson(),
   };
+}
+
+enum OrderPaymentStatus {
+  pending("PENDING"),
+  readyForPayment("READY_FOR_PAYMENT"),
+  partiallyPaid("PARTIALLY_PAID"),
+  paid("PAID");
+
+  const OrderPaymentStatus(this.name);
+  final String name;
+
+  static OrderPaymentStatus fromString(String status) {
+    switch (status) {
+      case "PENDING":
+        return OrderPaymentStatus.pending;
+      case "READY_FOR_PAYMENT":
+        return OrderPaymentStatus.readyForPayment;
+      case "PARTIALLY_PAID":
+        return OrderPaymentStatus.partiallyPaid;
+      case "PAID":
+        return OrderPaymentStatus.paid;
+      default:
+        return OrderPaymentStatus.pending;
+    }
+  }
 }

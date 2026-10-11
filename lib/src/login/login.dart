@@ -9,10 +9,11 @@ import 'package:hooks_riverpod/experimental/mutation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:laundrylane/models/auth_response.dart';
 import 'package:laundrylane/providers/token_provider.dart';
+import 'package:laundrylane/services/push_message_handler.dart';
 import 'package:laundrylane/src/apis/mutations.dart';
 import 'package:laundrylane/src/forgot_password/forgot_password.dart';
-import 'package:laundrylane/src/home/home.dart';
 import 'package:laundrylane/src/signup/signup.dart';
+import 'package:laundrylane/src/stores/store_select.dart';
 import 'package:laundrylane/utils/helper_functions.dart';
 import 'package:laundrylane/widgets/password_input.dart';
 import 'package:laundrylane/widgets/progress_button.dart';
@@ -103,7 +104,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               style: ButtonStyle(
                                 elevation: WidgetStatePropertyAll(0),
                                 backgroundColor: WidgetStatePropertyAll(
-                                  Theme.of(context).colorScheme.inversePrimary,
+                                  Theme.of(context).colorScheme.tertiary,
                                 ),
                                 shape: WidgetStatePropertyAll(
                                   RoundedRectangleBorder(
@@ -141,12 +142,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                       saveUserModel(response.user!);
                                       setLoadingState(false);
                                       if (context.mounted) {
+                                        updateFcmToken();
                                         Navigator.of(
                                           context,
                                         ).pushNamedAndRemoveUntil(
-                                          HomePage.routeName,
+                                          StoreSelectPage.routeName,
                                           ModalRoute.withName(
-                                            HomePage.routeName,
+                                            StoreSelectPage.routeName,
                                           ),
                                         );
                                       }
@@ -195,12 +197,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               label: Text(
                                 "X(Twitter)",
                                 style: GoogleFonts.almarai(
-                                  color: Colors.black,
+                                  color:
+                                      Theme.of(context).colorScheme.onSecondary,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
                                 ),
                               ),
-                              icon: Icon(TablerIcons.brand_twitter, weight: 12),
+                              icon: Icon(
+                                TablerIcons.brand_twitter,
+                                weight: 12,
+                                color: Theme.of(context).colorScheme.onTertiary,
+                              ),
                             ),
                       ),
                     ),
@@ -211,7 +218,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           child: TextButton.icon(
                             style: ButtonStyle(
                               backgroundColor: WidgetStatePropertyAll(
-                                Theme.of(context).colorScheme.inversePrimary,
+                                Theme.of(context).colorScheme.tertiary,
                               ),
                               shape: WidgetStatePropertyAll(
                                 RoundedRectangleBorder(
@@ -261,13 +268,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                             );
                                             saveUserModel(response.user!);
                                             setLoadingState(false);
+                                            updateFcmToken();
                                             if (context.mounted) {
                                               Navigator.of(
                                                 context,
                                               ).pushNamedAndRemoveUntil(
-                                                HomePage.routeName,
+                                                StoreSelectPage.routeName,
                                                 ModalRoute.withName(
-                                                  HomePage.routeName,
+                                                  StoreSelectPage.routeName,
                                                 ),
                                               );
                                             }
@@ -313,7 +321,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                     : Text(
                                       "Google",
                                       style: GoogleFonts.almarai(
-                                        color: Colors.black,
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.onTertiary,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 16,
                                       ),
@@ -321,7 +332,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             icon:
                                 isLoading
                                     ? SizedBox.shrink()
-                                    : Icon(TablerIcons.brand_google),
+                                    : Icon(
+                                      TablerIcons.brand_google,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onTertiary,
+                                    ),
                           ),
                         );
                       },
@@ -443,9 +460,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ref.invalidate(tokenProvider);
                         ref.invalidate(userProvider);
                         if (context.mounted) {
+                          updateFcmToken();
                           Navigator.of(context).pushNamedAndRemoveUntil(
-                            HomePage.routeName,
-                            ModalRoute.withName(HomePage.routeName),
+                            StoreSelectPage.routeName,
+                            ModalRoute.withName(StoreSelectPage.routeName),
                           );
                         }
                       } else {
@@ -483,13 +501,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ).pushNamed(SignupPage.routeName),
                     child: RichText(
                       text: TextSpan(
-                        style: GoogleFonts.almarai(color: Colors.black),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                         children: [
-                          TextSpan(text: "Dont have an account?"),
+                          TextSpan(text: "Dont have an account? "),
                           TextSpan(
                             text: " Sign up",
-                            style: GoogleFonts.almarai(
-                              color: Colors.blue,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
                               fontWeight: FontWeight.w600,
                               decoration: TextDecoration.underline,
                             ),
